@@ -33,11 +33,9 @@
 <body>
     <div id="nav-placeholder"></div>
     <script>
-    fetch("nav.html")
-        .then(response => response.text())
-        .then(data => {
-        document.getElementById("nav-placeholder").innerHTML = data;
-        });
+        fetch("/nav.html")
+        .then(r => r.text())
+        .then(html => { document.getElementById("nav-placeholder").innerHTML = html; });
     </script>
     <h1>Ben Pomeranz</h1>
     <p>Clearly, I don't do web development. I have a <a href="https://benpomeranz.substack.com/" target="_blank">blog</a> that's not half bad, but only because it's more than half empty.</p>
