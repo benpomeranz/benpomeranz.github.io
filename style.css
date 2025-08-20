@@ -19,16 +19,23 @@ nav img {
 a:hover { text-decoration: underline; }
 
 nav a {
-    text-decoration: none;
-    color: inherit;
+  text-decoration: none;
+  color: inherit;
+  display: inline-flex;      /* important for icon links */
+  align-items: center;
+  gap: 6px;                  /* space between bracket and icon/text */
+  padding: 0 2px;            /* small breathing room */
 }
-nav a:hover {
-    text-decoration: underline;
-}
+nav a:hover { text-decoration: underline; }
+
 
 .nav-right {
     margin-left: auto;
     display: flex;
     gap: 14px;
 }
+
+/* Global brackets on all links */
+a::before { content: "["; }
+a::after  { content: "]"; }
 
