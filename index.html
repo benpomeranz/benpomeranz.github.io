@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <link rel="icon" href="pixil-frame-0.png">
+    <link rel="stylesheet" href="style.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ben Pomeranz's Website</title>
@@ -11,7 +12,7 @@
             font-size: 120%;
         }
         h1 {
-            text-align: center;
+            text-align: left;
         }
         img {
             display: block;
@@ -19,15 +20,6 @@
             margin-right: auto;
             width: 20%;
             image-rendering: pixelated;
-        }
-        nav {
-        }
-        nav a {
-            text-decoration: none;
-            color: inherit;
-        }
-        nav a:hover {
-            text-decoration: underline;
         }
         a {
             text-decoration: none;
@@ -38,17 +30,21 @@
         }
         a::after {
             content: "]";
-        }
+        } 
         a:hover {
             text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <nav>
-      <a href="index.html">Home</a> 
-      <a href="now.html">Now</a>
-    </nav>
+    <div id="nav-placeholder"></div>
+    <script>
+    fetch("nav.html")
+        .then(response => response.text())
+        .then(data => {
+        document.getElementById("nav-placeholder").innerHTML = data;
+        });
+    </script>
     <h1>Ben Pomeranz</h1>
     <p>Clearly, I don't do web development. I have a <a href="https://benpomeranz.substack.com/" target="_blank">blog</a> that's not half bad, but only because it's more than half empty.</p>
     <!-- <p>Also, here's a crazy fact: for any complex number $z_0$, there is a sequence of complex numbers $(z_n)$ where $\lim_{n\rightarrow \infty}z_n = 0$ such that $$\lim_{n\rightarrow \infty}e^{\frac{1}{z_n}} = z_0$$</p>

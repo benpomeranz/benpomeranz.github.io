@@ -55,13 +55,37 @@
           height: 100px;
           object-fit: cover;
       }
+      nav {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+      }
+      nav img {
+          display: inline;
+          margin: 0;
+          width: auto;
+      }
+      nav img.icon {
+          height: 20px;
+          width: auto;
+          display: inline-block;
+          vertical-align: middle;
+      }
+      .spotify-row a::before,
+      .spotify-row a::after {
+          content: none;
+      }
   </style>
 </head>
 <body>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="now.html">Now</a>
-  </nav>
+  <div id="nav-placeholder"></div>
+<script>
+  fetch("nav.html")
+    .then(response => response.text())
+    .then(data => {
+      document.getElementById("nav-placeholder").innerHTML = data;
+    });
+</script>
   <h1>Now</h1>
   <p>
     I am at Brown University this autumn, continuing my degrees in math and computer science. I recently got back from <a href="https://www.worksinprogress.news/p/apply-for-invisible-college-2025" target="_blank" rel="noopener">Invisible College</a>, and before that I was at Montana State University trying to make <a href="poster.pdf" target="_blank">metabolic data easier to interpret</a> and <a href="https://www.strava.com/athletes/70147433" target="_blank" rel="noopener">running about</a>.
@@ -80,7 +104,7 @@
     <section class="widget" aria-labelledby="last-listened-title">
       <h2 id="last-listened-title">Currently listening</h2>
       <div class="spotify-row">
-        <img src="" alt="Album cover" id="sp-cover" style="display:none" />
+        <img src="" alt="Album cover" id="sp-cover" />
         <div>
           <div id="sp-title"></div>
           <div id="sp-artist" class="muted"></div>
