@@ -6,6 +6,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ben Pomeranz's Website</title>
     <style>
+        body {
+            font-family: sans-serif;
+            font-size: 120%;
+        }
         h1 {
             text-align: center;
         }
@@ -16,17 +20,43 @@
             width: 20%;
             image-rendering: pixelated;
         }
+        nav {
+        }
+        nav a {
+            text-decoration: none;
+            color: inherit;
+        }
+        nav a:hover {
+            text-decoration: underline;
+        }
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+        a::before {
+            content: "[";
+        }
+        a::after {
+            content: "]";
+        }
+        a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
-    <h1>Ben Pomeranz Made a Website</h1>
-    <p>I do not do web dev. I have a <a href="https://benpomeranz.substack.com/"target="_blank">blog</a> that's not half bad, but only because it's more than three quarters empty.<p></p>
-    <p>Also, here's a crazy fact: for any complex number $z_0$, there is a sequence of complex numbers $(z_n)$ where $\lim_{n\rightarrow \infty}z_n = 0$ such that $$\lim_{n\rightarrow \infty}e^{\frac{1}{z_n}} = z_0$$</p>
-    <p> Additionally, here's an art deco looking image: it comes from exploring the <a href="https://arxiv.org/abs/2307.12458"target="_blank">"Chips Taking Game"</a>, which involves no snack stealing.</p>
-    <img src="website_example.png" alt="Art Deco Chip Taking picture">
-    <p> Finally, here's a photo of me so you can clarify whether this is the website of <em>the</em> Ben Pomeranz who you're trying to Google, though I'd think it's already obvious. </p>
+    <nav>
+      <a href="index.html">Home</a> 
+      <a href="now.html">Now</a>
+    </nav>
+    <h1>Ben Pomeranz</h1>
+    <p>Clearly, I don't do web development. I have a <a href="https://benpomeranz.substack.com/" target="_blank">blog</a> that's not half bad, but only because it's more than half empty.</p>
+    <!-- <p>Also, here's a crazy fact: for any complex number $z_0$, there is a sequence of complex numbers $(z_n)$ where $\lim_{n\rightarrow \infty}z_n = 0$ such that $$\lim_{n\rightarrow \infty}e^{\frac{1}{z_n}} = z_0$$</p>
+    <p>Additionally, here's an art deco looking image: it comes from exploring the <a href="https://arxiv.org/abs/2307.12458" target="_blank">"Chips Taking Game"</a>, which involves no snack stealing.</p>
+    <img src="website_example.png" alt="Art Deco Chip Taking picture"> -->
+    <p>Here's a photo of me so you can clarify whether this is the website of <em>the</em> Ben Pomeranz you're trying to Google, though I'd think it's already obvious.</p>
     <img src="IMG_4466.jpg" alt="Ben on a mountain">
-    <p> If you were looking for the website of Ben Pomeranz the Slovakian Mountain and now are certain this is the right place, it's not.</p>
+    <p>If you were looking for the website of Ben Pomeranz the Slovakian Mountain and now are certain this is the right place, it's not.</p>
 </body>
 <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
