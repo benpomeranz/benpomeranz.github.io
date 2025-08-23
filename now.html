@@ -36,6 +36,9 @@
       .widget h2 {
           margin-top: 0;
           font-size: 1.25rem;
+          display: flex;
+          justify-content: space-between;
+          align-items: baseline;
       }
       .widget ul {
           margin: 0.5rem 0 0 0;
@@ -114,6 +117,14 @@
     fetch('https://my-spotify-worker.ben-pomeranz.workers.dev')
       .then(response => response.json())
       .then(data => {
+        const headerEl = document.getElementById('last-listened-title');
+        let updatedEl = document.getElementById('sp-updated');
+        if (!updatedEl) {
+          updatedEl = document.createElement('span');
+          updatedEl.id = 'sp-updated';
+          updatedEl.className = 'muted';
+          headerEl.appendChild(updatedEl);
+        }
         const titleEl = document.getElementById('sp-title');
         const artistEl = document.getElementById('sp-artist');
         const coverEl = document.getElementById('sp-cover');
@@ -139,6 +150,38 @@
           coverEl.style.display = 'inline-block';
         } else {
           coverEl.style.display = 'none';
+        }
+        // Determine a finish/played timestamp from the worker response
+        // Prefer explicit `finished_at`, then `played_at` (Spotify "recently played"),
+        // else derive from `started_at + duration_ms`.
+        let ts = data.finished_at || data.played_at || null;
+        if (!ts && data.started_at && (data.duration_ms !== undefined && data.duration_ms !== null)) {
+          try {
+            const started = new Date(data.started_at).getTime();
+            const dur = Number(data.duration_ms);
+            if (!Number.isNaN(started) && !Number.isNaN(dur)) {
+              ts = new Date(started + dur).toISOString();
+            }
+          } catch (_) {}
+        }
+
+        if (ts) {
+          const d = new Date(ts);
+          // Format as local datetime, e.g., "Aug 23, 4:05 PM"
+          const formattedDate = d.toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          });
+          const formattedTime = d.toLocaleTimeString(undefined, {
+            hour: 'numeric',
+            minute: '2-digit'
+          });
+          const formatted = `${formattedDate} at ${formattedTime}`;
+          updatedEl.textContent = `Ok not really currently really on ${formatted}`;
+        } else {
+          // If we can't determine a timestamp, clear the label
+          updatedEl.textContent = '';
         }
       })
       .catch(() => {
