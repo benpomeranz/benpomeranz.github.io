@@ -35,6 +35,11 @@ nav a:hover { text-decoration: underline; }
     gap: 14px;
 }
 
+.datawrapper-container {
+  width: 75%;
+  margin: 0 auto;
+}
+
 /* Global brackets on all links */
 a::before { content: "["; }
 a::after  { content: "]"; }
