@@ -1,197 +1,309 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>Now – Ben Pomeranz</title>
-  <link rel="icon" href="favicon.ico">
-  <link rel="stylesheet" href="styles.css?v=3">
-  <style>
-      body {
-          font-family: sans-serif;
-          font-size: 120%;
-      }
-      a {
-          text-decoration: none;
-          color: inherit;
-      }
-      a::before { content: "["; }
-      a::after { content: "]"; }
-      a:hover { text-decoration: underline; }
-      .widget {
-          border: 1px solid #ddd;
-          border-radius: 0;
-          padding: 1rem 1.25rem;
-          display: inline-block;
-          background: #fafafa;
-          flex: 1;
-      }
-      .widgets-container {
-          display: flex;
-          gap: 1rem;
-          align-items: stretch;
-          margin-top: 1rem;
-      }
-      .widget h2 {
-          margin-top: 0;
-          font-size: 1.25rem;
-          display: flex;
-          justify-content: space-between;
-          align-items: baseline;
-      }
-      .widget ul {
-          margin: 0.5rem 0 0 0;
-          padding-left: 1.25rem;
-      }
-      .muted {
-          font-size: 0.9rem;
-          opacity: 0.7;
-      }
-      .spotify-row {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-      }
-      .spotify-row img {
-          width: 100px;
-          height: 100px;
-          object-fit: cover;
-      }
-      nav {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-      }
-      nav img {
-          display: inline;
-          margin: 0;
-          width: auto;
-      }
-      nav img.icon {
-          height: 20px;
-          width: auto;
-          display: inline-block;
-          vertical-align: middle;
-      }
-      .spotify-row a::before,
-      .spotify-row a::after {
-          content: none;
-      }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Now – Ben Pomeranz</title>
+    <link rel="icon" href="favicon.ico">
+    <link rel="stylesheet" href="styles.css?v=7">
+    <link rel="preconnect" href="https://my-spotify-worker.ben-pomeranz.workers.dev">
+    <link rel="preconnect" href="https://datawrapper.dwcdn.net">
 </head>
 <body>
-  <div id="nav-placeholder"></div>
-  <script>
-    fetch("/nav.html")
-      .then(r => r.text())
-      .then(html => { document.getElementById("nav-placeholder").innerHTML = html; });
-  </script>
-  <h1>Now</h1>
-  <p>
-    I am at Brown University this autumn, continuing my degrees in math and computer science. 
-    Over the summer I was at Montana State University trying to make <a href="poster.pdf" target="_blank">metabolic data easier to interpret</a> and <a href="https://www.strava.com/athletes/70147433" target="_blank" rel="noopener">running about</a>. I also enjoyed attending <a href="https://www.worksinprogress.news/p/apply-for-invisible-college-2025" target="_blank" rel="noopener">Invisible College</a>. 
-  </p>
-  <div class="widgets-container">
-    <section class="widget" aria-labelledby="currently-studying-title">
-      <h2 id="currently-studying-title">Currently studying</h2>
-      <!-- Edit this list as you switch classes -->
-      <ul id="current-courses">
-        <li>Number Theory</li>
-        <li>Theory of Computing</li>
-        <li>Real Function Theory</li>
-      </ul>
-    </section>
-    <section class="widget" aria-labelledby="last-listened-title">
-      <h2 id="last-listened-title">Currently listening</h2>
-      <div class="spotify-row">
-        <img src="" alt="Album cover" id="sp-cover" />
-        <div>
-          <div id="sp-title"></div>
-          <div id="sp-artist" class="muted"></div>
+    <div id="nav-placeholder"></div>
+    <script>
+        fetch("/nav.html")
+        .then(r => r.text())
+        .then(html => { document.getElementById("nav-placeholder").innerHTML = html; });
+    </script>
+
+    <h1 class="now-header">
+        <span id="page-title">Now</span>
+        <div class="date-wheel-container">
+            <button class="date-wheel-selected" id="date-wheel-btn"></button>
+            <div class="date-wheel" id="date-wheel"></div>
         </div>
-      </div>
-    </section>
-  </div>
-  <script>
-    fetch('https://my-spotify-worker.ben-pomeranz.workers.dev')
-      .then(response => response.json())
-      .then(data => {
-        const headerEl = document.getElementById('last-listened-title');
-        let updatedEl = document.getElementById('sp-updated');
-        if (!updatedEl) {
-          updatedEl = document.createElement('span');
-          updatedEl.id = 'sp-updated';
-          updatedEl.className = 'muted';
-          headerEl.appendChild(updatedEl);
+    </h1>
+
+    <p id="current-paragraph"></p>
+
+    <div class="widgets-container">
+        <section class="widget" aria-labelledby="currently-studying-title">
+            <h2 id="currently-studying-title">Currently studying</h2>
+            <ul id="current-courses"></ul>
+        </section>
+        <section class="widget" aria-labelledby="last-listened-title">
+            <h2 id="last-listened-title">Currently listening</h2>
+            <div class="spotify-row">
+                <img src="" alt="Album cover" id="sp-cover" loading="lazy">
+                <div>
+                    <div id="sp-title"></div>
+                    <div id="sp-artist" class="muted"></div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Caffeine chart - only shown in current view -->
+    <div id="caffeine-section">
+        <p>I'm also making (and drinking) a lot of chai without becoming addicted to caffeine:</p>
+        <div class="responsive-iframe">
+            <iframe title="Average reaction time with and without caffeine" aria-label="Scatter Plot" id="datawrapper-chart-CA9Lb" src="https://datawrapper.dwcdn.net/CA9Lb/10/" scrolling="no" frameborder="0" style="border: none;" width="500" height="431" data-external="1"></iframe>
+        </div>
+    </div>
+
+    <script>
+        let archive = null;
+        let viewingCurrent = true;
+        let currentPastIndex = -1; // -1 means viewing current
+        let wheelOpen = false;
+
+        // Format date for display
+        function formatDate(dateStr) {
+            const date = new Date(dateStr + 'T00:00:00');
+            return date.toLocaleDateString(undefined, {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
         }
-        const titleEl = document.getElementById('sp-title');
-        const artistEl = document.getElementById('sp-artist');
-        const coverEl = document.getElementById('sp-cover');
-        if(data.url) {
-          const link = document.createElement('a');
-          link.href = data.url;
-          link.textContent = data.title;
-          link.target = '_blank';
-          link.rel = 'noopener';
-          titleEl.textContent = '';
-          titleEl.appendChild(link);
-        } else {
-          titleEl.textContent = data.title;
-        }
-        if (data.artists) {
-          artistEl.textContent = (data.album ? `${data.artists} – ${data.album}` : data.artists);
-        } else {
-          artistEl.textContent = data.album || '';
-        }
-        if (data.cover) {
-          coverEl.src = data.cover;
-          coverEl.alt = data.album || 'Album cover';
-          coverEl.style.display = 'inline-block';
-        } else {
-          coverEl.style.display = 'none';
-        }
-        // Determine a finish/played timestamp from the worker response
-        // Prefer explicit `finished_at`, then `played_at` (Spotify "recently played"),
-        // else derive from `started_at + duration_ms`.
-        let ts = data.finished_at || data.played_at || null;
-        if (!ts && data.started_at && (data.duration_ms !== undefined && data.duration_ms !== null)) {
-          try {
-            const started = new Date(data.started_at).getTime();
-            const dur = Number(data.duration_ms);
-            if (!Number.isNaN(started) && !Number.isNaN(dur)) {
-              ts = new Date(started + dur).toISOString();
+
+        // Render the page with given data
+        function renderPage(data, isCurrent) {
+            viewingCurrent = isCurrent;
+
+            // Update title
+            document.getElementById('page-title').textContent = isCurrent ? 'Now' : 'Past';
+            document.title = isCurrent ? 'Now – Ben Pomeranz' : 'Past – Ben Pomeranz';
+
+            // Update studying/listening labels
+            document.getElementById('currently-studying-title').textContent = isCurrent ? 'Currently studying' : 'Was studying';
+            document.getElementById('last-listened-title').textContent = isCurrent ? 'Currently listening' : 'Was listening';
+
+            // Update paragraph
+            document.getElementById('current-paragraph').innerHTML = data.paragraph;
+
+            // Update courses
+            document.getElementById('current-courses').innerHTML = data.courses
+                .map(course => `<li>${course}</li>`)
+                .join('');
+
+            // Show/hide caffeine chart
+            document.getElementById('caffeine-section').style.display = isCurrent ? 'block' : 'none';
+
+            // Handle Spotify
+            if (isCurrent) {
+                fetchLiveSpotify();
+            } else if (data.spotify) {
+                renderSpotifySnapshot(data.spotify);
+            } else {
+                document.getElementById('sp-title').textContent = 'No track recorded';
+                document.getElementById('sp-artist').textContent = '';
+                document.getElementById('sp-cover').style.display = 'none';
             }
-          } catch (_) {}
         }
 
-        if (ts) {
-          const d = new Date(ts);
-          // Format as local datetime, e.g., "Aug 23, 4:05 PM"
-          const formattedDate = d.toLocaleDateString(undefined, {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric'
-          });
-          const formattedTime = d.toLocaleTimeString(undefined, {
-            hour: 'numeric',
-            minute: '2-digit'
-          });
-          const formatted = `${formattedDate} at ${formattedTime}`;
-          updatedEl.textContent = `Ok not really currently really on ${formatted}`;
-        } else {
-          // If we can't determine a timestamp, clear the label
-          updatedEl.textContent = '';
+        // Render Spotify from snapshot data
+        function renderSpotifySnapshot(spotify) {
+            const titleEl = document.getElementById('sp-title');
+            const artistEl = document.getElementById('sp-artist');
+            const coverEl = document.getElementById('sp-cover');
+
+            const updatedEl = document.getElementById('sp-updated');
+            if (updatedEl) updatedEl.textContent = '';
+
+            if (spotify.url) {
+                titleEl.innerHTML = `<a href="${spotify.url}" target="_blank" rel="noopener">${spotify.title}</a>`;
+            } else {
+                titleEl.textContent = spotify.title;
+            }
+
+            artistEl.textContent = spotify.album
+                ? `${spotify.artists} – ${spotify.album}`
+                : spotify.artists;
+
+            if (spotify.cover) {
+                coverEl.src = spotify.cover;
+                coverEl.alt = spotify.album || 'Album cover';
+                coverEl.style.display = 'inline-block';
+            } else {
+                coverEl.style.display = 'none';
+            }
         }
-      })
-      .catch(() => {
-        document.getElementById('sp-title').textContent = 'Unable to load track info';
-      });
-  </script>
-<p> 
-  I'm also making (and drinking) a lot of chai without becoming addicted to caffeine:
-</p>
-<iframe title="Average reaction time with and without caffeine" aria-label="Scatter Plot" id="datawrapper-chart-CA9Lb" src="https://datawrapper.dwcdn.net/CA9Lb/10/" scrolling="no" frameborder="0" style="border: none;" width="500" height="431" data-external="1"></iframe>
+
+        // Fetch live Spotify data
+        function fetchLiveSpotify() {
+            fetch('https://my-spotify-worker.ben-pomeranz.workers.dev')
+                .then(response => response.json())
+                .then(data => {
+                    const headerEl = document.getElementById('last-listened-title');
+                    let updatedEl = document.getElementById('sp-updated');
+                    if (!updatedEl) {
+                        updatedEl = document.createElement('span');
+                        updatedEl.id = 'sp-updated';
+                        updatedEl.className = 'muted';
+                        headerEl.appendChild(updatedEl);
+                    }
+                    const titleEl = document.getElementById('sp-title');
+                    const artistEl = document.getElementById('sp-artist');
+                    const coverEl = document.getElementById('sp-cover');
+                    if(data.url) {
+                        const link = document.createElement('a');
+                        link.href = data.url;
+                        link.textContent = data.title;
+                        link.target = '_blank';
+                        link.rel = 'noopener';
+                        titleEl.textContent = '';
+                        titleEl.appendChild(link);
+                    } else {
+                        titleEl.textContent = data.title;
+                    }
+                    if (data.artists) {
+                        artistEl.textContent = (data.album ? `${data.artists} – ${data.album}` : data.artists);
+                    } else {
+                        artistEl.textContent = data.album || '';
+                    }
+                    if (data.cover) {
+                        coverEl.src = data.cover;
+                        coverEl.alt = data.album || 'Album cover';
+                        coverEl.style.display = 'inline-block';
+                    } else {
+                        coverEl.style.display = 'none';
+                    }
+                    let ts = data.finished_at || data.played_at || null;
+                    if (!ts && data.started_at && (data.duration_ms !== undefined && data.duration_ms !== null)) {
+                        try {
+                            const started = new Date(data.started_at).getTime();
+                            const dur = Number(data.duration_ms);
+                            if (!Number.isNaN(started) && !Number.isNaN(dur)) {
+                                ts = new Date(started + dur).toISOString();
+                            }
+                        } catch (_) {}
+                    }
+                    if (ts) {
+                        const d = new Date(ts);
+                        const formattedDate = d.toLocaleDateString(undefined, {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric'
+                        });
+                        const formattedTime = d.toLocaleTimeString(undefined, {
+                            hour: 'numeric',
+                            minute: '2-digit'
+                        });
+                        const formatted = `${formattedDate} at ${formattedTime}`;
+                        updatedEl.textContent = `Ok not really currently really on ${formatted}`;
+                    } else {
+                        updatedEl.textContent = '';
+                    }
+                })
+                .catch(() => {
+                    document.getElementById('sp-title').textContent = 'Unable to load track info';
+                });
+        }
+
+        // Build the date wheel
+        function buildWheel() {
+            const wheel = document.getElementById('date-wheel');
+            wheel.innerHTML = '';
+
+            // All dates: current first, then past
+            const allDates = [
+                { label: formatDate(archive.lastUpdated), index: -1, isCurrent: true }
+            ];
+            archive.past.forEach((entry, i) => {
+                allDates.push({ label: formatDate(entry.date), index: i, isCurrent: false });
+            });
+
+            allDates.forEach((item, i) => {
+                const btn = document.createElement('button');
+                btn.className = 'date-wheel-item';
+                if (item.index === currentPastIndex) {
+                    btn.classList.add('selected');
+                }
+                btn.textContent = item.label;
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    selectDate(item.index);
+                };
+                wheel.appendChild(btn);
+            });
+        }
+
+        // Select a date
+        function selectDate(index) {
+            currentPastIndex = index;
+            if (index === -1) {
+                renderPage(archive.current, true);
+                updateSelectedButton();
+            } else {
+                renderPage(archive.past[index], false);
+                updateSelectedButton(archive.past[index].date);
+            }
+            closeWheel();
+        }
+
+        // Update the selected button text
+        function updateSelectedButton(pastDate) {
+            const btn = document.getElementById('date-wheel-btn');
+            if (currentPastIndex === -1) {
+                btn.textContent = formatDate(archive.lastUpdated);
+            } else {
+                btn.textContent = formatDate(pastDate || archive.past[currentPastIndex].date);
+            }
+        }
+
+        // Open/close wheel
+        function openWheel() {
+            if (archive.past.length === 0) return; // No past entries to scroll through
+            buildWheel();
+            document.getElementById('date-wheel').classList.add('open');
+            wheelOpen = true;
+        }
+
+        function closeWheel() {
+            document.getElementById('date-wheel').classList.remove('open');
+            wheelOpen = false;
+        }
+
+        function toggleWheel() {
+            if (wheelOpen) {
+                closeWheel();
+            } else {
+                openWheel();
+            }
+        }
+
+        // Initialize
+        document.getElementById('date-wheel-btn').onclick = (e) => {
+            e.stopPropagation();
+            toggleWheel();
+        };
+
+        // Close wheel when clicking outside
+        document.addEventListener('click', (e) => {
+            if (wheelOpen && !e.target.closest('.date-wheel-container')) {
+                closeWheel();
+            }
+        });
+
+        // Load archive and render
+        fetch('/now-archive.json')
+            .then(r => r.json())
+            .then(data => {
+                archive = data;
+                renderPage(archive.current, true);
+                updateSelectedButton();
+                // Show/hide wheel button based on whether there are past entries
+                if (archive.past.length === 0) {
+                    document.getElementById('date-wheel-btn').classList.add('no-past');
+                }
+            })
+            .catch(err => {
+                console.error('Failed to load archive:', err);
+                document.getElementById('current-paragraph').textContent = 'Failed to load content.';
+            });
+    </script>
 </body>
-
 </html>

@@ -1,0 +1,7 @@
+# One course per line. Lines starting with # are ignored.
+# Edit this file, then run: node update-now.js
+
+Recent Applications of Probability and Statistics
+Cryptography
+Manifolds
+Hilbert and Banach Space Theory

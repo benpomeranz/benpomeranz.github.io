@@ -1,0 +1,31 @@
+{
+  "lastUpdated": "2026-02-03",
+  "current": {
+    "paragraph": "I am at Brown University this spring, finishing my degrees in math and computer science. Over winter break I travelled with my family to <a href=\"https://substack.com/@benpomeranz/p-182236187\" target=\"_blank\" rel=\"noopener\">Vietnam</a>, and then attended my first ever <a href=\"https://meetings.ams.org/math/jmm2026/meetingapp.cgi/Paper/55179\" target=\"_blank\" rel=\"noopener\">JMM</a>. From there, I was off to Pittsburgh where I stayed at the nicest institution the city has to offer. I did my new outdoor experience of the month, which was learning how to ski (ish ish ish) in the North Country of New York. In a shocking conclusion, I watched live what will surely be <a href=\"https://www.youtube.com/watch?v=1DgjDi774FI\" target=\"_blank\" rel=\"noopener\">the craziest sports feat I ever see in person</a> on my Chicagoan grandmother's 95th birthday. <br> And now I'm in Providence, and there is no place I'd rather be.",
+    "courses": [
+      "Recent Applications of Probability and Statistics",
+      "Cryptography",
+      "Manifolds",
+      "Hilbert and Banach Space Theory"
+    ]
+  },
+  "past": [
+    {
+      "date": "2025-02-01",
+      "paragraph": "I am at Brown University this autumn, continuing my degrees in math and computer science. Over the summer I was at Montana State University trying to make <a href=\"poster.pdf\" target=\"_blank\" rel=\"noopener\">metabolic data easier to interpret</a> and <a href=\"https://www.strava.com/athletes/70147433\" target=\"_blank\" rel=\"noopener\">running about</a>. I also enjoyed attending <a href=\"https://www.worksinprogress.news/p/apply-for-invisible-college-2025\" target=\"_blank\" rel=\"noopener\">Invisible College</a>.",
+      "courses": [
+        "Real Function Theory",
+        "Theory of Computing",
+        "Number Theory",
+        "Creative Nonfiction"
+      ],
+      "spotify": {
+        "title": "Greenpoint",
+        "artists": "Elijah Fox",
+        "album": "City in the Sky (Piano Works)",
+        "cover": "https://i.scdn.co/image/ab67616d0000b273ad7b56ac0b4421c550932da6",
+        "url": "https://open.spotify.com/track/5MXTc01uCrzj6p6NbNwXUy"
+      }
+    }
+  ]
+}
