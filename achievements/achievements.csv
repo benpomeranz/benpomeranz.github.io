@@ -40,7 +40,7 @@ puzzle_hunt,Participate in a Puzzle Hunt,Participate in a puzzle hunt,,1,false,f
 make_a_website,Make a Website,Make a website,,1,false,false,true,0,0,1
 anki_one_week,Anki One Week Streak,Maintain an Anki streak for one week,,7,false,false,false,0,0,0
 anki_one_month,Anki One Month Streak,Maintain an Anki streak for one month,anki_one_week,30,false,false,false,0,0,0
-woodworking_workshop,Woodworking Workshop in BDW,Attend a woodworking workshop in BDW,,1,true,false,false,1,0,0
+woodworking_workshop,Woodworking Workshop in BDW,Attend a woodworking workshop in BDW,,1,true,true,false,1,1,0
 advanced_woodworking,Advanced Woodworking,Attend an advanced woodworking workshop in BDW,woodworking_workshop,1,false,false,false,0,0,0
 knitting_project,Complete a Knitting Project,Complete a knitting project,,1,false,false,false,0,0,0
 read_a_book,Read a Book,Read a book,,1,false,false,false,0,0,0
