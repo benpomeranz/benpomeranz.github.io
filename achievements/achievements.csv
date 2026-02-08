@@ -13,7 +13,7 @@ morning_swim,Morning Swim,Go for a morning swim,,1,false,false,false,0,0,0
 morning_swim_three_locations,Morning Swim in Three Different Locations,Go for a morning swim in three different locations,morning_swim,3,false,false,false,0,0,0
 morning_swim_thrice_week,Morning Swim Thrice in a Week,Go for a morning swim three times in one week,morning_swim,3,false,false,false,0,0,0
 shabbos_catan,Shabbos Catan,Play Catan on Shabbos,,1,false,false,false,0,0,0
-shabbos_chess,Shabbos Chess,Play chess on Shabbos,,1,false,false,false,0,0,0
+shabbos_chess,Shabbos Chess,Play chess on Shabbos,,1,true,false,false,1,0,0
 host_shabbos_dinner,Host Shabbos Dinner,Host a Shabbos dinner,,1,false,false,false,0,0,0
 cook_3_new_recipes,Cook 3 New Recipes,Cook 3 new recipes,,3,false,false,false,0,0,0
 cook_9_new_recipes,Cook 9 New Recipes,Cook 9 new recipes,cook_3_new_recipes,9,false,false,false,0,0,0
