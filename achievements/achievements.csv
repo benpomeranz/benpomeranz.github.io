@@ -56,7 +56,7 @@ portobello,Portobello,Portobello,,1,false,false,false,0,0,0
 horse_mushroom,The Horse Mushroom,The horse mushroom,portobello,1,false,false,false,0,0,0
 make_furniture,Make a Piece of Furniture,Make a piece of furniture,woodworking_workshop,1,false,false,false,0,0,0
 customize_clothing,Customize a Piece of Clothing,Customize a piece of clothing,,1,false,false,false,0,0,0
-eat_probiotics,Eat Probiotics,Eat probiotics,,1,false,false,false,0,0,0
+eat_probiotics,Eat Probiotics,(Lactose intolerance will be one shot so also applies to Adin),,1,false,false,false,0,0,0
 acquire_lactose_tolerance,Acquire Lactose Tolerance,Acquire lactose tolerance,eat_probiotics,1,false,false,false,0,0,0
 drawing_tablet,Bring Up Drawing Tablet,Bring the drawing tablet up,,1,false,false,false,0,0,0
 record_player,Bring Record Player Up,Bring the record player up,,1,false,false,false,0,0,0
