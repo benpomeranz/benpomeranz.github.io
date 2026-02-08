@@ -20,7 +20,7 @@ cook_9_new_recipes,Cook 9 New Recipes,Cook 9 new recipes,cook_3_new_recipes,9,fa
 cook_27_new_recipes,Cook 27 New Recipes,Cook 27 new recipes,cook_9_new_recipes,27,false,false,false,0,0,0
 cook_three_course_meal,Cook a Three Course Meal,Cook a full three course meal,cook_3_new_recipes,1,false,false,false,0,0,0
 make_family_recipe,Make the House a Family Recipe,Make the house a family recipe,,1,false,false,false,0,0,0
-enter_gcb,Enter GCB,Enter GCB,,1,true,false,false,1,0,0
+enter_gcb,Enter GCB,Enter GCB,,1,false,false,false,0,0,0
 random_bar_not_providence,Go to a Random Bar Not in Providence,Go to a random bar outside of Providence,enter_gcb,1,false,false,false,0,0,0
 host_a_rager,Host a Rager,Host a rager,,1,false,false,false,0,0,0
 pickup_basketball,Bring Back Pickup Basketball League,Bring back the pickup basketball league,,1,false,false,false,0,0,0
