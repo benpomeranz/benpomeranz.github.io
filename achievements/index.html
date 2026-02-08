@@ -1059,11 +1059,42 @@
         }
 
         // Parse CSV
+        // Split a CSV line respecting quoted fields (RFC 4180)
+        function splitCSVLine(line) {
+            const fields = [];
+            let current = '';
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                const ch = line[i];
+                if (inQuotes) {
+                    if (ch === '"' && line[i + 1] === '"') {
+                        current += '"';
+                        i++; // skip escaped quote
+                    } else if (ch === '"') {
+                        inQuotes = false;
+                    } else {
+                        current += ch;
+                    }
+                } else {
+                    if (ch === '"') {
+                        inQuotes = true;
+                    } else if (ch === ',') {
+                        fields.push(current);
+                        current = '';
+                    } else {
+                        current += ch;
+                    }
+                }
+            }
+            fields.push(current);
+            return fields;
+        }
+
         function parseCSV(csv) {
             const lines = csv.trim().split('\n');
-            const headers = lines[0].split(',');
+            const headers = splitCSVLine(lines[0]);
             return lines.slice(1).map(line => {
-                const values = line.split(',');
+                const values = splitCSVLine(line);
                 const obj = {};
                 headers.forEach((header, i) => {
                     let value = values[i];
@@ -1083,12 +1114,21 @@
             });
         }
 
+        // Quote a CSV field if it contains commas or double quotes (RFC 4180)
+        function csvField(val) {
+            const s = String(val);
+            if (s.indexOf(',') !== -1 || s.indexOf('"') !== -1) {
+                return '"' + s.replace(/"/g, '""') + '"';
+            }
+            return s;
+        }
+
         // Generate CSV
         function generateCSV() {
             const headers = 'id,name,description,prerequisites,target,bentzi_completed,adin_completed,ben_completed,bentzi_progress,adin_progress,ben_progress';
             const rows = achievements.map(a => {
                 const prereqs = a.prerequisites ? a.prerequisites.join('|') : '';
-                return `${a.id},${a.name},${a.description},${prereqs},${a.target || 1},${a.bentzi_completed},${a.adin_completed},${a.ben_completed},${a.bentzi_progress || 0},${a.adin_progress || 0},${a.ben_progress || 0}`;
+                return [a.id, a.name, a.description, prereqs, a.target || 1, a.bentzi_completed, a.adin_completed, a.ben_completed, a.bentzi_progress || 0, a.adin_progress || 0, a.ben_progress || 0].map(csvField).join(',');
             });
             return headers + '\n' + rows.join('\n');
         }
