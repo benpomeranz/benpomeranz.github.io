@@ -1,0 +1,74 @@
+id,name,description,prerequisites,target,bentzi_completed,adin_completed,ben_completed,bentzi_progress,adin_progress,ben_progress
+climb_one_higher,Climb One Higher Than Top Boulder,Climb one grade higher than your top boulder (Bentzi V5 / Adin V8 / Ben V6),,1,false,false,false,0,0,0
+climb_two_higher,Climb Two Higher,Climb two grades higher (Bentzi V6 / Adin V9 / Ben V7),climb_one_higher,1,false,false,false,0,0,0
+run_10_miles_week,Run 10 Miles in a Week,Run 10 miles in a single week,,10,false,false,false,0,0,0
+run_10_miles_one_run,Run 10 Miles in One Run,Run 10 miles in a single run,run_10_miles_week,10,false,false,false,0,0,0
+providence_half,Providence Half,Run the Providence half marathon,run_10_miles_one_run,1,false,false,false,0,0,0
+middle_split,Middle Split,Achieve a full middle split,,1,false,false,false,0,0,0
+front_split,Front Split,Achieve a full front split,,1,false,false,false,0,0,0
+full_pancake,Full Pancake,Achieve a full pancake stretch,middle_split,1,false,false,false,0,0,0
+hiking_trip,Hiking Trip,Go on a hiking trip,,1,false,false,false,0,0,0
+backpacking_trip,Backpacking Trip,Go on a backpacking trip,hiking_trip,1,false,false,false,0,0,0
+morning_swim,Morning Swim,Go for a morning swim,,1,false,false,false,0,0,0
+morning_swim_three_locations,Morning Swim in Three Different Locations,Go for a morning swim in three different locations,morning_swim,3,false,false,false,0,0,0
+morning_swim_thrice_week,Morning Swim Thrice in a Week,Go for a morning swim three times in one week,morning_swim,3,false,false,false,0,0,0
+shabbos_catan,Shabbos Catan,Play Catan on Shabbos,,1,false,false,false,0,0,0
+shabbos_chess,Shabbos Chess,Play chess on Shabbos,,1,false,false,false,0,0,0
+host_shabbos_dinner,Host Shabbos Dinner,Host a Shabbos dinner,,1,false,false,false,0,0,0
+cook_3_new_recipes,Cook 3 New Recipes,Cook 3 new recipes,,3,false,false,false,0,0,0
+cook_9_new_recipes,Cook 9 New Recipes,Cook 9 new recipes,cook_3_new_recipes,9,false,false,false,0,0,0
+cook_27_new_recipes,Cook 27 New Recipes,Cook 27 new recipes,cook_9_new_recipes,27,false,false,false,0,0,0
+cook_three_course_meal,Cook a Three Course Meal,Cook a full three course meal,cook_3_new_recipes,1,false,false,false,0,0,0
+make_family_recipe,Make the House a Family Recipe,Make the house a family recipe,,1,false,false,false,0,0,0
+enter_gcb,Enter GCB,Enter GCB,,1,false,false,false,0,0,0
+random_bar_not_providence,Go to a Random Bar Not in Providence,Go to a random bar outside of Providence,enter_gcb,1,false,false,false,0,0,0
+host_a_rager,Host a Rager,Host a rager,,1,false,false,false,0,0,0
+pickup_basketball,Bring Back Pickup Basketball League,Bring back the pickup basketball league,,1,false,false,false,0,0,0
+layout_for_a_goal,Layout for a Goal,Layout for a goal,,1,false,false,false,0,0,0
+support_roommate,Support Your Roommate,Go support your roommate at a presentation / sporting event / artistic endeavor,,1,false,false,false,0,0,0
+nude_figure_drawing,Nude Figure Drawing,Attend a nude figure drawing session,,1,false,false,false,0,0,0
+model_nude_figure_drawing,Model for Nude Figure Drawing,Model for a nude figure drawing session,nude_figure_drawing,1,false,false,false,0,0,0
+donate_blood,Donate Blood,Donate blood,,1,false,false,false,0,0,0
+donate_plasma,Donate Plasma,Donate plasma,donate_blood,1,false,false,false,0,0,0
+donate_sperm,Donate Sperm,Donate sperm,donate_plasma,1,false,false,false,0,0,0
+three_movies_theater,Three Movies in a Theater,Watch three movies in a theater,,3,false,false,false,0,0,0
+three_movies_theater_week,Three Movies in a Theater in a Week,Watch three movies in a theater in one week,three_movies_theater,3,false,false,false,0,0,0
+three_movies_theater_day,Three Movies in a Theater in a Day,Watch three movies in a theater in one day,three_movies_theater_week,3,false,false,false,0,0,0
+do_standup,Do Standup,Perform standup comedy,,1,false,false,false,0,0,0
+open_improv_hours,Open Improv Hours,Attend open improv hours,,1,false,false,false,0,0,0
+puzzle_hunt,Participate in a Puzzle Hunt,Participate in a puzzle hunt,,1,false,false,false,0,0,0
+make_a_website,Make a Website,Make a website,,1,false,false,true,0,0,1
+anki_one_week,Anki One Week Streak,Maintain an Anki streak for one week,,7,false,false,false,0,0,0
+anki_one_month,Anki One Month Streak,Maintain an Anki streak for one month,anki_one_week,30,false,false,false,0,0,0
+woodworking_workshop,Woodworking Workshop in BDW,Attend a woodworking workshop in BDW,,1,true,false,false,1,0,0
+advanced_woodworking,Advanced Woodworking,Attend an advanced woodworking workshop in BDW,woodworking_workshop,1,false,false,false,0,0,0
+knitting_project,Complete a Knitting Project,Complete a knitting project,,1,false,false,false,0,0,0
+read_a_book,Read a Book,Read a book,,1,false,false,false,0,0,0
+read_two_books,Read Two Books,Read two books,read_a_book,2,false,false,false,0,0,0
+read_3_books,Read 3 Books,Read 3 books,read_two_books,3,false,false,false,0,0,0
+read_5_books,Read 5 Books,Read 5 books,read_3_books,5,false,false,false,0,0,0
+read_10_books,Read 10 Books,Read 10 books,read_5_books,10,false,false,false,0,0,0
+write_fiction,Write a Longform Piece of Fiction,Write a longform piece of fiction,,1,false,false,false,0,0,0
+post_blogpost,Post a Blogpost,Post a blogpost,,1,false,false,false,0,0,0
+keep_shabbos,Keep Shabbos Once,Keep Shabbos once,,1,false,false,false,0,0,0
+five_minutes,Five Minutes,Five minutes,,1,false,false,false,0,0,0
+portobello,Portobello,Portobello,,1,false,false,false,0,0,0
+horse_mushroom,The Horse Mushroom,The horse mushroom,portobello,1,false,false,false,0,0,0
+make_furniture,Make a Piece of Furniture,Make a piece of furniture,woodworking_workshop,1,false,false,false,0,0,0
+customize_clothing,Customize a Piece of Clothing,Customize a piece of clothing,,1,false,false,false,0,0,0
+eat_probiotics,Eat Probiotics,Eat probiotics,,1,false,false,false,0,0,0
+acquire_lactose_tolerance,Acquire Lactose Tolerance,Acquire lactose tolerance,eat_probiotics,1,false,false,false,0,0,0
+drawing_tablet,Bring Drawing Tablet Up,Bring the drawing tablet up,,1,false,false,false,0,0,0
+record_player,Bring Record Player Up,Bring the record player up,,1,false,false,false,0,0,0
+flipbook_animation,Make Flipbook Style Animation,Make a flipbook style animation,,1,false,false,false,0,0,0
+clean_3_fridays,Clean 3 Fridays in a Row,Clean 3 Fridays in a row,,3,false,false,false,0,2,0
+trash_15_times,Take Out Trash 15 Times,Take out the trash 15 times,,15,false,false,false,0,0,0
+work_5_new_buildings,Work in 5 New Buildings,Work in 5 new buildings,,5,false,false,false,0,0,0
+office_hours_new_prof,Go to Office Hours with a New Professor,Go to office hours with a professor you're interested in (not from your class),,1,false,false,false,0,0,0
+go_to_yosemite,Go to Yosemite,Go to Yosemite,,1,false,false,false,0,0,0
+trail_run_3_locations,Trail Run or Hike at 3 Locations,Trail run or hike at 3 locations within a 1 hour radius of Providence,,3,false,false,false,0,0,0
+barefoot_day,Barefoot Day,Spend an entire day barefoot,,1,false,false,false,0,0,0
+go_out_in_drag,Go Out in Drag,Go out in drag (can be off campus),,1,false,false,false,0,0,0
+buy_200_dollar_thing,Buy a $200 Thing,Buy a $200 thing,,1,false,false,false,0,0,0
+boston_rationalist,Boston Rationalist Event,Attend a Boston Rationalist event,,1,false,false,false,0,0,0
+hebrew_dinner,Hebrew Dinner,Hebrew Dinner,,1,false,false,false,0,0,0
