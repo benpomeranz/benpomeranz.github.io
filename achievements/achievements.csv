@@ -12,16 +12,16 @@ backpacking_trip,Backpacking Trip,Go on a backpacking trip,hiking_trip,1,false,f
 morning_swim,Morning Swim,Go for a morning swim,,1,false,false,false,0,0,0
 morning_swim_three_locations,Morning Swim in Three Different Locations,Go for a morning swim in three different locations,morning_swim,3,false,false,false,0,0,0
 morning_swim_thrice_week,Morning Swim Thrice in a Week,Go for a morning swim three times in one week,morning_swim,3,false,false,false,0,0,0
-shabbos_catan,Shabbos Catan,Play Catan on Shabbos,,1,false,false,false,0,0,0
-shabbos_chess,Shabbos Chess,Play chess on Shabbos,,1,false,false,false,0,0,0
-host_shabbos_dinner,Host Shabbos Dinner,Host a Shabbos dinner,,1,false,false,false,0,0,0
-cook_3_new_recipes,Cook 3 New Recipes,Cook 3 new recipes,,3,false,false,false,0,0,0
+shabbos_catan,Shabbos Catan,Play Catan on Shabbos,,1,true,true,true,1,1,1
+shabbos_chess,Shabbos Chess,Play chess on Shabbos,,1,true,true,false,1,1,0
+host_shabbos_dinner,Host Shabbos Dinner,Host a Shabbos dinner,,1,false,false,true,0,0,1
+cook_3_new_recipes,Cook 3 New Recipes,Cook 3 new recipes,,3,false,false,false,2,0,0
 cook_9_new_recipes,Cook 9 New Recipes,Cook 9 new recipes,cook_3_new_recipes,9,false,false,false,0,0,0
 cook_27_new_recipes,Cook 27 New Recipes,Cook 27 new recipes,cook_9_new_recipes,27,false,false,false,0,0,0
 cook_three_course_meal,Cook a Three Course Meal,Cook a full three course meal,cook_3_new_recipes,1,false,false,false,0,0,0
 make_family_recipe,Make the House a Family Recipe,Make the house a family recipe,,1,false,false,false,0,0,0
 enter_gcb,Enter GCB,Enter GCB,,1,false,false,false,0,0,0
-random_bar_not_providence,Go to a Random Bar Not in Providence,Go to a random bar outside of Providence,enter_gcb,1,false,false,false,0,0,0
+random_bar_not_providence,Go to a Random Bar Not in Providence,Go to a random bar outside of Providence,,1,false,false,false,0,0,0
 host_a_rager,Host a Rager,Host a rager,,1,false,false,false,0,0,0
 pickup_basketball,Bring Back Pickup Basketball League,Bring back the pickup basketball league,,1,false,false,false,0,0,0
 layout_for_a_goal,Layout for a Goal,Layout for a goal,,1,false,false,false,0,0,0
@@ -31,21 +31,21 @@ model_nude_figure_drawing,Model for Nude Figure Drawing,Model for a nude figure 
 donate_blood,Donate Blood,Donate blood,,1,false,false,false,0,0,0
 donate_plasma,Donate Plasma,Donate plasma,donate_blood,1,false,false,false,0,0,0
 donate_sperm,Donate Sperm,Donate sperm,donate_plasma,1,false,false,false,0,0,0
-three_movies_theater,Three Movies in a Theater,Watch three movies in a theater,,3,false,false,false,0,0,0
+three_movies_theater,Three Movies in a Theater,Watch three movies in a theater,,3,false,false,false,1,0,0
 three_movies_theater_week,Three Movies in a Theater in a Week,Watch three movies in a theater in one week,three_movies_theater,3,false,false,false,0,0,0
 three_movies_theater_day,Three Movies in a Theater in a Day,Watch three movies in a theater in one day,three_movies_theater_week,3,false,false,false,0,0,0
 do_standup,Do Standup,Perform standup comedy,,1,false,false,false,0,0,0
 open_improv_hours,Open Improv Hours,Attend open improv hours,,1,false,false,false,0,0,0
-puzzle_hunt,Participate in a Puzzle Hunt,Participate in a puzzle hunt,,1,false,false,false,0,0,0
+puzzle_hunt,Participate in Puzzle Hunt,Participate in a puzzle hunt,,1,false,false,false,0,0,0
 make_a_website,Make a Website,Make a website,,1,false,false,true,0,0,1
 anki_one_week,Anki One Week Streak,Maintain an Anki streak for one week,,7,false,false,false,0,0,0
 anki_one_month,Anki One Month Streak,Maintain an Anki streak for one month,anki_one_week,30,false,false,false,0,0,0
-woodworking_workshop,Woodworking Workshop in BDW,Attend a woodworking workshop in BDW,,1,true,false,false,1,0,0
+woodworking_workshop,Woodworking Workshop in BDW,Attend a woodworking workshop in BDW,,1,true,true,false,1,1,0
 advanced_woodworking,Advanced Woodworking,Attend an advanced woodworking workshop in BDW,woodworking_workshop,1,false,false,false,0,0,0
 knitting_project,Complete a Knitting Project,Complete a knitting project,,1,false,false,false,0,0,0
-read_a_book,Read a Book,Read a book,,1,false,false,false,0,0,0
-read_two_books,Read Two Books,Read two books,read_a_book,2,false,false,false,0,0,0
-read_3_books,Read 3 Books,Read 3 books,read_two_books,3,false,false,false,0,0,0
+read_a_book,Read a Book,Read a book,,1,true,false,false,1,0,0
+read_two_books,Read Two Books,Read two books,read_a_book,2,true,false,false,2,0,0
+read_3_books,Read 3 Books,Read 3 books,read_two_books,3,false,false,false,2,0,0
 read_5_books,Read 5 Books,Read 5 books,read_3_books,5,false,false,false,0,0,0
 read_10_books,Read 10 Books,Read 10 books,read_5_books,10,false,false,false,0,0,0
 write_fiction,Write a Longform Piece of Fiction,Write a longform piece of fiction,,1,false,false,false,0,0,0
@@ -58,7 +58,7 @@ make_furniture,Make a Piece of Furniture,Make a piece of furniture,woodworking_w
 customize_clothing,Customize a Piece of Clothing,Customize a piece of clothing,,1,false,false,false,0,0,0
 eat_probiotics,Eat Probiotics,Eat probiotics,,1,false,false,false,0,0,0
 acquire_lactose_tolerance,Acquire Lactose Tolerance,Acquire lactose tolerance,eat_probiotics,1,false,false,false,0,0,0
-drawing_tablet,Bring Drawing Tablet Up,Bring the drawing tablet up,,1,false,false,false,0,0,0
+drawing_tablet,Bring Up Drawing Tablet,Bring the drawing tablet up,,1,false,false,false,0,0,0
 record_player,Bring Record Player Up,Bring the record player up,,1,false,false,false,0,0,0
 flipbook_animation,Make Flipbook Style Animation,Make a flipbook style animation,,1,false,false,false,0,0,0
 clean_3_fridays,Clean 3 Fridays in a Row,Clean 3 Fridays in a row,,3,false,false,false,0,2,0
@@ -72,3 +72,4 @@ go_out_in_drag,Go Out in Drag,Go out in drag (can be off campus),,1,false,false,
 buy_200_dollar_thing,Buy a $200 Thing,Buy a $200 thing,,1,false,false,false,0,0,0
 boston_rationalist,Boston Rationalist Event,Attend a Boston Rationalist event,,1,false,false,false,0,0,0
 hebrew_dinner,Hebrew Dinner,Hebrew Dinner,,1,false,false,false,0,0,0
+go_to_a_new_bar_providence,Go to a new bar Providence,Go to a new bar Providence (not seaweeds, Wick Pub, GCB, etc.),random_bar_not_providence,1,false,false,false,0,0,0
