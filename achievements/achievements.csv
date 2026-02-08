@@ -72,5 +72,5 @@ go_out_in_drag,Go Out in Drag,Go out in drag (can be off campus),,1,false,false,
 buy_200_dollar_thing,Buy a $200 Thing,Buy a $200 thing,,1,false,false,false,0,0,0
 boston_rationalist,Boston Rationalist Event,Attend a Boston Rationalist event,,1,false,false,false,0,0,0
 hebrew_dinner,Hebrew Dinner,Hebrew Dinner,,1,false,false,false,0,0,0
-go_to_a_new_bar_providence,Go to a new bar Providence,"Go to a new bar Providence (not seaweeds, Wick Pub, GCB, etc.)",,1, etc.),random_bar_not_providence,1,0,0,0
+go_to_a_new_bar_providence,Go to a new bar Providence,"Go to a new bar Providence (not seaweeds, Wick Pub, GCB, etc.)",,1,false,false,false,0,0,0
 24_18_12_6,24, 18, 12,6,Beers, Donuts, Os,0,12,6
