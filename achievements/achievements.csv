@@ -43,7 +43,7 @@ anki_one_month,Anki One Month Streak,Maintain an Anki streak for one month,anki_
 woodworking_workshop,Woodworking Workshop in BDW,Attend a woodworking workshop in BDW,,1,true,true,false,1,1,0
 advanced_woodworking,Advanced Woodworking,Attend an advanced woodworking workshop in BDW,woodworking_workshop,1,false,false,false,0,0,0
 knitting_project,Complete a Knitting Project,Complete a knitting project,,1,false,false,false,0,0,0
-read_a_book,Read a Book,Read a book,,1,false,false,false,0,0,0
+read_a_book,Read a Book,Read a book,,1,true,false,false,1,0,0
 read_two_books,Read Two Books,Read two books,read_a_book,2,false,false,false,0,0,0
 read_3_books,Read 3 Books,Read 3 books,read_two_books,3,false,false,false,0,0,0
 read_5_books,Read 5 Books,Read 5 books,read_3_books,5,false,false,false,0,0,0
