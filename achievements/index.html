@@ -1,0 +1,2442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dorm Achievement Tree</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/computer-modern-font@1.0.0/cmsans.css">
+    <style>
+        @import url('https://fonts.cdnfonts.com/css/latin-modern-sans');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Latin Modern Sans', 'Computer Modern Sans', 'CMU Sans Serif', sans-serif;
+            background: linear-gradient(135deg, #f6eee3 0%, #ebe3d8 50%, #e0d8cd 100%);
+            min-height: 100vh;
+            color: #2d3748;
+            overflow: hidden;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 30px;
+            background: rgba(246, 238, 227, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #2B547E;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            color: #2B547E;
+        }
+
+        .player-scores {
+            display: flex;
+            gap: 15px;
+        }
+
+        .player-score-card {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(43, 84, 126, 0.3);
+        }
+
+        .player-score-card.bentzi { border-color: rgba(255, 107, 107, 0.5); }
+        .player-score-card.adin { border-color: rgba(255, 217, 61, 0.5); }
+        .player-score-card.ben { border-color: rgba(107, 203, 255, 0.5); }
+
+        .player-icon { font-size: 18px; }
+        .player-info { display: flex; flex-direction: column; }
+        .player-name { font-weight: 600; font-size: 12px; }
+        .player-score { font-size: 11px; opacity: 0.8; }
+
+        #canvas-container {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            cursor: grab;
+        }
+
+        #canvas-container.grabbing { cursor: grabbing; }
+        #canvas-container.adding { cursor: crosshair; }
+
+        #achievementCanvas { display: block; }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(246, 238, 227, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px 16px;
+            border-radius: 8px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            max-width: 280px;
+            z-index: 1000;
+            border: 1px solid rgba(43, 84, 126, 0.4);
+            font-size: 13px;
+            color: #2d3748;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .tooltip.visible { opacity: 1; }
+        .tooltip-title { font-size: 15px; font-weight: 600; margin-bottom: 4px; color: #1a202c; }
+        .tooltip-desc { opacity: 0.85; margin-bottom: 8px; line-height: 1.4; }
+        .tooltip-prereqs { font-size: 11px; opacity: 0.7; margin-bottom: 8px; font-style: italic; }
+        .tooltip-status { display: flex; gap: 10px; font-size: 12px; }
+        .tooltip-player { display: flex; align-items: center; gap: 4px; }
+        .tooltip-player .icon { font-size: 14px; }
+        .tooltip-player.completed { color: #16a34a; }
+        .tooltip-player.incomplete { color: #9ca3af; }
+
+        .mode-indicator {
+            position: fixed;
+            top: 75px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(74, 222, 128, 0.9);
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            z-index: 150;
+            display: none;
+            text-align: center;
+        }
+
+        .mode-indicator.visible { display: block; }
+        .mode-indicator .hint { font-size: 12px; font-weight: normal; opacity: 0.8; margin-top: 4px; }
+
+        .instructions {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(246, 238, 227, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 11px;
+            border: 1px solid rgba(43, 84, 126, 0.3);
+            text-align: right;
+            color: #4a5568;
+        }
+
+        .instructions p { margin-bottom: 4px; opacity: 0.8; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.visible { display: flex; }
+
+        .modal-content {
+            background: linear-gradient(135deg, #f6eee3 0%, #ebe3d8 100%);
+            padding: 25px 30px;
+            border-radius: 12px;
+            max-width: 450px;
+            width: 90%;
+            border: 1px solid rgba(43, 84, 126, 0.3);
+            animation: modalPop 0.3s ease;
+            color: #2d3748;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        @keyframes modalPop {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .modal-title { font-size: 20px; font-weight: 600; margin-bottom: 15px; text-align: center; }
+        .modal-desc { opacity: 0.85; margin-bottom: 15px; line-height: 1.4; text-align: center; }
+
+        .modal-players {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .modal-player-toggle {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        .modal-player-toggle:hover { background: rgba(0, 0, 0, 0.06); }
+        .modal-player-toggle.bentzi { border-color: rgba(255, 107, 107, 0.5); }
+        .modal-player-toggle.adin { border-color: rgba(255, 193, 7, 0.5); }
+        .modal-player-toggle.ben { border-color: rgba(59, 130, 246, 0.5); }
+        .modal-player-toggle.completed { background: rgba(74, 222, 128, 0.15); border-color: rgba(22, 163, 74, 0.5); }
+        .modal-player-toggle .icon { font-size: 24px; }
+        .modal-player-toggle .name { font-size: 11px; font-weight: 600; }
+        .modal-player-toggle .status { font-size: 16px; }
+
+        .progress-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 4px;
+        }
+
+        .progress-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 1px solid rgba(43, 84, 126, 0.4);
+            background: rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: inherit;
+            color: #2d3748;
+            transition: all 0.15s ease;
+        }
+
+        .progress-btn:hover {
+            background: rgba(0, 0, 0, 0.1);
+            transform: scale(1.1);
+        }
+
+        .progress-display {
+            font-size: 13px;
+            font-weight: 600;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: inherit;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .modal-btn.close {
+            background: rgba(0, 0, 0, 0.05);
+            color: #4a5568;
+            border: 1px solid rgba(43, 84, 126, 0.4);
+        }
+
+        .modal-btn.delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .modal-btn:hover { transform: translateY(-1px); }
+
+        /* Add Achievement Modal */
+        .add-modal-content {
+            max-width: 500px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            opacity: 0.9;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 6px;
+            border: 1px solid rgba(43, 84, 126, 0.4);
+            background: rgba(246, 238, 227, 0.9);
+            color: #2d3748;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: rgba(22, 163, 74, 0.5);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .selected-nodes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            min-height: 32px;
+            padding: 8px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 6px;
+        }
+
+        .selected-node-tag {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            background: rgba(0, 0, 0, 0.08);
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .selected-node-tag.prereq { border-left: 3px solid #f59e0b; }
+        .selected-node-tag.postreq { border-left: 3px solid #8b5cf6; }
+
+        .selected-node-tag .remove {
+            cursor: pointer;
+            opacity: 0.6;
+            margin-left: 2px;
+        }
+
+        .selected-node-tag .remove:hover { opacity: 1; }
+
+        .selection-instructions {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 6px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .modal-btn.primary {
+            background: rgba(22, 163, 74, 0.15);
+            color: #16a34a;
+            border: 1px solid rgba(22, 163, 74, 0.4);
+        }
+
+        .zoom-indicator {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(246, 238, 227, 0.9);
+            color: #4a5568;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            border: 1px solid rgba(43, 84, 126, 0.3);
+        }
+
+        .zoom-indicator.visible { opacity: 1; }
+
+        .confetti {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 300;
+        }
+
+        /* Edit Mode */
+        .header.edit-mode {
+            border-bottom-color: rgba(22, 163, 74, 0.5);
+            background: rgba(220, 252, 231, 0.9);
+        }
+
+        #inlineInput {
+            position: fixed;
+            display: none;
+            z-index: 150;
+        }
+
+        #inlineInput input {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 2px solid rgba(22, 163, 74, 0.6);
+            background: rgba(246, 238, 227, 0.98);
+            color: #2d3748;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            width: 180px;
+            text-align: center;
+            outline: none;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        #inlineInput input::placeholder {
+            color: rgba(0, 0, 0, 0.4);
+        }
+
+        .edit-hint {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            background: rgba(220, 252, 231, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 11px;
+            border: 1px solid rgba(22, 163, 74, 0.3);
+            text-align: right;
+            display: none;
+            color: #166534;
+        }
+
+        .edit-hint.visible { display: block; }
+        .edit-hint p { margin-bottom: 4px; opacity: 0.8; }
+        .edit-hint p:last-child { margin-bottom: 0; }
+
+        .auth-btn {
+            background: none;
+            border: 1px solid rgba(43, 84, 126, 0.3);
+            border-radius: 6px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 13px;
+            color: #4a5568;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .auth-btn:hover { background: rgba(0,0,0,0.05); }
+        .auth-btn.authenticated {
+            border-color: rgba(22, 163, 74, 0.5);
+            color: #16a34a;
+        }
+
+        .search-box {
+            position: relative;
+        }
+        .search-box input {
+            padding: 5px 10px 5px 28px;
+            border: 1px solid rgba(43, 84, 126, 0.3);
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.03);
+            font-family: inherit;
+            font-size: 13px;
+            color: #2d3748;
+            width: 180px;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .search-box input:focus {
+            border-color: rgba(43, 84, 126, 0.6);
+            background: rgba(255, 255, 255, 0.5);
+            width: 240px;
+        }
+        .search-box input::placeholder { color: #9ca3af; }
+        .search-box::before {
+            content: '/';
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9ca3af;
+            font-size: 13px;
+            pointer-events: none;
+        }
+        .search-results-count {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 10px;
+            color: #9ca3af;
+            pointer-events: none;
+        }
+
+        .save-indicator {
+            position: fixed;
+            top: 75px;
+            right: 20px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 150;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .save-indicator.saving {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3b82f6;
+            opacity: 1;
+        }
+        .save-indicator.saved {
+            background: rgba(22, 163, 74, 0.15);
+            color: #16a34a;
+            opacity: 1;
+        }
+        .save-indicator.error {
+            background: rgba(239, 68, 68, 0.15);
+            color: #dc2626;
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-left">
+            <div class="title">Dorm Achievement Tree</div>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search achievements...">
+                <span class="search-results-count" id="searchCount"></span>
+            </div>
+            <button class="auth-btn" id="authBtn" title="Authenticate to save changes">
+                <span id="authIcon">🔒</span>
+                <span id="authLabel">View Only</span>
+            </button>
+        </div>
+        <div class="player-scores">
+            <div class="player-score-card bentzi">
+                <span class="player-icon">🐈‍⬛</span>
+                <div class="player-info">
+                    <div class="player-name">Bentzi</div>
+                    <div class="player-score" id="score-bentzi">0 / 0</div>
+                </div>
+            </div>
+            <div class="player-score-card adin">
+                <span class="player-icon">🦫</span>
+                <div class="player-info">
+                    <div class="player-name">Adin</div>
+                    <div class="player-score" id="score-adin">0 / 0</div>
+                </div>
+            </div>
+            <div class="player-score-card ben">
+                <span class="player-icon">🐻</span>
+                <div class="player-info">
+                    <div class="player-name">Ben</div>
+                    <div class="player-score" id="score-ben">0 / 0</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="canvas-container">
+        <canvas id="achievementCanvas"></canvas>
+    </div>
+
+    <div class="tooltip" id="tooltip">
+        <div class="tooltip-title"></div>
+        <div class="tooltip-desc"></div>
+        <div class="tooltip-prereqs"></div>
+        <div class="tooltip-status"></div>
+    </div>
+
+    <div class="mode-indicator" id="modeIndicator">
+        <div class="mode-text"></div>
+        <div class="hint"></div>
+    </div>
+
+    <div class="instructions">
+        <p>Click node to toggle completion</p>
+        <p>Drag canvas to pan • Scroll to zoom</p>
+        <p>/ to search • R to reset view • L to re-layout</p>
+        <p><strong>E to enter Edit Mode</strong></p>
+    </div>
+
+    <!-- Achievement Details Modal -->
+    <div class="modal" id="achievementModal">
+        <div class="modal-content">
+            <div class="modal-title"></div>
+            <div class="modal-desc"></div>
+            <div class="modal-players"></div>
+            <div class="modal-buttons">
+                <button class="modal-btn delete" id="deleteAchievementBtn">Delete</button>
+                <button class="modal-btn close">Done</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Achievement Modal (for edit mode) -->
+    <div class="modal" id="editAchievementModal">
+        <div class="modal-content add-modal-content">
+            <div class="modal-title">Edit Achievement</div>
+            <div class="form-group">
+                <label>Achievement Name</label>
+                <input type="text" id="editAchievementName" placeholder="Achievement name">
+            </div>
+            <div class="form-group">
+                <label>Description</label>
+                <textarea id="editAchievementDesc" placeholder="What does this achievement involve?"></textarea>
+            </div>
+            <div class="form-actions">
+                <button class="modal-btn delete" id="editDeleteBtn">Delete</button>
+                <button class="modal-btn close" id="editCancelBtn">Cancel</button>
+                <button class="modal-btn primary" id="editSaveBtn">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="inlineInput">
+        <input type="text" placeholder="Achievement name..." id="inlineInputField">
+    </div>
+
+    <div class="edit-hint" id="editHint">
+        <p>Double-click to add node</p>
+        <p>Drag from node edge to connect</p>
+        <p>Right-click node to remove links</p>
+        <p>Press E or Esc to exit edit mode</p>
+    </div>
+
+    <div class="save-indicator" id="saveIndicator"></div>
+    <canvas class="confetti" id="confettiCanvas"></canvas>
+    <div class="zoom-indicator" id="zoomIndicator">100%</div>
+
+    <script>
+        // Player configuration
+        const PLAYERS = {
+            bentzi: { name: 'Bentzi', color: '#ff6b6b', icon: '🐈‍⬛' },
+            adin: { name: 'Adin', color: '#ffd93d', icon: '🦫' },
+            ben: { name: 'Ben', color: '#6bcbff', icon: '🐻' }
+        };
+
+        // Worker URL (update after deploying)
+        const WORKER_URL = 'https://achievements-worker.ben-pomeranz.workers.dev';
+        const CSV_URL = 'achievements.csv'; // relative path; works on GitHub Pages
+
+        // Auth state
+        let isAuthenticated = false;
+        let authPassword = null;
+        let saveTimeout = null;
+
+        // Achievement targets (default is 1 for binary achievements)
+        const ACHIEVEMENT_TARGETS = {
+            cook_3_new_recipes: 3,
+            cook_9_new_recipes: 9,
+            cook_27_new_recipes: 27,
+            read_two_books: 2,
+            read_3_books: 3,
+            read_5_books: 5,
+            read_10_books: 10,
+            three_movies_theater: 3,
+            three_movies_theater_week: 3,
+            three_movies_theater_day: 3,
+            morning_swim_three_locations: 3,
+            morning_swim_thrice_week: 3,
+            clean_3_fridays: 3,
+            trash_15_times: 15,
+            work_5_new_buildings: 5,
+            trail_run_3_locations: 3,
+            run_10_miles_week: 10,
+            run_10_miles_one_run: 10,
+            anki_one_week: 7,
+            anki_one_month: 30,
+        };
+
+        // State
+        let achievements = [];
+        let nodes = [];
+        let edges = [];
+        let selectedNode = null;
+        let draggedNode = null;
+        let hoveredNode = null;
+        let lastTime = 0;
+        let nodePositions = {}; // Store positions separately
+
+        // Edit mode state
+        let isEditMode = false;
+        let isDraggingConnection = false;
+        let connectionSourceNode = null;
+        let connectionSourceIsBottom = true; // true = dragging from bottom (source is prereq)
+        let connectionMouseX = 0;
+        let connectionMouseY = 0;
+        let isAnimatingLayout = false;
+
+        // View transform
+        let viewScale = 1;
+        let viewOffsetX = 0;
+        let viewOffsetY = 0;
+        let isDraggingCanvas = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let dragStartOffsetX = 0;
+        let dragStartOffsetY = 0;
+        let hasDragged = false;
+
+        // Canvas setup
+        const canvas = document.getElementById('achievementCanvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('canvas-container');
+        const tooltip = document.getElementById('tooltip');
+        const modal = document.getElementById('achievementModal');
+        const editModal = document.getElementById('editAchievementModal');
+        const confettiCanvas = document.getElementById('confettiCanvas');
+        const confettiCtx = confettiCanvas.getContext('2d');
+        const zoomIndicator = document.getElementById('zoomIndicator');
+        const modeIndicator = document.getElementById('modeIndicator');
+
+        const inlineInput = document.getElementById('inlineInput');
+        const inlineInputField = document.getElementById('inlineInputField');
+        const editHint = document.getElementById('editHint');
+        const header = document.querySelector('.header');
+
+        let confettiParticles = [];
+        let zoomIndicatorTimeout = null;
+        let searchQuery = '';
+        let searchMatchIds = new Set();
+        let searchCurrentIndex = -1;
+
+        function resizeCanvas() {
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = container.clientWidth * dpr;
+            canvas.height = container.clientHeight * dpr;
+            canvas.style.width = container.clientWidth + 'px';
+            canvas.style.height = container.clientHeight + 'px';
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.scale(dpr, dpr);
+
+            confettiCanvas.width = window.innerWidth * dpr;
+            confettiCanvas.height = window.innerHeight * dpr;
+            confettiCanvas.style.width = window.innerWidth + 'px';
+            confettiCanvas.style.height = window.innerHeight + 'px';
+            confettiCtx.setTransform(1, 0, 0, 1, 0, 0);
+            confettiCtx.scale(dpr, dpr);
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Helper: draw rounded rectangle
+        function roundedRect(ctx, x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            ctx.lineTo(x + r, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+            ctx.closePath();
+        }
+
+        // Achievement Node class
+        class AchievementNode {
+            constructor(achievement, x, y) {
+                this.id = achievement.id;
+                this.achievement = achievement;
+                this.x = x;
+                this.y = y;
+                this.width = 140;
+                this.height = 80;
+                this.cornerRadius = 12;
+                this.scale = 1;
+                this.targetX = null;
+                this.targetY = null;
+            }
+
+            isUnlocked(player) {
+                const prereqs = this.achievement.prerequisites;
+                if (!prereqs || prereqs.length === 0) return true;
+                return prereqs.every(prereqId => {
+                    const prereqAchievement = achievements.find(a => a.id === prereqId);
+                    return prereqAchievement && prereqAchievement[`${player}_completed`];
+                });
+            }
+
+            isFullyLocked() {
+                return !Object.keys(PLAYERS).some(p => this.isUnlocked(p));
+            }
+
+            getCompletionCount() {
+                let count = 0;
+                Object.keys(PLAYERS).forEach(p => {
+                    if (this.achievement[`${p}_completed`]) count++;
+                });
+                return count;
+            }
+
+            draw(ctx) {
+                const s = this.scale;
+                const w = this.width * s;
+                const h = this.height * s;
+                const x = this.x - w / 2;
+                const y = this.y - h / 2;
+                const r = this.cornerRadius * s;
+
+                // Dim non-matching nodes during search
+                const isSearching = searchQuery.length > 0;
+                const isMatch = searchMatchIds.has(this.id);
+                if (isSearching && !isMatch) {
+                    ctx.globalAlpha = 0.15;
+                }
+
+                const completionCount = this.getCompletionCount();
+                const isLocked = this.isFullyLocked();
+
+                // Determine node color based on completion (light theme)
+                let bgColor, borderColor, glowColor;
+                if (completionCount === 3) {
+                    bgColor = '#dcfce7';
+                    borderColor = '#16a34a';
+                    glowColor = 'rgba(22, 163, 74, 0.25)';
+                } else if (completionCount > 0) {
+                    bgColor = '#dbeafe';
+                    borderColor = '#3b82f6';
+                    glowColor = null;
+                } else if (!isLocked) {
+                    bgColor = '#f6eee3';
+                    borderColor = '#2B547E';
+                    glowColor = null;
+                } else {
+                    bgColor = '#ebe3d8';
+                    borderColor = 'rgba(43, 84, 126, 0.5)';
+                    glowColor = null;
+                }
+
+                // Glow effect
+                if (glowColor) {
+                    ctx.shadowColor = glowColor;
+                    ctx.shadowBlur = 20;
+                }
+
+                // Background
+                roundedRect(ctx, x, y, w, h, r);
+                ctx.fillStyle = bgColor;
+                ctx.fill();
+
+                ctx.shadowColor = 'transparent';
+                ctx.shadowBlur = 0;
+
+                // Border
+                roundedRect(ctx, x, y, w, h, r);
+                ctx.strokeStyle = borderColor;
+                ctx.lineWidth = (isLocked ) ? 1 : 2;
+                if (isLocked ) {
+                    ctx.setLineDash([4, 4]);
+                }
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // Search highlight ring
+                if (isSearching && isMatch) {
+                    roundedRect(ctx, x - 5, y - 5, w + 10, h + 10, r + 3);
+                    ctx.strokeStyle = '#f59e0b';
+                    ctx.lineWidth = 3;
+                    ctx.stroke();
+                }
+
+                // Hover ring
+                if (hoveredNode === this) {
+                    roundedRect(ctx, x - 4, y - 4, w + 8, h + 8, r + 2);
+                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+
+                // Achievement name
+                ctx.fillStyle = isLocked ? '#9ca3af' : '#1f2937';
+                ctx.font = `600 ${13 * s}px "Latin Modern Sans", "Computer Modern Sans", sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                const displayName = this.achievement.name;
+                const maxWidth = w - 16;
+
+                // Word wrap if needed
+                if (ctx.measureText(displayName).width > maxWidth) {
+                    const words = displayName.split(' ');
+                    let line1 = '';
+                    let line2 = '';
+                    for (const word of words) {
+                        if (ctx.measureText(line1 + word).width < maxWidth) {
+                            line1 += (line1 ? ' ' : '') + word;
+                        } else {
+                            line2 += (line2 ? ' ' : '') + word;
+                        }
+                    }
+                    ctx.fillText(line1, this.x, this.y - 12 * s);
+                    ctx.fillText(line2, this.x, this.y + 2 * s);
+                } else {
+                    ctx.fillText(displayName, this.x, this.y - 8 * s);
+                }
+
+                // Lock icon for fully locked
+                if (isLocked ) {
+                    ctx.font = `${18 * s}px sans-serif`;
+                    ctx.fillText('🔒', this.x, this.y + 18 * s);
+                } else {
+                    // Player completion indicators at bottom
+                    const indicatorY = this.y + 22 * s;
+                    const indicatorSpacing = 28 * s;
+                    const players = Object.entries(PLAYERS);
+                    const startX = this.x - indicatorSpacing;
+
+                    players.forEach(([key, player], i) => {
+                        const px = startX + i * indicatorSpacing;
+                        const completed = this.achievement[`${key}_completed`];
+                        const unlocked = this.isUnlocked(key);
+                        const progress = this.achievement[`${key}_progress`] || 0;
+                        const target = this.achievement.target || 1;
+                        const ratio = Math.min(progress / target, 1);
+
+                        if (completed) {
+                            ctx.beginPath();
+                            ctx.arc(px, indicatorY, 8 * s, 0, Math.PI * 2);
+                            ctx.fillStyle = player.color;
+                            ctx.fill();
+                            ctx.fillStyle = '#000';
+                            ctx.font = `bold ${10 * s}px sans-serif`;
+                            ctx.fillText('✓', px, indicatorY + 1);
+                        } else if (unlocked && target > 1 && progress > 0) {
+                            // Outline
+                            ctx.beginPath();
+                            ctx.arc(px, indicatorY, 8 * s, 0, Math.PI * 2);
+                            ctx.strokeStyle = player.color;
+                            ctx.lineWidth = 2 * s;
+                            ctx.stroke();
+                            // Partial fill arc (pie wedge from top)
+                            ctx.beginPath();
+                            ctx.moveTo(px, indicatorY);
+                            ctx.arc(px, indicatorY, 8 * s, -Math.PI / 2, -Math.PI / 2 + ratio * Math.PI * 2);
+                            ctx.closePath();
+                            ctx.fillStyle = player.color;
+                            ctx.globalAlpha = 0.45;
+                            ctx.fill();
+                            ctx.globalAlpha = 1.0;
+                        } else if (unlocked) {
+                            ctx.beginPath();
+                            ctx.arc(px, indicatorY, 8 * s, 0, Math.PI * 2);
+                            ctx.strokeStyle = player.color;
+                            ctx.lineWidth = 2 * s;
+                            ctx.stroke();
+                        } else {
+                            ctx.beginPath();
+                            ctx.arc(px, indicatorY, 8 * s, 0, Math.PI * 2);
+                            ctx.strokeStyle = '#d1d5db';
+                            ctx.lineWidth = 1 * s;
+                            ctx.setLineDash([2, 2]);
+                            ctx.stroke();
+                            ctx.setLineDash([]);
+                        }
+                    });
+                }
+
+                // Restore alpha after search dimming
+                if (isSearching && !isMatch) {
+                    ctx.globalAlpha = 1.0;
+                }
+            }
+
+            drawConnectionHandles(ctx) {
+                if (!isEditMode) return;
+                const handleRadius = 6;
+
+                // Bottom handle
+                ctx.beginPath();
+                ctx.arc(this.x, this.y + this.height / 2, handleRadius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(74, 222, 128, 0.6)';
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(74, 222, 128, 0.9)';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                // Top handle
+                ctx.beginPath();
+                ctx.arc(this.x, this.y - this.height / 2, handleRadius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(139, 92, 246, 0.6)';
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(139, 92, 246, 0.9)';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+            }
+
+            containsPoint(x, y) {
+                const hw = this.width / 2;
+                const hh = this.height / 2;
+                return x >= this.x - hw && x <= this.x + hw &&
+                       y >= this.y - hh && y <= this.y + hh;
+            }
+        }
+
+        // Edge class
+        class Edge {
+            constructor(from, to) {
+                this.from = from;
+                this.to = to;
+            }
+
+            draw(ctx) {
+                const fromLocked = this.from.isFullyLocked();
+                const toLocked = this.to.isFullyLocked();
+                const isActive = !fromLocked && !toLocked;
+
+                const fromY = this.from.y + this.from.height / 2;
+                const toY = this.to.y - this.to.height / 2;
+
+                const startX = this.from.x;
+                const startY = fromY;
+                const endX = this.to.x;
+                const endY = toY;
+
+                ctx.strokeStyle = isActive ? 'rgba(100, 116, 139, 0.6)' : 'rgba(148, 163, 184, 0.4)';
+                ctx.lineWidth = isActive ? 2 : 1;
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+
+                const midY = (startY + endY) / 2;
+                ctx.bezierCurveTo(startX, midY, endX, midY, endX, endY);
+                ctx.stroke();
+
+                // Arrow head
+                const arrowSize = 8;
+                const angle = Math.PI / 2;
+                ctx.fillStyle = isActive ? 'rgba(100, 116, 139, 0.8)' : 'rgba(148, 163, 184, 0.5)';
+                ctx.beginPath();
+                ctx.moveTo(endX, endY);
+                ctx.lineTo(endX - arrowSize * Math.cos(angle - Math.PI / 6), endY - arrowSize * Math.sin(angle - Math.PI / 6));
+                ctx.lineTo(endX - arrowSize * Math.cos(angle + Math.PI / 6), endY - arrowSize * Math.sin(angle + Math.PI / 6));
+                ctx.closePath();
+                ctx.fill();
+            }
+        }
+
+        // Parse CSV
+        function parseCSV(csv) {
+            const lines = csv.trim().split('\n');
+            const headers = lines[0].split(',');
+            return lines.slice(1).map(line => {
+                const values = line.split(',');
+                const obj = {};
+                headers.forEach((header, i) => {
+                    let value = values[i];
+                    const h = header.trim();
+                    if (value === 'true') value = true;
+                    else if (value === 'false') value = false;
+                    else if (['target', 'bentzi_progress', 'adin_progress', 'ben_progress'].includes(h)) {
+                        value = parseInt(value) || 0;
+                    } else if (header === 'prerequisites' && value) {
+                        value = value.split('|').filter(v => v);
+                    } else if (header === 'prerequisites') {
+                        value = [];
+                    }
+                    obj[header.trim()] = value;
+                });
+                return obj;
+            });
+        }
+
+        // Generate CSV
+        function generateCSV() {
+            const headers = 'id,name,description,prerequisites,target,bentzi_completed,adin_completed,ben_completed,bentzi_progress,adin_progress,ben_progress';
+            const rows = achievements.map(a => {
+                const prereqs = a.prerequisites ? a.prerequisites.join('|') : '';
+                return `${a.id},${a.name},${a.description},${prereqs},${a.target || 1},${a.bentzi_completed},${a.adin_completed},${a.ben_completed},${a.bentzi_progress || 0},${a.adin_progress || 0},${a.ben_progress || 0}`;
+            });
+            return headers + '\n' + rows.join('\n');
+        }
+
+        function downloadCSV() {
+            const csv = generateCSV();
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'achievements.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Initialize graph with static positions
+        function initializeGraph() {
+            const centerX = container.clientWidth / 2;
+            const centerY = container.clientHeight / 2;
+
+            // Load saved positions
+            const savedPositions = localStorage.getItem('dormAchievementPositions');
+            if (savedPositions) {
+                nodePositions = JSON.parse(savedPositions);
+            }
+
+            const hasSaved = Object.keys(nodePositions).length > 0;
+
+            // Create nodes with temporary positions first
+            nodes = [];
+            achievements.forEach(a => {
+                const x = nodePositions[a.id] ? nodePositions[a.id].x : centerX;
+                const y = nodePositions[a.id] ? nodePositions[a.id].y : centerY;
+                nodes.push(new AchievementNode(a, x, y));
+            });
+
+            rebuildEdges();
+
+            // If no saved positions, compute force layout for initial placement
+            if (!hasSaved) {
+                const positions = computeForceLayout(null);
+                nodes.forEach(n => {
+                    if (positions[n.id]) {
+                        n.x = positions[n.id].x;
+                        n.y = positions[n.id].y;
+                    }
+                });
+                savePositions();
+            }
+
+            updatePlayerScores();
+        }
+
+        function rebuildEdges() {
+            edges = [];
+            achievements.forEach(a => {
+                if (a.prerequisites && a.prerequisites.length > 0) {
+                    a.prerequisites.forEach(prereqId => {
+                        const fromNode = nodes.find(n => n.id === prereqId);
+                        const toNode = nodes.find(n => n.id === a.id);
+                        if (fromNode && toNode) {
+                            edges.push(new Edge(fromNode, toNode));
+                        }
+                    });
+                }
+            });
+        }
+
+        function savePositions() {
+            nodes.forEach(node => {
+                nodePositions[node.id] = { x: node.x, y: node.y };
+            });
+            localStorage.setItem('dormAchievementPositions', JSON.stringify(nodePositions));
+        }
+
+        // Transform functions
+        function screenToWorld(screenX, screenY) {
+            return {
+                x: (screenX - viewOffsetX) / viewScale,
+                y: (screenY - viewOffsetY) / viewScale
+            };
+        }
+
+        // Render loop (no physics, just static drawing)
+        function render(timestamp) {
+            ctx.clearRect(0, 0, container.clientWidth, container.clientHeight);
+
+            ctx.save();
+            ctx.translate(viewOffsetX, viewOffsetY);
+            ctx.scale(viewScale, viewScale);
+
+            // Draw grid
+            const gridSize = 50;
+            const startX = Math.floor(-viewOffsetX / viewScale / gridSize) * gridSize - gridSize;
+            const startY = Math.floor(-viewOffsetY / viewScale / gridSize) * gridSize - gridSize;
+            const endX = startX + container.clientWidth / viewScale + gridSize * 2;
+            const endY = startY + container.clientHeight / viewScale + gridSize * 2;
+
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.lineWidth = 1 / viewScale;
+            for (let x = startX; x < endX; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, startY);
+                ctx.lineTo(x, endY);
+                ctx.stroke();
+            }
+            for (let y = startY; y < endY; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(startX, y);
+                ctx.lineTo(endX, y);
+                ctx.stroke();
+            }
+
+            // Animate layout
+            if (isAnimatingLayout) {
+                let allDone = true;
+                nodes.forEach(node => {
+                    if (node.targetX !== null && node.targetY !== null) {
+                        const dx = node.targetX - node.x;
+                        const dy = node.targetY - node.y;
+                        if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
+                            node.x += dx * 0.08;
+                            node.y += dy * 0.08;
+                            allDone = false;
+                        } else {
+                            node.x = node.targetX;
+                            node.y = node.targetY;
+                            node.targetX = null;
+                            node.targetY = null;
+                        }
+                    }
+                });
+                if (allDone) {
+                    isAnimatingLayout = false;
+                    savePositions();
+                }
+            }
+
+            // Draw edges
+            edges.forEach(edge => edge.draw(ctx));
+
+            // Draw nodes
+            nodes.forEach(node => node.draw(ctx));
+
+            // Draw connection handles in edit mode
+            if (isEditMode) {
+                nodes.forEach(node => node.drawConnectionHandles(ctx));
+            }
+
+            // Draw connection drag line
+            if (isDraggingConnection && connectionSourceNode) {
+                const worldMouse = screenToWorld(connectionMouseX, connectionMouseY);
+                const startX = connectionSourceNode.x;
+                const startY = connectionSourceIsBottom
+                    ? connectionSourceNode.y + connectionSourceNode.height / 2
+                    : connectionSourceNode.y - connectionSourceNode.height / 2;
+
+                ctx.strokeStyle = 'rgba(74, 222, 128, 0.8)';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([6, 4]);
+                ctx.beginPath();
+                ctx.moveTo(startX, startY);
+                const midY = (startY + worldMouse.y) / 2;
+                ctx.bezierCurveTo(startX, midY, worldMouse.x, midY, worldMouse.x, worldMouse.y);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            ctx.restore();
+
+            // Draw confetti
+            updateConfetti();
+
+            requestAnimationFrame(render);
+        }
+
+        // Mouse handling
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+        }
+
+        canvas.addEventListener('mousedown', (e) => {
+            if (e.button !== 0) return; // Only left click
+            const pos = getMousePos(e);
+            const worldPos = screenToWorld(pos.x, pos.y);
+            const node = nodes.find(n => n.containsPoint(worldPos.x, worldPos.y));
+
+            hasDragged = false;
+
+            if (isEditMode && node) {
+                // Check for connection handle hit
+                const handle = getConnectionHandle(node, worldPos.x, worldPos.y);
+                if (handle) {
+                    isDraggingConnection = true;
+                    connectionSourceNode = node;
+                    connectionSourceIsBottom = (handle === 'bottom');
+                    connectionMouseX = pos.x;
+                    connectionMouseY = pos.y;
+                    return;
+                }
+                // In edit mode, allow dragging nodes to reposition
+                draggedNode = node;
+                selectedNode = node;
+                node.targetX = null;
+                node.targetY = null;
+                container.classList.add('grabbing');
+            } else if (node) {
+                draggedNode = node;
+                selectedNode = node;
+                node.targetX = null;
+                node.targetY = null;
+                container.classList.add('grabbing');
+            } else {
+                isDraggingCanvas = true;
+                dragStartX = e.clientX;
+                dragStartY = e.clientY;
+                dragStartOffsetX = viewOffsetX;
+                dragStartOffsetY = viewOffsetY;
+                container.classList.add('grabbing');
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            const pos = getMousePos(e);
+
+            if (isDraggingConnection) {
+                connectionMouseX = pos.x;
+                connectionMouseY = pos.y;
+                return;
+            }
+
+            if (draggedNode) {
+                const worldPos = screenToWorld(pos.x, pos.y);
+                draggedNode.x = worldPos.x;
+                draggedNode.y = worldPos.y;
+                hasDragged = true;
+            } else if (isDraggingCanvas) {
+                const dx = e.clientX - dragStartX;
+                const dy = e.clientY - dragStartY;
+                if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+                    hasDragged = true;
+                }
+                viewOffsetX = dragStartOffsetX + dx;
+                viewOffsetY = dragStartOffsetY + dy;
+            }
+
+            const worldPos = screenToWorld(pos.x, pos.y);
+            hoveredNode = nodes.find(n => n.containsPoint(worldPos.x, worldPos.y));
+
+            // Change cursor for connection handles in edit mode
+            if (isEditMode && hoveredNode) {
+                const handle = getConnectionHandle(hoveredNode, worldPos.x, worldPos.y);
+                canvas.style.cursor = handle ? 'crosshair' : 'grab';
+            } else if (isEditMode) {
+                canvas.style.cursor = 'default';
+            }
+
+            if (hoveredNode && !isDraggingCanvas  && !isEditMode) {
+                showTooltip(hoveredNode, e.clientX, e.clientY);
+            } else {
+                hideTooltip();
+            }
+        });
+
+        canvas.addEventListener('mouseup', (e) => {
+            if (isDraggingConnection && connectionSourceNode) {
+                const pos = getMousePos(e);
+                const worldPos = screenToWorld(pos.x, pos.y);
+                const targetNode = nodes.find(n => n.containsPoint(worldPos.x, worldPos.y));
+
+                if (targetNode && targetNode !== connectionSourceNode) {
+                    if (connectionSourceIsBottom) {
+                        // Dragged from bottom of source → source is prereq of target
+                        addPrerequisiteLink(connectionSourceNode, targetNode);
+                    } else {
+                        // Dragged from top of source → target is prereq of source
+                        addPrerequisiteLink(targetNode, connectionSourceNode);
+                    }
+                }
+
+                isDraggingConnection = false;
+                connectionSourceNode = null;
+                return;
+            }
+
+            if (draggedNode) {
+                savePositions();
+                if (!hasDragged && selectedNode === draggedNode ) {
+                    if (isEditMode) {
+                        // In edit mode, show edit modal for any node
+                        showEditModal(draggedNode);
+                    } else if (!draggedNode.isFullyLocked()) {
+                        showModal(draggedNode);
+                    }
+                }
+            }
+            draggedNode = null;
+            isDraggingCanvas = false;
+            container.classList.remove('grabbing');
+        });
+
+        canvas.addEventListener('dblclick', (e) => {
+            if (!isEditMode) return;
+            const pos = getMousePos(e);
+            const worldPos = screenToWorld(pos.x, pos.y);
+            // Don't create on top of existing node
+            const existingNode = nodes.find(n => n.containsPoint(worldPos.x, worldPos.y));
+            if (existingNode) return;
+
+            showInlineInput(e.clientX, e.clientY, worldPos.x, worldPos.y);
+        });
+
+        canvas.addEventListener('mouseleave', () => {
+            hideTooltip();
+        });
+
+        // Scroll to zoom
+        canvas.addEventListener('wheel', (e) => {
+            e.preventDefault();
+
+            const pos = getMousePos(e);
+            const worldBefore = screenToWorld(pos.x, pos.y);
+
+            const zoomFactor = e.deltaY > 0 ? 0.9 : 1.1;
+            const newScale = Math.max(0.2, Math.min(3, viewScale * zoomFactor));
+
+            if (newScale !== viewScale) {
+                viewScale = newScale;
+
+                const worldAfter = screenToWorld(pos.x, pos.y);
+                viewOffsetX += (worldAfter.x - worldBefore.x) * viewScale;
+                viewOffsetY += (worldAfter.y - worldBefore.y) * viewScale;
+
+                showZoomIndicator();
+            }
+        }, { passive: false });
+
+        function showZoomIndicator() {
+            zoomIndicator.textContent = `${Math.round(viewScale * 100)}%`;
+            zoomIndicator.classList.add('visible');
+
+            if (zoomIndicatorTimeout) clearTimeout(zoomIndicatorTimeout);
+            zoomIndicatorTimeout = setTimeout(() => {
+                zoomIndicator.classList.remove('visible');
+            }, 1000);
+        }
+
+        // Tooltip
+        function showTooltip(node, x, y) {
+            tooltip.querySelector('.tooltip-title').textContent = node.achievement.name;
+            tooltip.querySelector('.tooltip-desc').textContent = node.achievement.description;
+
+            const prereqs = node.achievement.prerequisites;
+            const prereqsDiv = tooltip.querySelector('.tooltip-prereqs');
+            if (prereqs && prereqs.length > 0) {
+                const prereqNames = prereqs.map(id => {
+                    const a = achievements.find(a => a.id === id);
+                    return a ? a.name : id;
+                }).join(', ');
+                prereqsDiv.textContent = `Requires: ${prereqNames}`;
+                prereqsDiv.style.display = 'block';
+            } else {
+                prereqsDiv.style.display = 'none';
+            }
+
+            const statusDiv = tooltip.querySelector('.tooltip-status');
+            const target = node.achievement.target || 1;
+            statusDiv.innerHTML = Object.entries(PLAYERS).map(([key, player]) => {
+                const completed = node.achievement[`${key}_completed`];
+                const unlocked = node.isUnlocked(key);
+                const progress = node.achievement[`${key}_progress`] || 0;
+                let statusIcon;
+                if (completed) statusIcon = '✓';
+                else if (!unlocked) statusIcon = '🔒';
+                else if (target > 1) statusIcon = `${progress}/${target}`;
+                else statusIcon = '○';
+                let statusClass = completed ? 'completed' : 'incomplete';
+                return `
+                    <div class="tooltip-player ${statusClass}">
+                        <span class="icon">${player.icon}</span>
+                        <span>${statusIcon}</span>
+                    </div>
+                `;
+            }).join('');
+
+            tooltip.style.left = (x + 15) + 'px';
+            tooltip.style.top = (y + 15) + 'px';
+            tooltip.classList.add('visible');
+        }
+
+        function hideTooltip() {
+            tooltip.classList.remove('visible');
+        }
+
+        // Achievement Modal
+        function showModal(node) {
+            modal.querySelector('.modal-title').textContent = node.achievement.name;
+            modal.querySelector('.modal-desc').textContent = node.achievement.description;
+
+            const playersDiv = modal.querySelector('.modal-players');
+            const target = node.achievement.target || 1;
+
+            playersDiv.innerHTML = Object.entries(PLAYERS).map(([key, player]) => {
+                const completed = node.achievement[`${key}_completed`];
+                const unlocked = node.isUnlocked(key);
+                const progress = node.achievement[`${key}_progress`] || 0;
+
+                if (target > 1) {
+                    return `
+                        <div class="modal-player-toggle ${key} ${completed ? 'completed' : ''}"
+                             data-player="${key}" ${!unlocked ? 'style="opacity: 0.5; pointer-events: none;"' : ''}>
+                            <span class="icon">${player.icon}</span>
+                            <span class="name">${player.name}</span>
+                            <div class="progress-controls">
+                                <button class="progress-btn minus" data-player="${key}">−</button>
+                                <span class="progress-display">${progress} / ${target}</span>
+                                <button class="progress-btn plus" data-player="${key}">+</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    return `
+                        <div class="modal-player-toggle ${key} ${completed ? 'completed' : ''}"
+                             data-player="${key}" ${!unlocked ? 'style="opacity: 0.5; cursor: not-allowed;"' : ''}>
+                            <span class="icon">${player.icon}</span>
+                            <span class="name">${player.name}</span>
+                            <span class="status">${completed ? '✓' : (unlocked ? '○' : '🔒')}</span>
+                        </div>
+                    `;
+                }
+            }).join('');
+
+            if (target > 1) {
+                playersDiv.querySelectorAll('.progress-btn').forEach(btn => {
+                    btn.onclick = (e) => {
+                        e.stopPropagation();
+                        if (!isAuthenticated) { alert('Authenticate first to make changes.'); return; }
+                        const playerKey = btn.dataset.player;
+                        if (!node.isUnlocked(playerKey)) return;
+
+                        const progressKey = `${playerKey}_progress`;
+                        const completedKey = `${playerKey}_completed`;
+                        let progress = node.achievement[progressKey] || 0;
+
+                        if (btn.classList.contains('plus')) {
+                            progress = Math.min(progress + 1, target);
+                        } else {
+                            progress = Math.max(progress - 1, 0);
+                        }
+
+                        node.achievement[progressKey] = progress;
+                        const achievement = achievements.find(a => a.id === node.id);
+                        if (achievement) achievement[progressKey] = progress;
+
+                        const wasCompleted = node.achievement[completedKey];
+                        const nowCompleted = progress >= target;
+                        node.achievement[completedKey] = nowCompleted;
+                        if (achievement) achievement[completedKey] = nowCompleted;
+
+                        btn.closest('.modal-player-toggle').querySelector('.progress-display').textContent = `${progress} / ${target}`;
+                        btn.closest('.modal-player-toggle').classList.toggle('completed', nowCompleted);
+
+                        if (nowCompleted && !wasCompleted) {
+                            const screenPos = { x: node.x * viewScale + viewOffsetX, y: node.y * viewScale + viewOffsetY };
+                            createConfetti(screenPos.x, screenPos.y);
+                        }
+
+                        updatePlayerScores();
+                        saveToLocalStorage();
+                    };
+                });
+            } else {
+                playersDiv.querySelectorAll('.modal-player-toggle').forEach(toggle => {
+                    toggle.onclick = () => {
+                        if (!isAuthenticated) { alert('Authenticate first to make changes.'); return; }
+                        const playerKey = toggle.dataset.player;
+                        if (!node.isUnlocked(playerKey)) return;
+
+                        const key = `${playerKey}_completed`;
+                        const wasCompleted = node.achievement[key];
+                        node.achievement[key] = !wasCompleted;
+
+                        const achievement = achievements.find(a => a.id === node.id);
+                        if (achievement) achievement[key] = !wasCompleted;
+
+                        // Sync progress for binary achievements
+                        const progressKey = `${playerKey}_progress`;
+                        node.achievement[progressKey] = !wasCompleted ? 1 : 0;
+                        if (achievement) achievement[progressKey] = !wasCompleted ? 1 : 0;
+
+                        toggle.classList.toggle('completed');
+                        toggle.querySelector('.status').textContent = !wasCompleted ? '✓' : '○';
+
+                        if (!wasCompleted) {
+                            const screenPos = { x: node.x * viewScale + viewOffsetX, y: node.y * viewScale + viewOffsetY };
+                            createConfetti(screenPos.x, screenPos.y);
+                        }
+
+                        updatePlayerScores();
+                        saveToLocalStorage();
+                    };
+                });
+            }
+
+            // Delete button
+            document.getElementById('deleteAchievementBtn').onclick = () => {
+                if (confirm(`Delete "${node.achievement.name}"? This cannot be undone.`)) {
+                    deleteAchievement(node.id);
+                    modal.classList.remove('visible');
+                }
+            };
+
+            modal.classList.add('visible');
+
+            modal.querySelector('.modal-btn.close').onclick = () => {
+                modal.classList.remove('visible');
+            };
+        }
+
+        function deleteAchievement(id) {
+            // Remove from achievements
+            achievements = achievements.filter(a => a.id !== id);
+
+            // Remove as prerequisite from other achievements
+            achievements.forEach(a => {
+                if (a.prerequisites) {
+                    a.prerequisites = a.prerequisites.filter(p => p !== id);
+                }
+            });
+
+            // Remove node
+            nodes = nodes.filter(n => n.id !== id);
+
+            // Remove position
+            delete nodePositions[id];
+
+            rebuildEdges();
+            updatePlayerScores();
+            saveToLocalStorage();
+            savePositions();
+        }
+
+        // Edit Achievement Modal (for edit mode)
+        let editingNode = null;
+
+        function showEditModal(node) {
+            editingNode = node;
+            document.getElementById('editAchievementName').value = node.achievement.name;
+            document.getElementById('editAchievementDesc').value = node.achievement.description || '';
+            editModal.classList.add('visible');
+            document.getElementById('editAchievementName').focus();
+        }
+
+        document.getElementById('editSaveBtn').addEventListener('click', () => {
+            if (!editingNode) return;
+            const newName = document.getElementById('editAchievementName').value.trim();
+            const newDesc = document.getElementById('editAchievementDesc').value.trim();
+
+            if (!newName) {
+                alert('Please enter a name');
+                return;
+            }
+
+            editingNode.achievement.name = newName;
+            editingNode.achievement.description = newDesc || newName;
+
+            const achievement = achievements.find(a => a.id === editingNode.id);
+            if (achievement) {
+                achievement.name = newName;
+                achievement.description = newDesc || newName;
+            }
+
+            saveToLocalStorage();
+            editModal.classList.remove('visible');
+            editingNode = null;
+        });
+
+        document.getElementById('editCancelBtn').addEventListener('click', () => {
+            editModal.classList.remove('visible');
+            editingNode = null;
+        });
+
+        document.getElementById('editDeleteBtn').addEventListener('click', () => {
+            if (!editingNode) return;
+            if (confirm(`Delete "${editingNode.achievement.name}"? This cannot be undone.`)) {
+                deleteAchievement(editingNode.id);
+                editModal.classList.remove('visible');
+                editingNode = null;
+            }
+        });
+
+        editModal.addEventListener('click', (e) => {
+            if (e.target === editModal) {
+                editModal.classList.remove('visible');
+                editingNode = null;
+            }
+        });
+
+        // Close modals on escape / toggle edit mode
+        document.addEventListener('keydown', (e) => {
+            // Don't handle keys if typing in an input
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            if (e.key === 'Escape') {
+                if (editModal.classList.contains('visible')) {
+                    editModal.classList.remove('visible');
+                    editingNode = null;
+                } else if (isEditMode) {
+                    exitEditMode();
+                } else {
+                    modal.classList.remove('visible');
+                }
+            }
+            if (e.key === 'e' && !e.ctrlKey && !e.metaKey  && !editModal.classList.contains('visible') && inlineInput.style.display !== 'block') {
+                toggleEditMode();
+            }
+            if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
+                e.preventDefault();
+                downloadCSV();
+            }
+            if (e.key === 'r' && !e.ctrlKey && !e.metaKey  && !isEditMode) {
+                viewScale = 1;
+                viewOffsetX = 0;
+                viewOffsetY = 0;
+                showZoomIndicator();
+            }
+            if (e.key === 'l' && !e.ctrlKey && !e.metaKey && !isEditMode) {
+                runAutoLayout();
+            }
+        });
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.remove('visible');
+        });
+
+        // Confetti
+        function createConfetti(x, y) {
+            const colors = ['#ff6b6b', '#ffd93d', '#6bcbff', '#4ade80', '#f472b6', '#c084fc'];
+            const rect = canvas.getBoundingClientRect();
+            const absoluteX = rect.left + x;
+            const absoluteY = rect.top + y;
+
+            for (let i = 0; i < 50; i++) {
+                confettiParticles.push({
+                    x: absoluteX,
+                    y: absoluteY,
+                    vx: (Math.random() - 0.5) * 15,
+                    vy: (Math.random() - 0.8) * 15,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    size: Math.random() * 8 + 4,
+                    rotation: Math.random() * 360,
+                    rotationSpeed: (Math.random() - 0.5) * 10,
+                    life: 1
+                });
+            }
+        }
+
+        function updateConfetti() {
+            confettiCtx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+
+            confettiParticles = confettiParticles.filter(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.3;
+                p.rotation += p.rotationSpeed;
+                p.life -= 0.015;
+
+                if (p.life <= 0) return false;
+
+                confettiCtx.save();
+                confettiCtx.translate(p.x, p.y);
+                confettiCtx.rotate(p.rotation * Math.PI / 180);
+                confettiCtx.fillStyle = p.color;
+                confettiCtx.globalAlpha = p.life;
+                confettiCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+                confettiCtx.restore();
+
+                return true;
+            });
+        }
+
+        function updatePlayerScores() {
+            Object.keys(PLAYERS).forEach(player => {
+                const completed = achievements.filter(a => a[`${player}_completed`]).length;
+                const total = achievements.length;
+                const scoreEl = document.getElementById(`score-${player}`);
+                if (scoreEl) scoreEl.textContent = `${completed} / ${total}`;
+            });
+        }
+
+        function saveToLocalStorage() {
+            localStorage.setItem('dormAchievements', JSON.stringify(achievements));
+            saveRemote();
+        }
+
+        function loadFromLocalStorage() {
+            const saved = localStorage.getItem('dormAchievements');
+            if (saved) return JSON.parse(saved);
+            return null;
+        }
+
+        // ---- Edit Mode ----
+        function enterEditMode() {
+            isEditMode = true;
+            header.classList.add('edit-mode');
+            editHint.classList.add('visible');
+            modeIndicator.querySelector('.mode-text').textContent = 'Edit Mode';
+            modeIndicator.querySelector('.hint').textContent = 'Double-click to add • Drag edges to connect • Press E to exit';
+            modeIndicator.classList.add('visible');
+            container.classList.add('adding');
+        }
+
+        function exitEditMode() {
+            isEditMode = false;
+            isDraggingConnection = false;
+            connectionSourceNode = null;
+            header.classList.remove('edit-mode');
+            editHint.classList.remove('visible');
+            modeIndicator.classList.remove('visible');
+            container.classList.remove('adding');
+            hideInlineInput();
+        }
+
+        function toggleEditMode() {
+            if (isEditMode) {
+                exitEditMode();
+            } else {
+                if (!isAuthenticated) { alert('Authenticate first to enter edit mode.'); return; }
+                enterEditMode();
+            }
+        }
+
+        // ---- Inline Input ----
+        let inlineInputWorldX = 0;
+        let inlineInputWorldY = 0;
+
+        function showInlineInput(screenX, screenY, worldX, worldY) {
+            inlineInputWorldX = worldX;
+            inlineInputWorldY = worldY;
+            inlineInput.style.display = 'block';
+            inlineInput.style.left = (screenX - 90) + 'px';
+            inlineInput.style.top = (screenY - 18) + 'px';
+            inlineInputField.value = '';
+            inlineInputField.focus();
+        }
+
+        function hideInlineInput() {
+            inlineInput.style.display = 'none';
+            inlineInputField.value = '';
+        }
+
+        function createInlineNode(name) {
+            const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+            if (!id || achievements.find(a => a.id === id)) {
+                // Append a number to make unique
+                let counter = 2;
+                let uniqueId = id + '_' + counter;
+                while (achievements.find(a => a.id === uniqueId)) {
+                    counter++;
+                    uniqueId = id + '_' + counter;
+                }
+                return createNodeWithId(uniqueId, name);
+            }
+            return createNodeWithId(id, name);
+        }
+
+        function createNodeWithId(id, name) {
+            const newAchievement = {
+                id,
+                name,
+                description: name,
+                prerequisites: [],
+                target: ACHIEVEMENT_TARGETS[id] || 1,
+                bentzi_completed: false,
+                adin_completed: false,
+                ben_completed: false,
+                bentzi_progress: 0,
+                adin_progress: 0,
+                ben_progress: 0
+            };
+            achievements.push(newAchievement);
+            const node = new AchievementNode(newAchievement, inlineInputWorldX, inlineInputWorldY);
+            nodes.push(node);
+            nodePositions[id] = { x: inlineInputWorldX, y: inlineInputWorldY };
+            rebuildEdges();
+            updatePlayerScores();
+            saveToLocalStorage();
+            savePositions();
+            return node;
+        }
+
+        inlineInputField.addEventListener('keydown', (e) => {
+            e.stopPropagation(); // Prevent E from toggling edit mode
+            if (e.key === 'Enter') {
+                const name = inlineInputField.value.trim();
+                if (name) {
+                    createInlineNode(name);
+                }
+                hideInlineInput();
+            } else if (e.key === 'Escape') {
+                hideInlineInput();
+            }
+        });
+
+        inlineInputField.addEventListener('blur', () => {
+            // Small delay so click events on canvas aren't swallowed
+            setTimeout(() => hideInlineInput(), 150);
+        });
+
+        // ---- Connection Handle Detection ----
+        function getConnectionHandle(node, worldX, worldY) {
+            const handleRadius = 15;
+            // Bottom handle
+            const bottomX = node.x;
+            const bottomY = node.y + node.height / 2;
+            const distBottom = Math.hypot(worldX - bottomX, worldY - bottomY);
+            if (distBottom < handleRadius) return 'bottom';
+
+            // Top handle
+            const topX = node.x;
+            const topY = node.y - node.height / 2;
+            const distTop = Math.hypot(worldX - topX, worldY - topY);
+            if (distTop < handleRadius) return 'top';
+
+            return null;
+        }
+
+        // ---- Circular Dependency Check ----
+        function wouldCreateCycle(prereqId, dependentId) {
+            // Check if adding prereqId as a prerequisite of dependentId would create a cycle
+            // i.e., can we reach prereqId from dependentId by following prerequisites?
+            const visited = new Set();
+            const stack = [prereqId];
+            while (stack.length > 0) {
+                const current = stack.pop();
+                if (current === dependentId) return true;
+                if (visited.has(current)) continue;
+                visited.add(current);
+                const achievement = achievements.find(a => a.id === current);
+                if (achievement && achievement.prerequisites) {
+                    achievement.prerequisites.forEach(p => stack.push(p));
+                }
+            }
+            return false;
+        }
+
+        function addPrerequisiteLink(prereqNode, dependentNode) {
+            const prereqId = prereqNode.id;
+            const dependentId = dependentNode.id;
+
+            if (prereqId === dependentId) return;
+
+            const dependent = achievements.find(a => a.id === dependentId);
+            if (!dependent) return;
+            if (dependent.prerequisites && dependent.prerequisites.includes(prereqId)) return;
+
+            if (wouldCreateCycle(prereqId, dependentId)) return;
+
+            if (!dependent.prerequisites) dependent.prerequisites = [];
+            dependent.prerequisites.push(prereqId);
+            rebuildEdges();
+            saveToLocalStorage();
+        }
+
+        // ---- Right-click context menu for removing prerequisites ----
+        canvas.addEventListener('contextmenu', (e) => {
+            if (!isEditMode) return;
+            e.preventDefault();
+            const pos = getMousePos(e);
+            const worldPos = screenToWorld(pos.x, pos.y);
+            const node = nodes.find(n => n.containsPoint(worldPos.x, worldPos.y));
+            if (!node) return;
+
+            const achievement = achievements.find(a => a.id === node.id);
+            if (!achievement || !achievement.prerequisites || achievement.prerequisites.length === 0) return;
+
+            const prereqNames = achievement.prerequisites.map(pid => {
+                const a = achievements.find(a => a.id === pid);
+                return a ? a.name : pid;
+            });
+
+            const choice = prompt(
+                `Remove prerequisite from "${achievement.name}"?\n\nCurrent prerequisites:\n${prereqNames.map((n, i) => `${i + 1}. ${n}`).join('\n')}\n\nEnter number to remove (or "all" to clear all):`
+            );
+
+            if (choice === null) return;
+            if (choice.toLowerCase() === 'all') {
+                achievement.prerequisites = [];
+            } else {
+                const idx = parseInt(choice) - 1;
+                if (idx >= 0 && idx < achievement.prerequisites.length) {
+                    achievement.prerequisites.splice(idx, 1);
+                }
+            }
+            rebuildEdges();
+            saveToLocalStorage();
+        });
+
+        // ---- Force-Directed Layout ----
+        function computeNodeDepths() {
+            const nodeDepths = {};
+            function computeDepth(id, visited) {
+                if (visited.has(id)) return nodeDepths[id] || 0;
+                visited.add(id);
+                const achievement = achievements.find(a => a.id === id);
+                if (!achievement || !achievement.prerequisites || achievement.prerequisites.length === 0) {
+                    nodeDepths[id] = 0;
+                    return 0;
+                }
+                const maxPrereqDepth = Math.max(
+                    ...achievement.prerequisites.map(pid => computeDepth(pid, visited))
+                );
+                nodeDepths[id] = maxPrereqDepth + 1;
+                return nodeDepths[id];
+            }
+            const visited = new Set();
+            achievements.forEach(a => computeDepth(a.id, visited));
+            return nodeDepths;
+        }
+
+        function computeForceLayout(seedPositions) {
+            const centerX = container.clientWidth / 2;
+            const centerY = container.clientHeight / 2;
+            const nodeDepths = computeNodeDepths();
+            const maxDepth = Math.max(0, ...Object.values(nodeDepths));
+
+            const ITERATIONS = 300;
+            const GRAVITY = 0.008;
+            const REPULSION = 9000;
+            const REPULSION_MAX = 600;
+            const SPRING = 0.035;
+            const SPRING_REST = 200;
+            const LAYER_BIAS = 0.025;
+            const LAYER_SPACING = 180;
+            const DAMPING = 0.88;
+            const MIN_DIST = 190;
+
+            // Initialize positions
+            const pos = {};
+            const vel = {};
+            nodes.forEach(n => {
+                if (seedPositions && seedPositions[n.id]) {
+                    pos[n.id] = { x: seedPositions[n.id].x, y: seedPositions[n.id].y };
+                } else {
+                    const depth = nodeDepths[n.id] || 0;
+                    pos[n.id] = {
+                        x: centerX + (Math.random() - 0.5) * 400,
+                        y: centerY - (maxDepth * LAYER_SPACING) / 2 + depth * LAYER_SPACING + (Math.random() - 0.5) * 40
+                    };
+                }
+                vel[n.id] = { x: 0, y: 0 };
+            });
+
+            for (let iter = 0; iter < ITERATIONS; iter++) {
+                const forces = {};
+                nodes.forEach(n => { forces[n.id] = { x: 0, y: 0 }; });
+
+                // Gravity toward center
+                nodes.forEach(n => {
+                    forces[n.id].x -= GRAVITY * (pos[n.id].x - centerX);
+                    forces[n.id].y -= GRAVITY * (pos[n.id].y - centerY);
+                });
+
+                // Node-node repulsion
+                for (let i = 0; i < nodes.length; i++) {
+                    for (let j = i + 1; j < nodes.length; j++) {
+                        const a = nodes[i], b = nodes[j];
+                        let dx = pos[a.id].x - pos[b.id].x;
+                        let dy = pos[a.id].y - pos[b.id].y;
+                        let dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < 1) { dx = Math.random() - 0.5; dy = Math.random() - 0.5; dist = 1; }
+                        if (dist < REPULSION_MAX) {
+                            const force = REPULSION / (dist * dist);
+                            const fx = (dx / dist) * force;
+                            const fy = (dy / dist) * force;
+                            forces[a.id].x += fx;
+                            forces[a.id].y += fy;
+                            forces[b.id].x -= fx;
+                            forces[b.id].y -= fy;
+                        }
+                        // Hard overlap prevention
+                        if (dist < MIN_DIST) {
+                            const push = (MIN_DIST - dist) * 0.5;
+                            const px = (dx / dist) * push;
+                            const py = (dy / dist) * push;
+                            forces[a.id].x += px;
+                            forces[a.id].y += py;
+                            forces[b.id].x -= px;
+                            forces[b.id].y -= py;
+                        }
+                    }
+                }
+
+                // Edge springs
+                edges.forEach(edge => {
+                    const dx = pos[edge.to.id].x - pos[edge.from.id].x;
+                    const dy = pos[edge.to.id].y - pos[edge.from.id].y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 1) dist = 1;
+                    const displacement = dist - SPRING_REST;
+                    const force = SPRING * displacement;
+                    const fx = (dx / dist) * force;
+                    const fy = (dy / dist) * force;
+                    forces[edge.from.id].x += fx;
+                    forces[edge.from.id].y += fy;
+                    forces[edge.to.id].x -= fx;
+                    forces[edge.to.id].y -= fy;
+                });
+
+                // Layer bias (prereqs above dependents)
+                nodes.forEach(n => {
+                    const depth = nodeDepths[n.id] || 0;
+                    const idealY = centerY - (maxDepth * LAYER_SPACING) / 2 + depth * LAYER_SPACING;
+                    forces[n.id].y -= LAYER_BIAS * (pos[n.id].y - idealY);
+                });
+
+                // Apply forces with damping
+                let totalEnergy = 0;
+                nodes.forEach(n => {
+                    vel[n.id].x = (vel[n.id].x + forces[n.id].x) * DAMPING;
+                    vel[n.id].y = (vel[n.id].y + forces[n.id].y) * DAMPING;
+                    pos[n.id].x += vel[n.id].x;
+                    pos[n.id].y += vel[n.id].y;
+                    totalEnergy += vel[n.id].x * vel[n.id].x + vel[n.id].y * vel[n.id].y;
+                });
+
+                // Early exit if settled
+                if (totalEnergy < 0.1) break;
+            }
+
+            return pos;
+        }
+
+        function runAutoLayout() {
+            const positions = computeForceLayout(null);
+            nodes.forEach(n => {
+                if (positions[n.id]) {
+                    n.targetX = positions[n.id].x;
+                    n.targetY = positions[n.id].y;
+                }
+            });
+
+            viewScale = 1;
+            viewOffsetX = 0;
+            viewOffsetY = 0;
+            isAnimatingLayout = true;
+        }
+
+        // ---- Search ----
+        const searchInput = document.getElementById('searchInput');
+        const searchCount = document.getElementById('searchCount');
+
+        searchInput.addEventListener('input', () => {
+            searchQuery = searchInput.value.trim().toLowerCase();
+            searchMatchIds.clear();
+            searchCurrentIndex = -1;
+
+            if (searchQuery.length > 0) {
+                nodes.forEach(n => {
+                    if (n.achievement.name.toLowerCase().includes(searchQuery) ||
+                        n.achievement.description.toLowerCase().includes(searchQuery)) {
+                        searchMatchIds.add(n.id);
+                    }
+                });
+                searchCount.textContent = searchMatchIds.size > 0
+                    ? `${searchMatchIds.size} found`
+                    : 'none';
+
+                // Pan to first match
+                if (searchMatchIds.size > 0) {
+                    searchCurrentIndex = 0;
+                    panToSearchResult();
+                }
+            } else {
+                searchCount.textContent = '';
+            }
+        });
+
+        searchInput.addEventListener('keydown', (e) => {
+            e.stopPropagation(); // Don't trigger L, E, R shortcuts
+            if (e.key === 'Enter' && searchMatchIds.size > 0) {
+                // Cycle through results
+                searchCurrentIndex = (searchCurrentIndex + 1) % searchMatchIds.size;
+                panToSearchResult();
+            }
+            if (e.key === 'Escape') {
+                searchInput.value = '';
+                searchQuery = '';
+                searchMatchIds.clear();
+                searchCount.textContent = '';
+                searchInput.blur();
+            }
+        });
+
+        function panToSearchResult() {
+            const matchIds = [...searchMatchIds];
+            if (searchCurrentIndex < 0 || searchCurrentIndex >= matchIds.length) return;
+            const targetNode = nodes.find(n => n.id === matchIds[searchCurrentIndex]);
+            if (!targetNode) return;
+
+            // Pan so the node is centered on screen
+            const screenCenterX = container.clientWidth / 2;
+            const screenCenterY = container.clientHeight / 2;
+            viewOffsetX = screenCenterX - targetNode.x * viewScale;
+            viewOffsetY = screenCenterY - targetNode.y * viewScale;
+
+            searchCount.textContent = `${searchCurrentIndex + 1}/${matchIds.length}`;
+        }
+
+        // Keyboard shortcut: / to focus search
+        document.addEventListener('keydown', (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.key === '/' && !e.ctrlKey && !e.metaKey) {
+                e.preventDefault();
+                searchInput.focus();
+            }
+        });
+
+        // ---- Auth & Remote Save ----
+        const authBtn = document.getElementById('authBtn');
+        const authIcon = document.getElementById('authIcon');
+        const authLabel = document.getElementById('authLabel');
+        const saveIndicator = document.getElementById('saveIndicator');
+
+        function setAuthState(authenticated, pw) {
+            isAuthenticated = authenticated;
+            authPassword = pw;
+            if (authenticated) {
+                sessionStorage.setItem('achievementsAuth', pw);
+                authBtn.classList.add('authenticated');
+                authIcon.textContent = '🔓';
+                authLabel.textContent = 'Authenticated';
+            } else {
+                sessionStorage.removeItem('achievementsAuth');
+                authBtn.classList.remove('authenticated');
+                authIcon.textContent = '🔒';
+                authLabel.textContent = 'View Only';
+            }
+        }
+
+        async function verifyPassword(pw) {
+            try {
+                authLabel.textContent = 'Verifying...';
+                const res = await fetch(WORKER_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: pw, action: 'verify' }),
+                });
+                const data = await res.json();
+                return res.ok && data.verified;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // Check for saved session
+        const savedPassword = sessionStorage.getItem('achievementsAuth');
+        if (savedPassword) {
+            // Re-verify on page load
+            verifyPassword(savedPassword).then(valid => {
+                if (valid) {
+                    setAuthState(true, savedPassword);
+                } else {
+                    setAuthState(false, null);
+                }
+            });
+        }
+
+        authBtn.addEventListener('click', async () => {
+            if (isAuthenticated) {
+                setAuthState(false, null);
+                return;
+            }
+
+            const pw = prompt('Enter password to enable editing:');
+            if (!pw) return;
+
+            const valid = await verifyPassword(pw);
+            if (valid) {
+                setAuthState(true, pw);
+            } else {
+                setAuthState(false, null);
+                alert('Wrong password.');
+            }
+        });
+
+        function showSaveStatus(status, message) {
+            saveIndicator.className = 'save-indicator ' + status;
+            saveIndicator.textContent = message;
+            if (status === 'saved' || status === 'error') {
+                setTimeout(() => { saveIndicator.className = 'save-indicator'; }, 2000);
+            }
+        }
+
+        function saveRemote() {
+            if (!isAuthenticated || !authPassword) return;
+
+            // Debounce: wait 1s after last change before saving
+            if (saveTimeout) clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(async () => {
+                showSaveStatus('saving', 'Saving...');
+                try {
+                    const csv = generateCSV();
+                    const res = await fetch(WORKER_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ password: authPassword, csv }),
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.success) {
+                        showSaveStatus('saved', 'Saved');
+                    } else if (res.status === 403) {
+                        showSaveStatus('error', 'Wrong password');
+                        setAuthState(false, null);
+                    } else {
+                        showSaveStatus('error', 'Save failed');
+                    }
+                } catch (e) {
+                    showSaveStatus('error', 'Save failed');
+                }
+            }, 1000);
+        }
+
+        async function loadCSVFromServer() {
+            try {
+                const res = await fetch(CSV_URL + '?t=' + Date.now());
+                if (res.ok) {
+                    const csv = await res.text();
+                    if (csv.trim().startsWith('id,')) {
+                        return parseCSV(csv);
+                    }
+                }
+            } catch (e) {
+                // Fetch failed (likely local dev), fall through
+            }
+            return null;
+        }
+
+        async function init() {
+            // Try loading from server CSV first, then localStorage, then default
+            const serverData = await loadCSVFromServer();
+            const saved = loadFromLocalStorage();
+
+            if (serverData) {
+                achievements = serverData;
+                // Update localStorage to match server
+                localStorage.setItem('dormAchievements', JSON.stringify(achievements));
+            } else if (saved) {
+                achievements = saved;
+            } else {
+                const defaultCSV = `id,name,description,prerequisites,target,bentzi_completed,adin_completed,ben_completed,bentzi_progress,adin_progress,ben_progress
+climb_one_higher,Climb One Higher Than Top Boulder,Climb one grade higher than your top boulder (Bentzi V5 / Adin V8 / Ben V6),,1,false,false,false,0,0,0
+climb_two_higher,Climb Two Higher,Climb two grades higher (Bentzi V6 / Adin V9 / Ben V7),climb_one_higher,1,false,false,false,0,0,0
+run_10_miles_week,Run 10 Miles in a Week,Run 10 miles in a single week,,10,false,false,false,0,0,0
+run_10_miles_one_run,Run 10 Miles in One Run,Run 10 miles in a single run,run_10_miles_week,10,false,false,false,0,0,0
+providence_half,Providence Half,Run the Providence half marathon,run_10_miles_one_run,1,false,false,false,0,0,0
+middle_split,Middle Split,Achieve a full middle split,,1,false,false,false,0,0,0
+front_split,Front Split,Achieve a full front split,,1,false,false,false,0,0,0
+full_pancake,Full Pancake,Achieve a full pancake stretch,middle_split,1,false,false,false,0,0,0
+hiking_trip,Hiking Trip,Go on a hiking trip,,1,false,false,false,0,0,0
+backpacking_trip,Backpacking Trip,Go on a backpacking trip,hiking_trip,1,false,false,false,0,0,0
+morning_swim,Morning Swim,Go for a morning swim,,1,false,false,false,0,0,0
+morning_swim_three_locations,Morning Swim in Three Different Locations,Go for a morning swim in three different locations,morning_swim,3,false,false,false,0,0,0
+morning_swim_thrice_week,Morning Swim Thrice in a Week,Go for a morning swim three times in one week,morning_swim,3,false,false,false,0,0,0
+shabbos_catan,Shabbos Catan,Play Catan on Shabbos,,1,false,false,false,0,0,0
+shabbos_chess,Shabbos Chess,Play chess on Shabbos,,1,false,false,false,0,0,0
+hebrew_dinner,Hebrew Dinner,Have a dinner conversation in Hebrew,,1,false,false,false,0,0,0
+host_shabbos_dinner,Host Shabbos Dinner,Host a Shabbos dinner,,1,false,false,false,0,0,0
+cook_3_new_recipes,Cook 3 New Recipes,Cook 3 new recipes,,3,false,false,false,0,0,0
+cook_9_new_recipes,Cook 9 New Recipes,Cook 9 new recipes,cook_3_new_recipes,9,false,false,false,0,0,0
+cook_27_new_recipes,Cook 27 New Recipes,Cook 27 new recipes,cook_9_new_recipes,27,false,false,false,0,0,0
+cook_three_course_meal,Cook a Three Course Meal,Cook a full three course meal,cook_3_new_recipes,1,false,false,false,0,0,0
+make_family_recipe,Make the House a Family Recipe,Make the house a family recipe,,1,false,false,false,0,0,0
+enter_gcb,Enter GCB,Enter GCB,,1,false,false,false,0,0,0
+random_bar_not_providence,Go to a Random Bar Not in Providence,Go to a random bar outside of Providence,enter_gcb,1,false,false,false,0,0,0
+host_a_rager,Host a Rager,Host a rager,,1,false,false,false,0,0,0
+pickup_basketball,Bring Back Pickup Basketball League,Bring back the pickup basketball league,,1,false,false,false,0,0,0
+layout_for_a_goal,Layout for a Goal,Layout for a goal,,1,false,false,false,0,0,0
+support_roommate,Support Your Roommate,Go support your roommate at a presentation / sporting event / artistic endeavor,,1,false,false,false,0,0,0
+nude_figure_drawing,Nude Figure Drawing,Attend a nude figure drawing session,,1,false,false,false,0,0,0
+model_nude_figure_drawing,Model for Nude Figure Drawing,Model for a nude figure drawing session,nude_figure_drawing,1,false,false,false,0,0,0
+donate_blood,Donate Blood,Donate blood,,1,false,false,false,0,0,0
+donate_plasma,Donate Plasma,Donate plasma,donate_blood,1,false,false,false,0,0,0
+donate_sperm,Donate Sperm,Donate sperm,donate_plasma,1,false,false,false,0,0,0
+three_movies_theater,Three Movies in a Theater,Watch three movies in a theater,,3,false,false,false,0,0,0
+three_movies_theater_week,Three Movies in a Theater in a Week,Watch three movies in a theater in one week,three_movies_theater,3,false,false,false,0,0,0
+three_movies_theater_day,Three Movies in a Theater in a Day,Watch three movies in a theater in one day,three_movies_theater_week,3,false,false,false,0,0,0
+do_standup,Do Standup,Perform standup comedy,,1,false,false,false,0,0,0
+open_improv_hours,Open Improv Hours,Attend open improv hours,,1,false,false,false,0,0,0
+puzzle_hunt,Participate in a Puzzle Hunt,Participate in a puzzle hunt,,1,false,false,false,0,0,0
+make_a_website,Make a Website,Make a website,,1,false,false,true,0,0,1
+anki_one_week,Anki One Week Streak,Maintain an Anki streak for one week,,7,false,false,false,0,0,0
+anki_one_month,Anki One Month Streak,Maintain an Anki streak for one month,anki_one_week,30,false,false,false,0,0,0
+woodworking_workshop,Woodworking Workshop in BDW,Attend a woodworking workshop in BDW,,1,false,false,false,0,0,0
+advanced_woodworking,Advanced Woodworking Workshop in BDW,Attend an advanced woodworking workshop in BDW,woodworking_workshop,1,false,false,false,0,0,0
+knitting_project,Complete a Knitting Project,Complete a knitting project,,1,false,false,false,0,0,0
+read_a_book,Read a Book,Read a book,,1,false,false,false,0,0,0
+read_two_books,Read Two Books,Read two books,read_a_book,2,false,false,false,0,0,0
+read_3_books,Read 3 Books,Read 3 books,read_two_books,3,false,false,false,0,0,0
+read_5_books,Read 5 Books,Read 5 books,read_3_books,5,false,false,false,0,0,0
+read_10_books,Read 10 Books,Read 10 books,read_5_books,10,false,false,false,0,0,0
+write_fiction,Write a Longform Piece of Fiction,Write a longform piece of fiction,,1,false,false,false,0,0,0
+post_blogpost,Post a Blogpost,Post a blogpost,,1,false,false,false,0,0,0
+keep_shabbos,Keep Shabbos Once,Keep Shabbos once,,1,false,false,false,0,0,0
+five_minutes,Five Minutes,Five minutes,,1,false,false,false,0,0,0
+portobello,Portobello,Portobello,,1,false,false,false,0,0,0
+horse_mushroom,The Horse Mushroom,The horse mushroom,portobello,1,false,false,false,0,0,0
+make_furniture,Make a Piece of Furniture,Make a piece of furniture,woodworking_workshop,1,false,false,false,0,0,0
+customize_clothing,Customize a Piece of Clothing,Customize a piece of clothing,,1,false,false,false,0,0,0
+eat_probiotics,Eat Probiotics,Eat probiotics,,1,false,false,false,0,0,0
+acquire_lactose_tolerance,Acquire Lactose Tolerance,Acquire lactose tolerance,eat_probiotics,1,false,false,false,0,0,0
+drawing_tablet,Bring Drawing Tablet Up,Bring the drawing tablet up,,1,false,false,false,0,0,0
+record_player,Bring Record Player Up,Bring the record player up,,1,false,false,false,0,0,0
+flipbook_animation,Make Flipbook Style Animation,Make a flipbook style animation,,1,false,false,false,0,0,0
+clean_3_fridays,Clean 3 Fridays in a Row,Clean 3 Fridays in a row,,3,false,false,false,0,0,0
+trash_15_times,Take Out Trash 15 Times,Take out the trash 15 times,,15,false,false,false,0,0,0
+work_5_new_buildings,Work in 5 New Buildings,Work in 5 new buildings,,5,false,false,false,0,0,0
+office_hours_new_prof,Go to Office Hours with a New Professor,Go to office hours with a professor you're interested in (not from your class),,1,false,false,false,0,0,0
+go_to_yosemite,Go to Yosemite,Go to Yosemite,,1,false,false,false,0,0,0
+trail_run_3_locations,Trail Run or Hike at 3 Locations,Trail run or hike at 3 locations within a 1 hour radius of Providence,,3,false,false,false,0,0,0
+barefoot_day,Barefoot Day,Spend an entire day barefoot,,1,false,false,false,0,0,0
+go_out_in_drag,Go Out in Drag,Go out in drag (can be off campus),,1,false,false,false,0,0,0
+buy_200_dollar_thing,Buy a $200 Thing,Buy a $200 thing,,1,false,false,false,0,0,0
+boston_rationalist,Boston Rationalist Event,Attend a Boston Rationalist event,,1,false,false,false,0,0,0`;
+                achievements = parseCSV(defaultCSV);
+            }
+
+            // Migration: add target/progress fields if missing
+            achievements.forEach(a => {
+                if (a.target === undefined || a.target === '') {
+                    a.target = ACHIEVEMENT_TARGETS[a.id] || 1;
+                }
+                ['bentzi', 'adin', 'ben'].forEach(p => {
+                    if (a[`${p}_progress`] === undefined || a[`${p}_progress`] === '') {
+                        a[`${p}_progress`] = a[`${p}_completed`] ? (a.target || 1) : 0;
+                    }
+                });
+            });
+
+            initializeGraph();
+            requestAnimationFrame(render);
+        }
+
+        init();
+    </script>
+</body>
+</html>

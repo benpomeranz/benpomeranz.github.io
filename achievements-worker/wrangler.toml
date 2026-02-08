@@ -1,0 +1,8 @@
+name = "achievements-worker"
+main = "src/index.js"
+compatibility_date = "2025-08-20"
+workers_dev = true
+
+# Secrets (set via `wrangler secret put`):
+# PASSWORD_HASH - bcrypt hash of the shared password
+# GITHUB_TOKEN  - GitHub Personal Access Token with repo write scope
