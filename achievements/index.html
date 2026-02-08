@@ -1639,6 +1639,7 @@
 
             // Delete button
             document.getElementById('deleteAchievementBtn').onclick = () => {
+                if (!isAuthenticated) { alert('Authenticate first to make changes.'); return; }
                 if (confirm(`Delete "${node.achievement.name}"? This cannot be undone.`)) {
                     deleteAchievement(node.id);
                     modal.classList.remove('visible');
@@ -1717,6 +1718,7 @@
 
         document.getElementById('editDeleteBtn').addEventListener('click', () => {
             if (!editingNode) return;
+            if (!isAuthenticated) { alert('Authenticate first to make changes.'); return; }
             if (confirm(`Delete "${editingNode.achievement.name}"? This cannot be undone.`)) {
                 deleteAchievement(editingNode.id);
                 editModal.classList.remove('visible');
