@@ -66,7 +66,7 @@ trash_15_times,Take Out Trash 15 Times,Take out the trash 15 times,,15,false,fal
 work_5_new_buildings,Work in 5 New Buildings,Work in 5 new buildings,,5,false,false,false,0,0,0
 office_hours_new_prof,Go to Office Hours with a New Professor,Go to office hours with a professor you're interested in (not from your class),,1,false,false,false,0,0,0
 go_to_yosemite,Go to Yosemite,Go to Yosemite,,1,false,false,false,0,0,0
-trail_run_3_locations,Trail Run or Hike at 3 Locations,Trail run or hike at 3 locations within a 1 hour radius of Providence,,3,false,false,true,0,0,3
+trail_run_3_locations,Trail Run or Hike at 3 Locations,Trail run or hike at 3 locations within a 1 hour radius of Providence,,3,false,false,false,0,0,0
 barefoot_day,Barefoot Day,Spend an entire day barefoot,,1,false,false,false,0,0,0
 go_out_in_drag,Go Out in Drag,Go out in drag (can be off campus),,1,false,false,false,0,0,0
 buy_200_dollar_thing,Buy a $200 Thing,Buy a $200 thing,,1,false,false,false,0,0,0
