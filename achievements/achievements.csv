@@ -75,4 +75,4 @@ hebrew_dinner,Hebrew Dinner,Hebrew Dinner,,1,false,false,false,0,0,0
 go_to_a_new_bar_providence,Go to a new bar Providence,"Go to a new bar Providence (not seaweeds, Wick Pub, etc.)",random_bar_not_providence,1,false,false,false,0,0,0
 24_18_12_6,"24, 18, 12, 6","Donuts, beers, miles, Os. Any permutation in 24 hours",run_10_miles_one_run,1,false,false,false,0,0,0
 24_18_12_6_2,"24, 18, 12, 6","Beers, Os, Miles, Donuts. One day.",,1,false,false,false,0,0,0
-early_bird,Early Bird,Early Bird,,1,false,false,false,0,0,0
+early_bird,Get the Worm,Wake up before 8 Monday-Friday,,1,false,false,false,0,0,0
