@@ -78,4 +78,4 @@ go_to_a_new_bar_providence,Go to a new bar Providence,"Go to a new bar Providenc
 early_bird,Get the Worm,Wake up before 8 Monday-Friday,,1,false,false,false,0,0,0
 publish_a_preprint,Publish a preprint,Hahaha how do you like your chess achievements now ash holes (Adin Neuro?),,1,false,false,false,0,0,0
 publish_in_a_journal,Publish in a Journal,Publish in a Journal,publish_a_preprint,1,false,false,false,0,0,0
-go_to_the_er,Go to the ER,Go to the ER,,1,false,false,false,0,0,0
+go_to_the_er,Go to the ER,Go to the ER,,1,true,false,false,1,0,0
