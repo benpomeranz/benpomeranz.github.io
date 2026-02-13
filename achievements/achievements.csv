@@ -31,7 +31,7 @@ model_nude_figure_drawing,Model for Nude Figure Drawing,Model for a nude figure 
 donate_blood,Donate Blood,Donate blood,,1,false,false,false,0,0,0
 donate_plasma,Donate Plasma,Donate plasma,donate_blood,1,false,false,false,0,0,0
 donate_sperm,Donate Sperm,Donate sperm,donate_plasma,1,false,false,false,0,0,0
-three_movies_theater,Three Movies in a Theater,Watch three movies in a theater,,3,false,false,false,1,0,0
+three_movies_theater,Three Movies in a Theater,Watch three movies in a theater,,3,false,false,false,1,1,0
 three_movies_theater_week,Three Movies in a Theater in a Week,Watch three movies in a theater in one week,three_movies_theater,3,false,false,false,0,0,0
 three_movies_theater_day,Three Movies in a Theater in a Day,Watch three movies in a theater in one day,three_movies_theater_week,3,false,false,false,0,0,0
 do_standup,Do Standup,Perform standup comedy,,1,false,false,false,0,0,0
