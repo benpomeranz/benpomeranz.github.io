@@ -63,11 +63,22 @@
             border-radius: 6px;
             background: rgba(0, 0, 0, 0.05);
             border: 1px solid rgba(43, 84, 126, 0.3);
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+            user-select: none;
+        }
+
+        .player-score-card:hover {
+            background: rgba(0, 0, 0, 0.1);
         }
 
         .player-score-card.bentzi { border-color: rgba(255, 107, 107, 0.5); }
         .player-score-card.adin { border-color: rgba(255, 217, 61, 0.5); }
         .player-score-card.ben { border-color: rgba(107, 203, 255, 0.5); }
+
+        .player-score-card.active.bentzi { background: rgba(255, 107, 107, 0.25); border-color: #ff6b6b; box-shadow: 0 0 8px rgba(255, 107, 107, 0.3); }
+        .player-score-card.active.adin { background: rgba(255, 217, 61, 0.25); border-color: #ffd93d; box-shadow: 0 0 8px rgba(255, 217, 61, 0.3); }
+        .player-score-card.active.ben { background: rgba(107, 203, 255, 0.25); border-color: #6bcbff; box-shadow: 0 0 8px rgba(107, 203, 255, 0.3); }
 
         .player-icon { font-size: 18px; }
         .player-info { display: flex; flex-direction: column; }
@@ -741,6 +752,8 @@
         let searchQuery = '';
         let searchMatchIds = new Set();
         let searchCurrentIndex = -1;
+        let activePlayerFilter = null; // null = show all, 'bentzi'/'adin'/'ben' = filter
+        let filteredNodeIds = null; // Set of node IDs to show, null = show all
 
         function resizeCanvas() {
             const dpr = window.devicePixelRatio || 1;
@@ -1263,15 +1276,21 @@
                 });
                 if (allDone) {
                     isAnimatingLayout = false;
-                    savePositions();
+                    if (!activePlayerFilter) savePositions();
                 }
             }
 
-            // Draw edges
-            edges.forEach(edge => edge.draw(ctx));
+            // Draw edges (skip filtered-out)
+            edges.forEach(edge => {
+                if (filteredNodeIds && (!filteredNodeIds.has(edge.from.id) || !filteredNodeIds.has(edge.to.id))) return;
+                edge.draw(ctx);
+            });
 
-            // Draw nodes
-            nodes.forEach(node => node.draw(ctx));
+            // Draw nodes (skip filtered-out)
+            nodes.forEach(node => {
+                if (filteredNodeIds && !filteredNodeIds.has(node.id)) return;
+                node.draw(ctx);
+            });
 
             // Draw connection handles in edit mode
             if (isEditMode) {
@@ -1314,11 +1333,15 @@
             };
         }
 
+        function isNodeVisible(node) {
+            return !filteredNodeIds || filteredNodeIds.has(node.id);
+        }
+
         canvas.addEventListener('mousedown', (e) => {
             if (e.button !== 0) return; // Only left click
             const pos = getMousePos(e);
             const worldPos = screenToWorld(pos.x, pos.y);
-            const node = nodes.find(n => n.containsPoint(worldPos.x, worldPos.y));
+            const node = nodes.find(n => isNodeVisible(n) && n.containsPoint(worldPos.x, worldPos.y));
 
             hasDragged = false;
 
@@ -1380,7 +1403,7 @@
             }
 
             const worldPos = screenToWorld(pos.x, pos.y);
-            hoveredNode = nodes.find(n => n.containsPoint(worldPos.x, worldPos.y));
+            hoveredNode = nodes.find(n => isNodeVisible(n) && n.containsPoint(worldPos.x, worldPos.y));
 
             // Change cursor for connection handles in edit mode
             if (isEditMode && hoveredNode) {
@@ -1401,7 +1424,7 @@
             if (isDraggingConnection && connectionSourceNode) {
                 const pos = getMousePos(e);
                 const worldPos = screenToWorld(pos.x, pos.y);
-                const targetNode = nodes.find(n => n.containsPoint(worldPos.x, worldPos.y));
+                const targetNode = nodes.find(n => isNodeVisible(n) && n.containsPoint(worldPos.x, worldPos.y));
 
                 if (targetNode && targetNode !== connectionSourceNode) {
                     if (connectionSourceIsBottom) {
@@ -1825,6 +1848,194 @@
             });
         }
 
+        // Player filter click handlers
+        document.querySelectorAll('.player-score-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const player = card.classList.contains('bentzi') ? 'bentzi' :
+                               card.classList.contains('adin') ? 'adin' : 'ben';
+                togglePlayerFilter(player);
+            });
+        });
+
+        function togglePlayerFilter(player) {
+            if (activePlayerFilter === player) {
+                // Deactivate filter — restore saved positions
+                activePlayerFilter = null;
+                filteredNodeIds = null;
+                document.querySelectorAll('.player-score-card').forEach(c => c.classList.remove('active'));
+                // Animate nodes back to their saved positions
+                nodes.forEach(n => {
+                    if (nodePositions[n.id]) {
+                        n.targetX = nodePositions[n.id].x;
+                        n.targetY = nodePositions[n.id].y;
+                    }
+                });
+                viewScale = 1;
+                viewOffsetX = 0;
+                viewOffsetY = 0;
+                isAnimatingLayout = true;
+                return;
+            } else {
+                // Activate filter for this player
+                activePlayerFilter = player;
+                filteredNodeIds = new Set();
+                achievements.forEach(a => {
+                    if (a[`${player}_completed`]) {
+                        filteredNodeIds.add(a.id);
+                    }
+                });
+                document.querySelectorAll('.player-score-card').forEach(c => c.classList.remove('active'));
+                document.querySelector(`.player-score-card.${player}`).classList.add('active');
+            }
+
+            // Re-layout the visible nodes using force-directed physics
+            runFilterLayout();
+        }
+
+        function runFilterLayout() {
+            const visibleNodes = nodes.filter(n => !filteredNodeIds || filteredNodeIds.has(n.id));
+
+            if (visibleNodes.length === 0) {
+                isAnimatingLayout = true;
+                return;
+            }
+
+            // Build filtered edges for layout
+            const visibleIds = new Set(visibleNodes.map(n => n.id));
+            const visibleEdges = edges.filter(e => visibleIds.has(e.from.id) && visibleIds.has(e.to.id));
+
+            // Compute force layout for visible nodes only
+            const centerX = container.clientWidth / 2;
+            const centerY = container.clientHeight / 2;
+
+            // Compute depths only among visible nodes
+            const nodeDepths = {};
+            function computeDepthFiltered(id, visited) {
+                if (visited.has(id)) return nodeDepths[id] || 0;
+                visited.add(id);
+                const achievement = achievements.find(a => a.id === id);
+                if (!achievement || !achievement.prerequisites || achievement.prerequisites.length === 0) {
+                    nodeDepths[id] = 0;
+                    return 0;
+                }
+                const visiblePrereqs = achievement.prerequisites.filter(pid => visibleIds.has(pid));
+                if (visiblePrereqs.length === 0) {
+                    nodeDepths[id] = 0;
+                    return 0;
+                }
+                const maxPrereqDepth = Math.max(
+                    ...visiblePrereqs.map(pid => computeDepthFiltered(pid, visited))
+                );
+                nodeDepths[id] = maxPrereqDepth + 1;
+                return nodeDepths[id];
+            }
+            const visited = new Set();
+            visibleNodes.forEach(n => computeDepthFiltered(n.id, visited));
+
+            const maxDepth = Math.max(0, ...Object.values(nodeDepths));
+
+            const ITERATIONS = 300;
+            const GRAVITY = 0.008;
+            const REPULSION = 9000;
+            const REPULSION_MAX = 600;
+            const SPRING = 0.035;
+            const SPRING_REST = 200;
+            const LAYER_BIAS = 0.025;
+            const LAYER_SPACING = 180;
+            const DAMPING = 0.88;
+            const MIN_DIST = 190;
+
+            const pos = {};
+            const vel = {};
+            visibleNodes.forEach(n => {
+                pos[n.id] = { x: n.x, y: n.y };
+                vel[n.id] = { x: 0, y: 0 };
+            });
+
+            for (let iter = 0; iter < ITERATIONS; iter++) {
+                const forces = {};
+                visibleNodes.forEach(n => { forces[n.id] = { x: 0, y: 0 }; });
+
+                visibleNodes.forEach(n => {
+                    forces[n.id].x -= GRAVITY * (pos[n.id].x - centerX);
+                    forces[n.id].y -= GRAVITY * (pos[n.id].y - centerY);
+                });
+
+                for (let i = 0; i < visibleNodes.length; i++) {
+                    for (let j = i + 1; j < visibleNodes.length; j++) {
+                        const a = visibleNodes[i], b = visibleNodes[j];
+                        let dx = pos[a.id].x - pos[b.id].x;
+                        let dy = pos[a.id].y - pos[b.id].y;
+                        let dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < 1) { dx = Math.random() - 0.5; dy = Math.random() - 0.5; dist = 1; }
+                        if (dist < REPULSION_MAX) {
+                            const force = REPULSION / (dist * dist);
+                            const fx = (dx / dist) * force;
+                            const fy = (dy / dist) * force;
+                            forces[a.id].x += fx;
+                            forces[a.id].y += fy;
+                            forces[b.id].x -= fx;
+                            forces[b.id].y -= fy;
+                        }
+                        if (dist < MIN_DIST) {
+                            const push = (MIN_DIST - dist) * 0.5;
+                            const px = (dx / dist) * push;
+                            const py = (dy / dist) * push;
+                            forces[a.id].x += px;
+                            forces[a.id].y += py;
+                            forces[b.id].x -= px;
+                            forces[b.id].y -= py;
+                        }
+                    }
+                }
+
+                visibleEdges.forEach(edge => {
+                    const dx = pos[edge.to.id].x - pos[edge.from.id].x;
+                    const dy = pos[edge.to.id].y - pos[edge.from.id].y;
+                    let dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 1) dist = 1;
+                    const displacement = dist - SPRING_REST;
+                    const force = SPRING * displacement;
+                    const fx = (dx / dist) * force;
+                    const fy = (dy / dist) * force;
+                    forces[edge.from.id].x += fx;
+                    forces[edge.from.id].y += fy;
+                    forces[edge.to.id].x -= fx;
+                    forces[edge.to.id].y -= fy;
+                });
+
+                visibleNodes.forEach(n => {
+                    const depth = nodeDepths[n.id] || 0;
+                    const idealY = centerY - (maxDepth * LAYER_SPACING) / 2 + depth * LAYER_SPACING;
+                    forces[n.id].y -= LAYER_BIAS * (pos[n.id].y - idealY);
+                });
+
+                let totalEnergy = 0;
+                visibleNodes.forEach(n => {
+                    vel[n.id].x = (vel[n.id].x + forces[n.id].x) * DAMPING;
+                    vel[n.id].y = (vel[n.id].y + forces[n.id].y) * DAMPING;
+                    pos[n.id].x += vel[n.id].x;
+                    pos[n.id].y += vel[n.id].y;
+                    totalEnergy += vel[n.id].x * vel[n.id].x + vel[n.id].y * vel[n.id].y;
+                });
+
+                if (totalEnergy < 0.1) break;
+            }
+
+            // Set targets for visible nodes
+            visibleNodes.forEach(n => {
+                if (pos[n.id]) {
+                    n.targetX = pos[n.id].x;
+                    n.targetY = pos[n.id].y;
+                }
+            });
+
+            viewScale = 1;
+            viewOffsetX = 0;
+            viewOffsetY = 0;
+            isAnimatingLayout = true;
+        }
+
         function saveToLocalStorage() {
             localStorage.setItem('dormAchievements', JSON.stringify(achievements));
             saveRemote();
@@ -2169,6 +2380,10 @@
         }
 
         function runAutoLayout() {
+            if (activePlayerFilter) {
+                runFilterLayout();
+                return;
+            }
             const positions = computeForceLayout(null);
             nodes.forEach(n => {
                 if (positions[n.id]) {
