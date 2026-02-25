@@ -21,7 +21,12 @@ export default {
       return new Response(null, { headers: corsHeaders() });
     }
 
-    // Only POST allowed
+    // GET: return current CSV + SHA for optimistic locking
+    if (req.method === 'GET') {
+      return await handleGet(env);
+    }
+
+    // Only POST allowed for other operations
     if (req.method !== 'POST') {
       return json({ error: 'Method not allowed' }, 405);
     }
@@ -33,7 +38,7 @@ export default {
       }
 
       const parsed = JSON.parse(body);
-      const { password, action } = parsed;
+      const { password, action, csv, sha: clientSha } = parsed;
 
       if (!password || typeof password !== 'string') {
         return json({ error: 'Missing password' }, 400);
@@ -56,8 +61,6 @@ export default {
       }
 
       // Save mode: commit CSV to GitHub
-      const { csv } = parsed;
-
       if (!csv || typeof csv !== 'string') {
         return json({ error: 'Missing csv' }, 400);
       }
@@ -80,10 +83,19 @@ export default {
         }
       );
 
-      let sha = null;
+      let currentSha = null;
       if (getRes.ok) {
         const fileData = await getRes.json();
-        sha = fileData.sha;
+        currentSha = fileData.sha;
+      }
+
+      // Optimistic locking: if the client sent the SHA they loaded from,
+      // reject the save if someone else has updated the file since then.
+      if (clientSha && currentSha && clientSha !== currentSha) {
+        return json({
+          error: 'conflict',
+          message: 'Data was updated by someone else. Reload the page to get the latest changes.',
+        }, 409);
       }
 
       // Commit updated CSV
@@ -92,7 +104,7 @@ export default {
         content: btoa(unescape(encodeURIComponent(csv))),
         branch: BRANCH,
       };
-      if (sha) commitBody.sha = sha;
+      if (currentSha) commitBody.sha = currentSha;
 
       const putRes = await fetch(
         `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`,
@@ -111,15 +123,62 @@ export default {
       if (!putRes.ok) {
         const err = await putRes.text();
         console.error('GitHub API error:', err);
+        // GitHub returns 422 for SHA conflicts (race condition between workers)
+        if (putRes.status === 422 || putRes.status === 409) {
+          return json({
+            error: 'conflict',
+            message: 'Data was updated by someone else. Reload the page to get the latest changes.',
+          }, 409);
+        }
         return json({ error: 'Save failed' }, 500);
       }
 
-      return json({ success: true });
+      // Return the new SHA so the client can track it for future saves
+      const putData = await putRes.json();
+      const newSha = putData.content?.sha ?? null;
+      return json({ success: true, sha: newSha });
     } catch (e) {
       return json({ error: 'Server error' }, 500);
     }
   },
 };
+
+// GET handler: returns current CSV + SHA for optimistic locking
+async function handleGet(env) {
+  try {
+    const getRes = await fetch(
+      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}?ref=${BRANCH}`,
+      {
+        headers: {
+          'Authorization': `Bearer ${env.GITHUB_TOKEN}`,
+          'Accept': 'application/vnd.github.v3+json',
+          'User-Agent': 'achievements-worker',
+        },
+      }
+    );
+
+    if (!getRes.ok) {
+      return json({ error: 'Failed to load CSV from GitHub' }, 502);
+    }
+
+    const fileData = await getRes.json();
+    // Decode base64 content (GitHub API encodes file content as base64) to UTF-8
+    const csv = decodeBase64Utf8(fileData.content);
+    return json({ csv, sha: fileData.sha });
+  } catch (e) {
+    return json({ error: 'Server error' }, 500);
+  }
+}
+
+// Decode GitHub API base64-encoded file content to a UTF-8 string
+function decodeBase64Utf8(base64) {
+  const binaryStr = atob(base64.replace(/\n/g, ''));
+  const bytes = new Uint8Array(binaryStr.length);
+  for (let i = 0; i < binaryStr.length; i++) {
+    bytes[i] = binaryStr.charCodeAt(i);
+  }
+  return new TextDecoder('utf-8').decode(bytes);
+}
 
 // Constant-time string comparison to prevent timing attacks
 function timingSafeEqual(a, b) {
@@ -146,7 +205,7 @@ function corsHeaders() {
   // Allow all origins so local file:// and production both work.
   return {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Max-Age': '86400',
   };

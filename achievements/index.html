@@ -675,6 +675,7 @@
         let isAuthenticated = false;
         let authPassword = null;
         let saveTimeout = null;
+        let loadedSha = null; // SHA of the CSV we loaded; used for optimistic locking
 
         // Achievement targets (default is 1 for binary achievements)
         const ACHIEVEMENT_TARGETS = {
@@ -2612,14 +2613,20 @@
                 showSaveStatus('saving', 'Saving...');
                 try {
                     const csv = generateCSV();
+                    const body = { password: authPassword, csv };
+                    if (loadedSha) body.sha = loadedSha; // include SHA for optimistic locking
                     const res = await fetch(WORKER_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ password: authPassword, csv }),
+                        body: JSON.stringify(body),
                     });
                     const data = await res.json();
                     if (res.ok && data.success) {
+                        if (data.sha) loadedSha = data.sha; // track new SHA for next save
                         showSaveStatus('saved', 'Saved');
+                    } else if (res.status === 409) {
+                        showSaveStatus('error', '⚠ Reload required');
+                        alert('Someone else saved changes while you were editing.\n\nPlease reload the page to get the latest data before making further changes.');
                     } else if (res.status === 403) {
                         showSaveStatus('error', 'Wrong password');
                         setAuthState(false, null);
@@ -2633,17 +2640,30 @@
         }
 
         async function loadCSVFromServer() {
+            // Try Worker GET first — returns { csv, sha } enabling optimistic locking
+            try {
+                const res = await fetch(WORKER_URL, { method: 'GET' });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.csv && data.csv.trim().startsWith('id,')) {
+                        loadedSha = data.sha || null;
+                        return parseCSV(data.csv);
+                    }
+                }
+            } catch (e) {
+                // Worker unreachable (e.g. local dev), fall through to static file
+            }
+            // Fallback: load static file from GitHub Pages (no SHA available)
             try {
                 const res = await fetch(CSV_URL + '?t=' + Date.now());
                 if (res.ok) {
                     const csv = await res.text();
                     if (csv.trim().startsWith('id,')) {
+                        loadedSha = null;
                         return parseCSV(csv);
                     }
                 }
-            } catch (e) {
-                // Fetch failed (likely local dev), fall through
-            }
+            } catch (e) {}
             return null;
         }
 
