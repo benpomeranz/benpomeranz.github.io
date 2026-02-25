@@ -24,7 +24,7 @@ cook_three_course_meal,Cook a Three Course Meal,Cook a full three course meal,co
 make_family_recipe,Make the House a Family Recipe,"Make the house a family recipe
 Ben: Grandma Louise's squash soup",,1,false,false,true,0,0,1
 enter_gcb,Enter GCB,Enter GCB,,1,false,false,false,0,0,0
-random_bar_not_providence,Go to a Random Bar Not in Providence,Go to a random bar outside of Providence,go_to_a_new_bar_providence,1,false,false,false,0,0,0
+random_bar_not_providence,Go to a Random Bar Not in Providence,Go to a random bar outside of Providence,,1,true,true,false,1,1,0
 host_a_rager,Host a Rager,Host a rager,,1,false,false,false,0,0,0
 pickup_basketball,Bring Back Pickup Basketball League,Bring back the pickup basketball league,,1,false,false,false,0,0,0
 layout_for_a_goal,Layout for a Goal,Pickup is allowed for Adin and Bentzi,,1,false,false,false,0,0,0
@@ -48,22 +48,23 @@ advanced_woodworking,Advanced Woodworking,Attend an advanced woodworking worksho
 knitting_project,Complete a Knitting Project,Complete a knitting project,,1,false,false,false,0,0,0
 read_a_book,Read a Book,"Read a book
 
-Ben: Pachinko",,1,true,false,true,1,0,1
-read_two_books,Read Two Books,Read two books,read_a_book,2,true,false,false,2,0,0
+Ben: Pachinko
+Adin: Running in the Family",,1,true,true,true,1,1,1
+read_two_books,Read Two Books,"Read two books
+Adin: Feeding Ghosts,",read_a_book,2,true,false,false,2,1,0
 read_3_books,Read 3 Books,Read 3 books,read_two_books,3,false,false,false,2,0,0
 read_5_books,Read 5 Books,Read 5 books,read_3_books,5,false,false,false,0,0,0
 read_10_books,Read 10 Books,Read 10 books,read_5_books,10,false,false,false,0,0,0
 write_fiction,Write a Longform Piece of Fiction,Write a longform piece of fiction,,1,false,false,false,0,0,0
 post_blogpost,Post a Blogpost,Post a blogpost,,1,false,false,false,0,0,0
 keep_shabbos,Keep Shabbos Once,Keep Shabbos once,,1,false,false,false,0,0,0
-five_minutes,Five Minutes,Five minutes,,1,false,false,true,0,0,1
+five_minutes,Five Minutes,Five minutes,,1,false,true,false,0,1,0
 portobello,Portobello,Portobello,,1,false,false,false,0,0,0
 horse_mushroom,The Horse Mushroom,The horse mushroom,portobello,1,false,false,false,0,0,0
 make_furniture,Make a Piece of Furniture,Make a piece of furniture,woodworking_workshop,1,false,false,false,0,0,0
 customize_clothing,Customize a Piece of Clothing,Customize a piece of clothing,,1,false,false,false,0,0,0
 eat_probiotics,Eat Probiotics,(Lactose intolerance will be one shot so also applies to Adin),,1,false,false,false,0,0,0
 acquire_lactose_tolerance,Acquire Lactose Tolerance,Acquire lactose tolerance,eat_probiotics,1,false,false,false,0,0,0
-drawing_tablet,Bring Up Drawing Tablet,Bring the drawing tablet up,,1,false,false,false,0,0,0
 record_player,Bring Record Player Up,Bring the record player up,,1,false,false,false,0,0,0
 flipbook_animation,Make Flipbook Style Animation,Make a flipbook style animation,,1,false,false,false,0,0,0
 clean_3_fridays,Clean 3 Fridays in a Row,Clean 3 Fridays in a row,,3,false,false,false,0,2,0
@@ -72,17 +73,18 @@ work_5_new_buildings,Work in 5 New Buildings,"Work in 5 new buildings
 Adin: American Studies, English, History",,5,false,false,false,0,3,0
 office_hours_new_prof,Go to Office Hours with a New Professor,Go to office hours with a professor you're interested in (not from your class),,1,false,false,false,0,0,0
 go_to_yosemite,Go to Yosemite,Go to Yosemite,,1,false,false,false,0,0,0
-trail_run_3_locations,Trail Run or Hike at 3 Locations,Trail run or hike at 3 locations within a 1 hour radius of Providence,,3,false,false,false,0,0,1
+trail_run_3_locations,Trail Run or Hike at 3 Locations,Trail run or hike at 3 locations within a 1 hour radius of Providence,,3,false,false,false,0,0,0
 barefoot_day,Barefoot Day,Spend an entire day barefoot,,1,false,false,false,0,0,0
 go_out_in_drag,Go Out in Drag,Go out in drag (can be off campus),,1,false,false,false,0,0,0
 buy_200_dollar_thing,Buy a $200 Thing,Buy a $200 thing,,1,false,false,false,0,0,0
 boston_rationalist,Boston Rationalist Event,Attend a Boston Rationalist event,,1,false,false,false,0,0,0
 hebrew_dinner,Hebrew Dinner,Hebrew Dinner,,1,false,false,false,0,0,0
-go_to_a_new_bar_providence,Go to a new bar Providence,"Go to a new bar Providence (not seaweeds, Wick Pub, etc.)",,1,false,false,false,0,0,0
+go_to_a_new_bar_providence,Go to a new bar Providence,"Go to a new bar Providence (not seaweeds, Wick Pub, etc.)",random_bar_not_providence,1,false,false,false,0,0,0
 24_18_12_6,"24, 18, 12, 6","Donuts, beers, miles, Os. Any permutation in 24 hours",run_10_miles_one_run,1,false,false,false,0,0,0
 24_18_12_6_2,"24, 18, 12, 6","Beers, Os, Miles, Donuts. One day.",,1,false,false,false,0,0,0
 early_bird,Get the Worm,Wake up before 8 Monday-Friday,,1,false,false,false,0,0,0
 publish_a_preprint,Publish a preprint,Hahaha how do you like your chess achievements now ash holes (Adin Neuro?),,1,false,false,false,0,0,0
 publish_in_a_journal,Publish in a Journal,Publish in a Journal,publish_a_preprint,1,false,false,false,0,0,0
+go_to_the_er,Go to the ER,Go to the ER,,1,true,false,false,1,0,0
 make_2_pieces_of_furnitue,Make 2 Pieces of Furniture,Make 2 Pieces of Furniture,make_furniture,1,false,false,false,0,0,0
 malcolm_reaction_video,Malcolm Reaction Video,IS THAT SHADOWVEK?!?!!?!?,,1,false,false,false,0,0,0
