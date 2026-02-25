@@ -21,8 +21,8 @@ Ben: Pancakes, Corn quesadillas",,3,true,false,false,3,0,2
 cook_9_new_recipes,Cook 9 New Recipes,Cook 9 new recipes,cook_3_new_recipes,9,false,false,false,0,0,0
 cook_27_new_recipes,Cook 27 New Recipes,Cook 27 new recipes,cook_9_new_recipes,27,false,false,false,0,0,0
 cook_three_course_meal,Cook a Three Course Meal,Cook a full three course meal,cook_3_new_recipes,1,false,false,false,0,0,0
-make_family_recipe,Make the House a Family Recipe,Make the house a family recipe
-Ben: Grandma Louise's squash soup,,1,false,false,true,0,0,1
+make_family_recipe,Make the House a Family Recipe,"Make the house a family recipe
+Ben: Grandma Louise's squash soup",,1,false,false,true,0,0,1
 enter_gcb,Enter GCB,Enter GCB,,1,false,false,false,0,0,0
 random_bar_not_providence,Go to a Random Bar Not in Providence,Go to a random bar outside of Providence,,1,false,false,false,0,0,0
 host_a_rager,Host a Rager,Host a rager,,1,false,false,false,0,0,0
@@ -46,9 +46,9 @@ anki_one_month,Anki One Month Streak,Maintain an Anki streak for one month,anki_
 woodworking_workshop,Woodworking Workshop in BDW,Attend a woodworking workshop in BDW,,1,true,true,false,1,1,0
 advanced_woodworking,Advanced Woodworking,Attend an advanced woodworking workshop in BDW,woodworking_workshop,1,false,false,false,0,0,0
 knitting_project,Complete a Knitting Project,Complete a knitting project,,1,false,false,false,0,0,0
-read_a_book,Read a Book,Read a book
+read_a_book,Read a Book,"Read a book
 
-Ben: Pachinko,,1,true,false,true,1,0,1
+Ben: Pachinko",,1,true,false,true,1,0,1
 read_two_books,Read Two Books,Read two books,read_a_book,2,true,false,false,2,0,0
 read_3_books,Read 3 Books,Read 3 books,read_two_books,3,false,false,false,2,0,0
 read_5_books,Read 5 Books,Read 5 books,read_3_books,5,false,false,false,0,0,0

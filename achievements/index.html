@@ -1104,33 +1104,92 @@
         }
 
         function parseCSV(csv) {
-            const lines = csv.trim().split('\n');
-            const headers = splitCSVLine(lines[0]);
-            return lines.slice(1).map(line => {
-                const values = splitCSVLine(line);
-                const obj = {};
-                headers.forEach((header, i) => {
-                    let value = values[i];
-                    const h = header.trim();
-                    if (value === 'true') value = true;
-                    else if (value === 'false') value = false;
-                    else if (['target', 'bentzi_progress', 'adin_progress', 'ben_progress'].includes(h)) {
-                        value = parseInt(value) || 0;
-                    } else if (header === 'prerequisites' && value) {
-                        value = value.split('|').filter(v => v);
-                    } else if (header === 'prerequisites') {
-                        value = [];
+            // RFC 4180 compliant: handles multi-line quoted fields properly
+            const records = [];
+            let currentRecord = [];
+            let currentField = '';
+            let inQuotes = false;
+            let i = 0;
+            const len = csv.length;
+
+            while (i < len) {
+                const ch = csv[i];
+                if (inQuotes) {
+                    if (ch === '"') {
+                        if (i + 1 < len && csv[i + 1] === '"') {
+                            currentField += '"'; // escaped double-quote
+                            i += 2;
+                        } else {
+                            inQuotes = false;
+                            i++;
+                        }
+                    } else {
+                        currentField += ch;
+                        i++;
                     }
-                    obj[header.trim()] = value;
+                } else {
+                    if (ch === '"') {
+                        inQuotes = true;
+                        i++;
+                    } else if (ch === ',') {
+                        currentRecord.push(currentField);
+                        currentField = '';
+                        i++;
+                    } else if (ch === '\r') {
+                        currentRecord.push(currentField);
+                        records.push(currentRecord);
+                        currentRecord = [];
+                        currentField = '';
+                        i++;
+                        if (i < len && csv[i] === '\n') i++; // skip \r\n
+                    } else if (ch === '\n') {
+                        currentRecord.push(currentField);
+                        records.push(currentRecord);
+                        currentRecord = [];
+                        currentField = '';
+                        i++;
+                    } else {
+                        currentField += ch;
+                        i++;
+                    }
+                }
+            }
+
+            // Push the last field/record if any
+            if (currentRecord.length > 0 || currentField !== '') {
+                currentRecord.push(currentField);
+                records.push(currentRecord);
+            }
+
+            if (records.length === 0) return [];
+
+            const headers = records[0];
+            return records.slice(1)
+                .filter(record => !(record.length === 1 && record[0] === '')) // skip blank rows
+                .map(values => {
+                    const obj = {};
+                    headers.forEach((header, i) => {
+                        let value = values[i];
+                        const h = header.trim();
+                        if (value === 'true') value = true;
+                        else if (value === 'false') value = false;
+                        else if (['target', 'bentzi_progress', 'adin_progress', 'ben_progress'].includes(h)) {
+                            value = parseInt(value) || 0;
+                        } else if (header === 'prerequisites' && value) {
+                            value = value.split('|').filter(v => v);
+                        } else if (header === 'prerequisites') {
+                            value = [];
+                        }
+                        obj[header.trim()] = value;
+                    });
+                    return obj;
                 });
-                return obj;
-            });
         }
 
-        // Quote a CSV field if it contains commas or double quotes (RFC 4180)
+        // Quote a CSV field if it contains commas, double quotes, or newlines (RFC 4180)
         function csvField(val) {
             const s = String(val);
-            if (s.indexOf(',') !== -1 || s.indexOf('"') !== -1) {
+            if (s.indexOf(',') !== -1 || s.indexOf('"') !== -1 || s.indexOf('\n') !== -1 || s.indexOf('\r') !== -1) {
                 return '"' + s.replace(/"/g, '""') + '"';
             }
             return s;
