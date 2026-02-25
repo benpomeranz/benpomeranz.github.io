@@ -1,5 +1,5 @@
 id,name,description,prerequisites,target,bentzi_completed,adin_completed,ben_completed,bentzi_progress,adin_progress,ben_progress
-climb_one_higher,Climb One Higher Than Top Boulder,Climb one grade higher than your top boulder (Bentzi V5 / Adin V8 / Ben V6),,1,false,true,false,0,1,0
+climb_one_higher,Climb One Higher Than Top Boulder,Climb one grade higher than your top boulder (Bentzi V5 / Adin V8 / Ben V6),,1,false,false,false,0,0,0
 climb_two_higher,Climb Two Higher,Climb two grades higher (Bentzi V6 / Adin V9 / Ben V7),climb_one_higher,1,false,false,false,0,0,0
 run_10_miles_week,Run 10 Miles in a Week,Run 10 miles in a single week,,10,false,false,false,0,0,0
 run_10_miles_one_run,Run 10 Miles in One Run,Run 10 miles in a single run,run_10_miles_week,10,false,false,false,0,0,0
