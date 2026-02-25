@@ -48,15 +48,15 @@ advanced_woodworking,Advanced Woodworking,Attend an advanced woodworking worksho
 knitting_project,Complete a Knitting Project,Complete a knitting project,,1,false,false,false,0,0,0
 read_a_book,Read a Book,"Read a book
 
-Ben: Pachinko",,1,true,false,true,1,0,1
-read_two_books,Read Two Books,Read two books,read_a_book,2,true,false,false,2,0,0
+Ben: Pachinko",,1,true,true,true,1,1,1
+read_two_books,Read Two Books,Read two books,read_a_book,2,true,true,false,2,2,0
 read_3_books,Read 3 Books,Read 3 books,read_two_books,3,false,false,false,2,0,0
 read_5_books,Read 5 Books,Read 5 books,read_3_books,5,false,false,false,0,0,0
 read_10_books,Read 10 Books,Read 10 books,read_5_books,10,false,false,false,0,0,0
 write_fiction,Write a Longform Piece of Fiction,Write a longform piece of fiction,,1,false,false,false,0,0,0
 post_blogpost,Post a Blogpost,Post a blogpost,,1,false,false,false,0,0,0
 keep_shabbos,Keep Shabbos Once,Keep Shabbos once,,1,false,false,false,0,0,0
-five_minutes,Five Minutes,Five minutes,,1,false,false,false,0,0,0
+five_minutes,Five Minutes,Five minutes,,1,false,true,false,0,1,0
 portobello,Portobello,Portobello,,1,false,false,false,0,0,0
 horse_mushroom,The Horse Mushroom,The horse mushroom,portobello,1,false,false,false,0,0,0
 make_furniture,Make a Piece of Furniture,Make a piece of furniture,woodworking_workshop,1,false,false,false,0,0,0
@@ -72,7 +72,7 @@ work_5_new_buildings,Work in 5 New Buildings,"Work in 5 new buildings
 Adin: American Studies, English, History",,5,false,false,false,0,3,0
 office_hours_new_prof,Go to Office Hours with a New Professor,Go to office hours with a professor you're interested in (not from your class),,1,false,false,false,0,0,0
 go_to_yosemite,Go to Yosemite,Go to Yosemite,,1,false,false,false,0,0,0
-trail_run_3_locations,Trail Run or Hike at 3 Locations,Trail run or hike at 3 locations within a 1 hour radius of Providence,,3,false,false,false,0,0,1
+trail_run_3_locations,Trail Run or Hike at 3 Locations,Trail run or hike at 3 locations within a 1 hour radius of Providence,,3,false,false,false,0,0,0
 barefoot_day,Barefoot Day,Spend an entire day barefoot,,1,false,false,false,0,0,0
 go_out_in_drag,Go Out in Drag,Go out in drag (can be off campus),,1,false,false,false,0,0,0
 buy_200_dollar_thing,Buy a $200 Thing,Buy a $200 thing,,1,false,false,false,0,0,0
