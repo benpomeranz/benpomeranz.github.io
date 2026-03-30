@@ -93,4 +93,6 @@ make_2_pieces_of_furnitue,Make 2 Pieces of Furniture,Make 2 Pieces of Furniture,
 malcolm_reaction_video,Malcolm Reaction Video,IS THAT SHADOWVEK?!?!!?!?,,1,false,false,false,0,0,0
 be_adin,Be Adin (ינוע),Be Adin (ינוע),,1,false,true,false,0,1,0
 have_a_serving_of_yogurt_every_day_for_two_weeks,Yogurt every day for two weeks,One full serving.,be_adin,1,false,false,false,0,0,0
-incline_press_60s,Incline Press 60s,Incline Press 60s,,1,false,false,false,0,0,0
+incline_press_60s,Incline Press,"Adin: 3 x 6 @ 65
+Ben: 3 x 6 @ 75
+Bentzi: 3 x 6 @ 50",,1,false,false,false,0,0,0
