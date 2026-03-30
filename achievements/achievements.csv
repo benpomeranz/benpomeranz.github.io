@@ -56,7 +56,7 @@ Ben: Pachinko
 Adin: Running in the Family",,1,true,true,true,1,1,1
 read_two_books,Read Two Books,Read two books,read_a_book,2,true,true,false,2,2,1
 read_3_books,Read 3 Books,Read 3 books,read_two_books,3,true,true,false,3,3,0
-read_5_books,Read 5 Books,Read 5 books,read_3_books,5,false,true,false,3,5,0
+read_5_books,Read 5 Books,Read 5 books,read_3_books,5,false,false,false,3,4,0
 read_10_books,Read 10 Books,Read 10 books,read_5_books,10,false,false,false,0,0,0
 write_fiction,Write a Longform Piece of Fiction,Write a longform piece of fiction,,1,false,false,false,0,0,0
 post_blogpost,Post a Blogpost,Post a blogpost,,1,false,false,true,0,0,1
