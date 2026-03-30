@@ -9,7 +9,7 @@ front_split,Front Split,Achieve a full front split,,1,false,false,false,0,0,0
 full_pancake,Full Pancake,Achieve a full pancake stretch,middle_split,1,false,false,false,0,0,0
 hiking_trip,Hiking Trip,Go on a hiking trip,,1,false,true,true,0,1,1
 backpacking_trip,Backpacking Trip,Go on a backpacking trip,hiking_trip,1,false,true,true,0,1,1
-morning_swim,Morning Swim,Go for a morning swim,,1,false,false,true,0,0,1
+morning_swim,Morning Swim,Go for a morning swim,,1,true,true,true,1,1,1
 morning_swim_three_locations,Morning Swim in Three Different Locations,"Go for a morning swim in three different locations
 Ben: Maine, Barrington Beach with MSUers,",morning_swim,3,false,false,false,0,0,2
 morning_swim_thrice_week,Morning Swim Thrice in a Week,Go for a morning swim three times in one week,morning_swim,3,false,false,false,0,0,2
