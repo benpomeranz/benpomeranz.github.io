@@ -95,4 +95,4 @@ be_adin,Adin ינוע arc,We all are Adin (ינוע),,1,false,true,false,0,1,0
 have_a_serving_of_yogurt_every_day_for_two_weeks,Yogurt every day for two weeks,One full serving.,be_adin,1,false,false,false,0,0,0
 incline_press_60s,Incline Press,"Adin: 3 x 6 @ 65
 Ben: 3 x 6 @ 75
-Bentzi: 3 x 6 @ 50",,1,false,false,false,0,0,0
+Bentzi: 3 x 6 @ 50",be_adin,1,false,false,false,0,0,0
