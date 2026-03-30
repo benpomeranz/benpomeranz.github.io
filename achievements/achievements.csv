@@ -61,7 +61,7 @@ read_10_books,Read 10 Books,Read 10 books,read_5_books,10,false,false,false,0,0,
 write_fiction,Write a Longform Piece of Fiction,Write a longform piece of fiction,,1,false,false,false,0,0,0
 post_blogpost,Post a Blogpost,Post a blogpost,,1,false,false,false,0,0,0
 keep_shabbos,Keep Shabbos Once,Keep Shabbos once,,1,false,false,false,0,0,0
-five_minutes,Five Minutes,Five minutes,,1,false,true,true,0,1,1
+five_minutes,Five Minutes,Five minutes,,1,true,true,true,1,1,1
 portobello,Portobello,Portobello,,1,false,false,false,0,0,0
 horse_mushroom,The Horse Mushroom,The horse mushroom,portobello,1,false,false,false,0,0,0
 make_furniture,Make a Piece of Furniture,Make a piece of furniture,woodworking_workshop,1,false,false,false,0,0,0
