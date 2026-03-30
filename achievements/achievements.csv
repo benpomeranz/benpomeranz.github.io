@@ -7,7 +7,7 @@ providence_half,Providence Half,Run the Providence half marathon,run_10_miles_on
 middle_split,Middle Split,Achieve a full middle split,,1,false,false,false,0,0,0
 front_split,Front Split,Achieve a full front split,,1,false,false,false,0,0,0
 full_pancake,Full Pancake,Achieve a full pancake stretch,middle_split,1,false,false,false,0,0,0
-hiking_trip,Hiking Trip,Go on a hiking trip,,1,false,false,true,0,0,1
+hiking_trip,Hiking Trip,Go on a hiking trip,,1,false,true,true,0,1,1
 backpacking_trip,Backpacking Trip,Go on a backpacking trip,hiking_trip,1,false,false,true,0,0,1
 morning_swim,Morning Swim,Go for a morning swim,,1,false,false,true,0,0,1
 morning_swim_three_locations,Morning Swim in Three Different Locations,"Go for a morning swim in three different locations
