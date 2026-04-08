@@ -11,8 +11,16 @@
 const REPO_OWNER = 'benpomeranz';
 const REPO_NAME = 'benpomeranz.github.io';
 const FILE_PATH = 'achievements/achievements.csv';
+const SIGNATURES_PATH = 'achievements/signatures.json';
 const BRANCH = 'main';
 const MAX_CSV_SIZE = 50000; // 50KB max
+const MAX_SIGNATURES_SIZE = 500000; // 500KB max
+
+// Allowed file paths for the generic file API
+const ALLOWED_FILES = {
+  'csv': { path: FILE_PATH, maxSize: MAX_CSV_SIZE, validate: csv => csv.startsWith('id,name,description,prerequisites,') },
+  'signatures': { path: SIGNATURES_PATH, maxSize: MAX_SIGNATURES_SIZE, validate: data => { try { JSON.parse(data); return true; } catch { return false; } } },
+};
 
 export default {
   async fetch(req, env) {
@@ -21,9 +29,12 @@ export default {
       return new Response(null, { headers: corsHeaders() });
     }
 
-    // GET: return current CSV + SHA for optimistic locking
+    // GET: return current file + SHA for optimistic locking
+    // ?file=signatures returns signatures.json; default is CSV
     if (req.method === 'GET') {
-      return await handleGet(env);
+      const url = new URL(req.url);
+      const fileKey = url.searchParams.get('file') || 'csv';
+      return await handleGet(env, fileKey);
     }
 
     // Only POST allowed for other operations
@@ -38,7 +49,7 @@ export default {
       }
 
       const parsed = JSON.parse(body);
-      const { password, action, csv, sha: clientSha } = parsed;
+      const { password, action, csv, sha: clientSha, file: fileKey, content: fileContent } = parsed;
 
       if (!password || typeof password !== 'string') {
         return json({ error: 'Missing password' }, 400);
@@ -60,20 +71,28 @@ export default {
         return json({ success: true, verified: true });
       }
 
-      // Save mode: commit CSV to GitHub
-      if (!csv || typeof csv !== 'string') {
-        return json({ error: 'Missing csv' }, 400);
+      // Determine which file to save
+      const targetFileKey = fileKey || 'csv';
+      const fileConfig = ALLOWED_FILES[targetFileKey];
+      if (!fileConfig) {
+        return json({ error: 'Unknown file type' }, 400);
       }
-      if (csv.length > MAX_CSV_SIZE) {
-        return json({ error: 'CSV too large' }, 413);
+
+      // Support both legacy "csv" field and new generic "content" field
+      const data = fileContent || csv;
+      if (!data || typeof data !== 'string') {
+        return json({ error: 'Missing content' }, 400);
       }
-      if (!csv.startsWith('id,name,description,prerequisites,')) {
-        return json({ error: 'Invalid CSV format' }, 400);
+      if (data.length > fileConfig.maxSize) {
+        return json({ error: 'Content too large' }, 413);
+      }
+      if (!fileConfig.validate(data)) {
+        return json({ error: 'Invalid format' }, 400);
       }
 
       // Get current file SHA (required by GitHub API for updates)
       const getRes = await fetch(
-        `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}?ref=${BRANCH}`,
+        `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${fileConfig.path}?ref=${BRANCH}`,
         {
           headers: {
             'Authorization': `Bearer ${env.GITHUB_TOKEN}`,
@@ -98,16 +117,17 @@ export default {
         }, 409);
       }
 
-      // Commit updated CSV
+      // Commit updated file
+      const commitMessage = targetFileKey === 'signatures' ? 'Update signatures' : 'Update achievements data';
       const commitBody = {
-        message: 'Update achievements data',
-        content: btoa(unescape(encodeURIComponent(csv))),
+        message: commitMessage,
+        content: btoa(unescape(encodeURIComponent(data))),
         branch: BRANCH,
       };
       if (currentSha) commitBody.sha = currentSha;
 
       const putRes = await fetch(
-        `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}`,
+        `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${fileConfig.path}`,
         {
           method: 'PUT',
           headers: {
@@ -123,7 +143,6 @@ export default {
       if (!putRes.ok) {
         const err = await putRes.text();
         console.error('GitHub API error:', err);
-        // GitHub returns 422 for SHA conflicts (race condition between workers)
         if (putRes.status === 422 || putRes.status === 409) {
           return json({
             error: 'conflict',
@@ -143,11 +162,16 @@ export default {
   },
 };
 
-// GET handler: returns current CSV + SHA for optimistic locking
-async function handleGet(env) {
+// GET handler: returns current file + SHA for optimistic locking
+async function handleGet(env, fileKey) {
+  const fileConfig = ALLOWED_FILES[fileKey];
+  if (!fileConfig) {
+    return json({ error: 'Unknown file type' }, 400);
+  }
+
   try {
     const getRes = await fetch(
-      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${FILE_PATH}?ref=${BRANCH}`,
+      `https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${fileConfig.path}?ref=${BRANCH}`,
       {
         headers: {
           'Authorization': `Bearer ${env.GITHUB_TOKEN}`,
@@ -158,13 +182,19 @@ async function handleGet(env) {
     );
 
     if (!getRes.ok) {
-      return json({ error: 'Failed to load CSV from GitHub' }, 502);
+      // For signatures, 404 is expected if no signatures exist yet
+      if (getRes.status === 404 && fileKey === 'signatures') {
+        return json({ content: '{}', sha: null });
+      }
+      return json({ error: 'Failed to load file from GitHub' }, 502);
     }
 
     const fileData = await getRes.json();
-    // Decode base64 content (GitHub API encodes file content as base64) to UTF-8
-    const csv = decodeBase64Utf8(fileData.content);
-    return json({ csv, sha: fileData.sha });
+    const content = decodeBase64Utf8(fileData.content);
+    // Return as both "csv" (legacy) and "content" (new) for backwards compat
+    const result = { content, sha: fileData.sha };
+    if (fileKey === 'csv') result.csv = content;
+    return json(result);
   } catch (e) {
     return json({ error: 'Server error' }, 500);
   }
