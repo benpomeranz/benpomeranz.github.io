@@ -62,7 +62,7 @@ record_player,Bring Record Player Up,Bring the record player up,,1,true,false,fa
 flipbook_animation,Make Flipbook Style Animation,Make a flipbook style animation,,1,false,false,false,0,0,0,,,
 clean_3_fridays,Clean 3 Fridays in a Row,Clean 3 Fridays in a row,,3,false,false,false,0,2,0,,,
 trash_15_times,Take Out Trash 15 Times,Take out the trash 15 times,,15,false,false,false,0,0,0,,,
-work_5_new_buildings,Work in 5 New Buildings,Work in 5 new buildings,,5,false,false,false,0,4,0,,"American Studies, English, History",
+work_5_new_buildings,Work in 5 New Buildings,Work in 5 new buildings,,5,false,false,false,0,4,0,,"American Studies, English, History, MCM",
 office_hours_new_prof,Go to Office Hours with a New Professor,Go to office hours with a professor you're interested in (not from your class),,1,false,false,false,0,0,0,,,
 go_to_yosemite,Go to Yosemite,Go to Yosemite,,1,false,false,false,0,0,0,,,
 trail_run_3_locations,Trail Run or Hike at 3 RI Locations,Trail run or hike at 3 locations within a 1 hour radius of Providence,,3,false,false,false,0,0,0,,,
