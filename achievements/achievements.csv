@@ -61,7 +61,7 @@ acquire_lactose_tolerance,Acquire Lactose Tolerance,Acquire lactose tolerance,ea
 record_player,Bring Record Player Up,Bring the record player up,,1,true,false,false,1,0,0,,,
 flipbook_animation,Make Flipbook Style Animation,Make a flipbook style animation,,1,false,false,false,0,0,0,,,
 clean_3_fridays,Clean 3 Fridays in a Row,Clean 3 Fridays in a row,,3,false,false,false,0,2,0,,,
-trash_15_times,Take Out Trash 15 Times,Take out the trash 15 times,,15,false,false,false,0,0,0,,,
+trash_15_times,Take Out Trash 15 Times,Take out the trash 15 times,,15,false,false,false,0,2,0,,,
 work_5_new_buildings,Work in 5 New Buildings,Work in 5 new buildings,,5,false,true,false,0,5,0,,"American Studies, English, History, MCM, Religious Studies",
 office_hours_new_prof,Go to Office Hours with a New Professor,Go to office hours with a professor you're interested in (not from your class),,1,false,false,false,0,0,0,,,
 go_to_yosemite,Go to Yosemite,Go to Yosemite,,1,false,false,false,0,0,0,,,
