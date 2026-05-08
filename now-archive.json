@@ -1,7 +1,7 @@
 {
-  "lastUpdated": "2026-02-03",
+  "lastUpdated": "2026-05-08",
   "current": {
-    "paragraph": "I am at Brown University this spring, finishing my degrees in math and computer science. Over winter break I travelled with my family to <a href=\"https://substack.com/@benpomeranz/p-182236187\" target=\"_blank\" rel=\"noopener\">Vietnam</a>, and then attended my first ever <a href=\"https://meetings.ams.org/math/jmm2026/meetingapp.cgi/Paper/55179\" target=\"_blank\" rel=\"noopener\">JMM</a>. From there, I was off to Pittsburgh where I stayed at the nicest institution the city has to offer. I did my new outdoor experience of the month, which was learning how to ski (ish ish ish) in the North Country of New York. In a shocking conclusion, I watched live what will surely be <a href=\"https://www.youtube.com/watch?v=1DgjDi774FI\" target=\"_blank\" rel=\"noopener\">the craziest sports feat I ever see in person</a> on my Chicagoan grandmother's 95th birthday. <br> And now I'm in Providence, and there is no place I'd rather be.",
+    "paragraph": "I am about to graduate from Brown University, unless something really unexpected happens. I feel a little confused about that, but I expect that's pretty normal. I've been spending my time making plans and connections for after graduation, and passing off Brown EA into great hands, and very slowly reading Anna Karenina. And now I crave manual labor. I spend a lot of time greedily squeezing the juice out of everyone I love on this campus. I go outside. <br> I'm learning a little math as always, and finally finishing the biomath paper. <br> This week, I spent a while drafting a blogpost which I think will be good, and by May 10th you'll be able to find it on <a href=\"https://substack.com/@benpomeranz\" target=\"_blank\" rel=\"noopener noreferrer\"> my blog</a>. The contents are, approximately, \"prize philanthropy is underrated.\" Ooh la la. <br> Maybe one's Now section should be more formal, but if I update this often then the informality might blend into a timely collage.",
     "courses": [
       "Recent Applications of Probability and Statistics",
       "Cryptography",
@@ -10,6 +10,23 @@
     ]
   },
   "past": [
+    {
+      "date": "2026-02-03",
+      "paragraph": "I am at Brown University this spring, finishing my degrees in math and computer science. Over winter break I travelled with my family to <a href=\"https://substack.com/@benpomeranz/p-182236187\" target=\"_blank\" rel=\"noopener\">Vietnam</a>, and then attended my first ever <a href=\"https://meetings.ams.org/math/jmm2026/meetingapp.cgi/Paper/55179\" target=\"_blank\" rel=\"noopener\">JMM</a>. From there, I was off to Pittsburgh where I stayed at the nicest institution the city has to offer. I did my new outdoor experience of the month, which was learning how to ski (ish ish ish) in the North Country of New York. In a shocking conclusion, I watched live what will surely be <a href=\"https://www.youtube.com/watch?v=1DgjDi774FI\" target=\"_blank\" rel=\"noopener\">the craziest sports feat I ever see in person</a> on my Chicagoan grandmother's 95th birthday. <br> And now I'm in Providence, and there is no place I'd rather be.",
+      "courses": [
+        "Recent Applications of Probability and Statistics",
+        "Cryptography",
+        "Manifolds",
+        "Hilbert and Banach Space Theory"
+      ],
+      "spotify": {
+        "title": "Non-Stop",
+        "artists": "Leslie Odom Jr., Lin-Manuel Miranda, Renée Elise Goldsberry, Phillipa Soo, Christopher Jackson, Original Broadway Cast of Hamilton",
+        "album": "Hamilton (Original Broadway Cast Recording)",
+        "cover": "https://i.scdn.co/image/ab67616d0000b273d72fb5571087bca0a2fed008",
+        "url": "https://open.spotify.com/track/7qfoq1JFKBUEIvhqOHzuqX"
+      }
+    },
     {
       "date": "2025-02-01",
       "paragraph": "I am at Brown University this autumn, continuing my degrees in math and computer science. Over the summer I was at Montana State University trying to make <a href=\"poster.pdf\" target=\"_blank\" rel=\"noopener\">metabolic data easier to interpret</a> and <a href=\"https://www.strava.com/athletes/70147433\" target=\"_blank\" rel=\"noopener\">running about</a>. I also enjoyed attending <a href=\"https://www.worksinprogress.news/p/apply-for-invisible-college-2025\" target=\"_blank\" rel=\"noopener\">Invisible College</a>.",

@@ -4,7 +4,18 @@
       "Bash(ls:*)",
       "Bash(sips:*)",
       "Bash(git add:*)",
-      "Bash(git commit -m \"$\\(cat <<''EOF''\nFix CSV parsing to handle commas in achievement names/descriptions\n\nUse RFC 4180 quoting: fields with commas get wrapped in double quotes\nwhen writing, and the parser respects quoted fields when reading.\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")"
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nFix CSV parsing to handle commas in achievement names/descriptions\n\nUse RFC 4180 quoting: fields with commas get wrapped in double quotes\nwhen writing, and the parser respects quoted fields when reading.\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git fetch:*)",
+      "Bash(python3:*)",
+      "Bash(head:*)",
+      "Bash(node:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git stash:*)",
+      "Bash(cd:*)",
+      "Bash(curl:*)",
+      "Bash(open:*)",
+      "Bash(git pull:*)"
     ]
   }
 }
