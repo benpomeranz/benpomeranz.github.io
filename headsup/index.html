@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>Heads Up</title>
+<style>
+  /* ============================================================
+     TUNABLE CONSTANTS are in the <script> (see TUNING block).
+     These are just visuals.
+     ============================================================ */
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    margin: 0; padding: 0; height: 100%; width: 100%;
+    overflow: hidden; overscroll-behavior: none;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #111; color: #fff;
+    user-select: none; -webkit-user-select: none; touch-action: none;
+  }
+  #app { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; text-align: center; }
+  .screen { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 24px; }
+  .screen.active { display: flex; }
+
+  h1 { font-size: clamp(2rem, 9vw, 4rem); margin: 0 0 8px; }
+  p.sub { opacity: 0.8; margin: 0 0 28px; font-size: 1.1rem; max-width: 30ch; }
+
+  button {
+    font: inherit; font-size: 1.2rem; font-weight: 600;
+    padding: 16px 28px; border: none; border-radius: 14px;
+    background: #fff; color: #111; cursor: pointer; margin: 6px;
+    min-width: 200px;
+  }
+  button.secondary { background: transparent; color: #fff; border: 2px solid rgba(255,255,255,0.4); }
+  button:active { transform: scale(0.97); }
+
+  /* Deck picker */
+  .decks { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 360px; margin-top: 8px; }
+  .deck-btn { width: 100%; text-align: left; display: flex; justify-content: space-between; align-items: center; }
+  .deck-btn small { font-weight: 400; opacity: 0.6; }
+
+  textarea {
+    width: 100%; max-width: 360px; height: 140px; border-radius: 12px; border: none;
+    padding: 12px; font: inherit; font-size: 1rem; resize: none;
+  }
+
+  /* Play screen */
+  #play { transition: background-color 0.12s; }
+  #word { font-size: clamp(2.5rem, 12vw, 6rem); font-weight: 800; line-height: 1.05; padding: 0 12px; }
+  #timer { position: absolute; top: env(safe-area-inset-top, 16px); left: 0; right: 0; font-size: 2rem; font-weight: 700; opacity: 0.85; margin-top: 12px; }
+  #score-live { position: absolute; bottom: env(safe-area-inset-bottom, 16px); left: 0; right: 0; font-size: 1.1rem; opacity: 0.7; margin-bottom: 12px; }
+
+  .flash-correct { background: #1db954 !important; }
+  .flash-pass { background: #e0245e !important; }
+
+  /* Countdown */
+  #count-num { font-size: clamp(5rem, 30vw, 12rem); font-weight: 800; }
+
+  /* Results */
+  .result-list { text-align: left; max-width: 360px; width: 100%; margin: 16px 0; max-height: 40vh; overflow-y: auto; }
+  .result-row { display: flex; justify-content: space-between; padding: 8px 4px; border-bottom: 1px solid rgba(255,255,255,0.12); }
+  .result-row.got span:last-child { color: #1db954; }
+  .result-row.passed span:last-child { color: #e0245e; }
+  #final-score { font-size: 3rem; font-weight: 800; margin: 8px 0; }
+
+  .hint { font-size: 0.85rem; opacity: 0.5; margin-top: 18px; max-width: 32ch; }
+  .err { color: #ff6b6b; margin-top: 14px; min-height: 1.2em; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HOME -->
+  <section id="home" class="screen active">
+    <h1>Heads Up</h1>
+    <p class="sub">Hold the phone to your forehead. Tilt <b>down</b> when you guess right, <b>up</b> to pass.</p>
+    <div id="timer-setting" style="margin-bottom:20px; width:100%; max-width:360px;">
+      <label for="timer-range" style="font-size:1rem; opacity:0.85;">Round length: <b id="timer-val">60</b>s</label>
+      <input id="timer-range" type="range" min="0" max="120" step="5" value="60" style="width:100%; margin-top:8px;" />
+    </div>
+    <div class="decks" id="deck-list"></div>
+    <button id="custom-toggle" class="secondary" style="margin-top:14px;">Custom deck</button>
+    <div id="custom-wrap" style="display:none; margin-top:12px;">
+      <textarea id="custom-input" placeholder="One word/phrase per line"></textarea>
+      <br><button id="custom-start">Play custom deck</button>
+    </div>
+    <p class="err" id="home-err"></p>
+    <p class="hint">Best on a phone. Needs motion access (you'll be asked once).</p>
+  </section>
+
+  <!-- COUNTDOWN -->
+  <section id="countdown" class="screen">
+    <div id="count-num">3</div>
+    <p class="sub">Phone to your forehead!</p>
+  </section>
+
+  <!-- PLAY -->
+  <section id="play" class="screen">
+    <div id="timer">60</div>
+    <div id="word">—</div>
+    <div id="score-live">0 correct</div>
+  </section>
+
+  <!-- RESULTS -->
+  <section id="results" class="screen">
+    <h1>Time!</h1>
+    <div id="final-score">0</div>
+    <div class="result-list" id="result-list"></div>
+    <button id="play-again">Play again</button>
+    <button id="home-btn" class="secondary">Change deck</button>
+  </section>
+
+</div>
+
+<script>
+/* ============================================================
+   TUNING — tweak these on a real phone
+   ============================================================ */
+const TUNING = {
+  ROUND_SECONDS: 60,
+  // Uses accelerationIncludingGravity.z (m/s^2). Orientation-independent:
+  //   z ~  0  -> phone vertical (held at forehead)  [neutral / re-armed]
+  //   z ~ -9.8 -> screen face-DOWN (tilt forward)   -> CORRECT
+  //   z ~ +9.8 -> screen face-UP (tilt back)        -> PASS
+  TRIGGER: 7.8,   // |z| past this fires an action
+  NEUTRAL: 4.0,   // must return within |z| < this to re-arm (reset zone)
+  FLASH_MS: 600,  // how long the green/red feedback shows
+  COUNTDOWN_FROM: 3,
+};
+
+/* ============================================================
+   DECKS — add your own here. Each is { name, emoji, words[] }
+   ============================================================ */
+const DECKS = [
+  {
+    name: "Math", emoji: "📐", words: [
+      "Fubini",
+      "Tonelli",
+      "Jill Pipher",
+      "Richard Schwartz",
+      "Arnav",
+      "Cantor Set",
+      "Measurable",
+      "Smooth Manifold",
+      "Sigma Algebra",
+      "Lebesgue Measure",
+      "Borel",
+      "Fatou",
+      "L Infinity",
+      "Radon-Nikodym",
+      "Von Neumann",
+      "Hardy-Littlewood Maximal Function",
+      "Weak Star",
+      "Reflexive Space",
+      "Fourier Transform",
+      "Partition of Unity",
+      "Pullback",
+      "Stokes' Theorem",
+      "Hyperbolic Space",
+      "Pair of Pants",
+      "Inverse Function Theorem",
+      "Cauchy",
+      "Christine Breiner",
+    ]
+  },
+  {
+    name: "Pastimes", emoji: "🎲", words: [
+      "Sports Betting",
+      "Fanduel",
+      "Parlay",
+      "Wembanyama",
+      "Injury",
+      "Climbing",
+      "Volleyball",
+      "Masturbation",
+      "Ketamine at Spring Weekend",
+      "Crying",
+      "Anime",
+      "Dinging Ben's Car",
+      "Eating Eggs",
+      "Haikyuu",
+      "Blue Lock",
+      "Vagabond",
+      "Berserk",
+      "Frieren",
+      "Playing So Real By Jeff Buckley on Guitar",
+      "Ketamine",
+    ]
+  },
+  {
+    name: "Music", emoji: "🎵", words: [
+      "Tortoise",
+      "Dr. Grim",
+      "serious goose",
+      "Rob Ford Explorer",
+      "yes",
+      "women (shaking hand)",
+      "sea and cake",
+      "gangerr (3/859)",
+      "KC Accidental",
+      "Broken Social Scene",
+      "Protomartyr",
+      "Nonstop",
+      "RE stacks",
+      "For Emma",
+      "Fishmans",
+      "Why Are You Going to New York",
+      "Bodys, By CSH",
+      "Fontaines DC",
+      "Helvetia",
+      "Adrienne Lenker",
+      "C418",
+      "King Crimson",
+      "Jaco Pastorius",
+      "Air",
+      "Brakhage",
+      "Stereolab",
+      "Adele",
+    ]
+  },
+  {
+    name: "Sayings & Stims", emoji: "💬", words: [
+      "Hello There (Kenobi)",
+      "General Kenobi (Gen Grievous)",
+      "ho there",
+      "Gorlami",
+      "catch a frog",
+      "but bearrr",
+      "r2d2 scream",
+      "Anita Maxween! Anita Maxweeennnn…",
+      "Love make your Kep Bahpee",
+      "lodi zone",
+      "Baaaaahdin",
+      "Heuhlo (Mr. Frog)",
+      "Instead of Me He Promotes Jessica Lee",
+      "Hongyiiii",
+      "Downnnnnn",
+      "nipplehole",
+      "doodoo marks",
+      "samuel reshevsky",
+      "piano scarf",
+      "Byron",
+      "Byron's Freshman Year Girlfriend",
+      "pothos",
+    ]
+  },
+  {
+    name: "Food", emoji: "🍳", words: [
+      "champa",
+      "Applegate Gluten Free Chicken Nuggs",
+      "slimy zucchini",
+      "yogurt a day",
+      "oat matzah",
+      "Wet Egg",
+      "Wet Rice",
+      "Allergy Closet",
+      "Tteok-bokki (duck bohkee)",
+      "Kombucha",
+      "Gluten",
+      "Good Fortune",
+      "Sweet Potato",
+      "Broccoli",
+    ]
+  },
+];
+
+/* ============================================================
+   App logic
+   ============================================================ */
+const screens = {
+  home: document.getElementById('home'),
+  countdown: document.getElementById('countdown'),
+  play: document.getElementById('play'),
+  results: document.getElementById('results'),
+};
+function show(name) {
+  Object.values(screens).forEach(s => s.classList.remove('active'));
+  screens[name].classList.add('active');
+}
+
+// --- audio (works on iOS once unlocked by a tap) ---
+let audioCtx = null;
+function ensureAudio() {
+  if (!audioCtx) {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (AC) audioCtx = new AC();
+  }
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+}
+function beep(freq, ms) {
+  if (!audioCtx) return;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.frequency.value = freq;
+  osc.type = 'sine';
+  osc.connect(gain); gain.connect(audioCtx.destination);
+  gain.gain.setValueAtTime(0.001, audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.4, audioCtx.currentTime + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + ms / 1000);
+  osc.start();
+  osc.stop(audioCtx.currentTime + ms / 1000);
+}
+function buzz(ms) { if (navigator.vibrate) navigator.vibrate(ms); }
+
+// --- game state ---
+let deck = [];
+let roundSeconds = TUNING.ROUND_SECONDS;
+let queue = [];
+let idx = 0;
+let results = [];   // {word, got:boolean}
+let timeLeft = 0;
+let timerId = null;
+let armed = true;   // ready to register a tilt
+let orientationHandler = null;
+let playing = false;
+
+// --- deck UI ---
+const deckList = document.getElementById('deck-list');
+DECKS.forEach((d, i) => {
+  const b = document.createElement('button');
+  b.className = 'deck-btn';
+  b.innerHTML = `<span>${d.emoji} ${d.name}</span><small>${d.words.length} cards</small>`;
+  b.onclick = () => startGame(d.words);
+  deckList.appendChild(b);
+});
+
+const timerRange = document.getElementById('timer-range');
+const timerVal = document.getElementById('timer-val');
+timerRange.addEventListener('input', () => {
+  roundSeconds = parseInt(timerRange.value, 10);
+  timerVal.textContent = roundSeconds;
+});
+
+document.getElementById('custom-toggle').onclick = () => {
+  const w = document.getElementById('custom-wrap');
+  w.style.display = w.style.display === 'none' ? 'block' : 'none';
+};
+document.getElementById('custom-start').onclick = () => {
+  const lines = document.getElementById('custom-input').value
+    .split('\n').map(s => s.trim()).filter(Boolean);
+  if (lines.length < 1) { setErr('Add at least one word.'); return; }
+  startGame(lines);
+};
+document.getElementById('play-again').onclick = () => startGame(deck);
+document.getElementById('home-btn').onclick = () => show('home');
+
+function setErr(msg) { document.getElementById('home-err').textContent = msg || ''; }
+
+// --- motion permission + start ---
+async function startGame(words) {
+  setErr('');
+  ensureAudio();
+  // iOS requires explicit permission, from a user gesture (this click).
+  if (typeof DeviceMotionEvent !== 'undefined' &&
+      typeof DeviceMotionEvent.requestPermission === 'function') {
+    try {
+      const res = await DeviceMotionEvent.requestPermission();
+      if (res !== 'granted') { setErr('Motion access denied — enable it to play.'); return; }
+    } catch (e) {
+      setErr('Could not request motion access. Are you on HTTPS?'); return;
+    }
+  }
+  deck = words.slice();
+  queue = shuffle(words.slice());
+  idx = 0;
+  results = [];
+  runCountdown();
+}
+
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function runCountdown() {
+  show('countdown');
+  let n = TUNING.COUNTDOWN_FROM;
+  const el = document.getElementById('count-num');
+  el.textContent = n;
+  beep(440, 120);
+  const cid = setInterval(() => {
+    n--;
+    if (n <= 0) {
+      clearInterval(cid);
+      beep(660, 200);
+      beginRound();
+    } else {
+      el.textContent = n;
+      beep(440, 120);
+    }
+  }, 1000);
+}
+
+function beginRound() {
+  show('play');
+  playing = true;
+  armed = true;
+  timeLeft = roundSeconds;
+  document.getElementById('timer').textContent = timeLeft;
+  updateLiveScore();
+  nextWord();
+
+  timerId = setInterval(() => {
+    timeLeft--;
+    document.getElementById('timer').textContent = Math.max(0, timeLeft);
+    if (timeLeft <= 0) endRound();
+  }, 1000);
+
+  orientationHandler = (e) => onMotion(e);
+  window.addEventListener('devicemotion', orientationHandler);
+}
+
+function nextWord() {
+  if (idx >= queue.length) { endRound(); return; }
+  document.getElementById('word').textContent = queue[idx];
+}
+
+function register(got) {
+  if (!playing) return;
+  results.push({ word: queue[idx], got });
+  idx++;
+  flash(got ? 'flash-correct' : 'flash-pass');
+  if (got) { beep(880, 150); buzz(60); } else { beep(220, 150); buzz([40, 40, 40]); }
+  updateLiveScore();
+  // brief feedback word, then next
+  const play = screens.play;
+  document.getElementById('word').textContent = got ? 'CORRECT' : 'PASS';
+  setTimeout(() => {
+    play.classList.remove('flash-correct', 'flash-pass');
+    nextWord();
+  }, TUNING.FLASH_MS);
+}
+
+function flash(cls) {
+  const play = screens.play;
+  play.classList.add(cls);
+}
+
+function updateLiveScore() {
+  const n = results.filter(r => r.got).length;
+  document.getElementById('score-live').textContent = n + ' correct';
+}
+
+function onMotion(e) {
+  if (!playing) return;
+  const acc = e.accelerationIncludingGravity;
+  if (!acc || acc.z == null) return;
+  const z = acc.z; // ~0 vertical, -9.8 face-down, +9.8 face-up
+
+  // Re-arm when phone returns to roughly vertical (forehead position)
+  if (Math.abs(z) < TUNING.NEUTRAL) { armed = true; return; }
+  if (!armed) return;
+
+  if (z < -TUNING.TRIGGER) {
+    // tilted forward, screen toward floor -> correct
+    armed = false;
+    register(true);
+  } else if (z > TUNING.TRIGGER) {
+    // tilted back, screen toward ceiling -> pass
+    armed = false;
+    register(false);
+  }
+}
+
+function endRound() {
+  if (!playing) return;
+  playing = false;
+  clearInterval(timerId);
+  if (orientationHandler) window.removeEventListener('deviceorientation', orientationHandler);
+  screens.play.classList.remove('flash-correct', 'flash-pass');
+  showResults();
+}
+
+function showResults() {
+  show('results');
+  const got = results.filter(r => r.got).length;
+  document.getElementById('final-score').textContent = got + (got === 1 ? ' point' : ' points');
+  const list = document.getElementById('result-list');
+  list.innerHTML = '';
+  results.forEach(r => {
+    const row = document.createElement('div');
+    row.className = 'result-row ' + (r.got ? 'got' : 'passed');
+    row.innerHTML = `<span>${r.word}</span><span>${r.got ? '✓' : 'passed'}</span>`;
+    list.appendChild(row);
+  });
+  if (results.length === 0) {
+    list.innerHTML = '<div class="result-row"><span>No cards played</span><span></span></div>';
+  }
+}
+
+// Keyboard fallback for desktop testing (no motion): ArrowDown=correct, ArrowUp=pass
+window.addEventListener('keydown', (e) => {
+  if (!playing) return;
+  if (e.key === 'ArrowDown') { armed = false; register(true); }
+  if (e.key === 'ArrowUp') { armed = false; register(false); }
+});
+
+// Keep screen awake-ish: re-request wake lock where supported
+let wakeLock = null;
+async function keepAwake() {
+  try { if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); } catch (_) {}
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') keepAwake(); });
+keepAwake();
+</script>
+</body>
+</html>
