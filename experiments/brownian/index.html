@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Harmonic extension by Brownian motion</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/aaaakshat/cm-web-fonts@latest/fonts.css" />
+<style>
+  :root { color-scheme: light; }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: #f6eee3; color: #1a1a1a;
+    font-family: "Computer Modern Sans", "CMU Sans Serif", sans-serif;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 24px 18px 80px; }
+  h1 { font-size: 1.5rem; font-weight: 700; margin: 0 0 6px; color: #1a1a1a; }
+  .sub { color: #6b6357; font-size: .98rem; margin: 0 0 18px; line-height: 1.5; }
+  .sub b { color: #1a1a1a; font-weight: 700; }
+  .layout { display: flex; gap: 18px; flex-wrap: wrap; align-items: flex-start; justify-content: center; }
+  canvas {
+    width: 600px; max-width: 100%; height: auto;
+    border: 1px solid #d4c4a8; background: #f6eee3;
+    cursor: crosshair; touch-action: none;
+  }
+  .panel { flex: 1 1 220px; min-width: 220px; max-width: 260px; }
+  .readout {
+    background: #fcf9f4; border: 1px solid #d4c4a8;
+    padding: 16px 16px 14px; margin-bottom: 14px;
+  }
+  .readout .lbl { font-size: .82rem; color: #6b6357; letter-spacing: .3px; text-transform: uppercase; }
+  .readout .big { font-size: 2.2rem; font-weight: 700; font-variant-numeric: tabular-nums; margin: 3px 0; color: #1a1a1a; }
+  .readout .meta { font-size: .84rem; color: #6b6357; font-variant-numeric: tabular-nums; line-height: 1.5; }
+  .readout .exact { color: #3a7d44; }
+  .readout .err { color: #b06a2c; }
+  .ctrl { display: flex; flex-direction: column; gap: 11px; }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: .92rem; color: #4a4438; }
+  select, input[type="number"], input[type="text"] {
+    background: #fcf9f4; color: #1a1a1a; border: 1px solid #d4c4a8;
+    border-radius: 0; padding: 6px 8px; font-size: .9rem; font-family: inherit;
+  }
+  select { width: 100%; }
+  input[type="number"] { width: 78px; }
+  input[type="range"] { width: 110px; accent-color: #8a6d3b; }
+  button {
+    background: #fcf9f4; color: #1a1a1a; border: 1px solid #d4c4a8; border-radius: 0;
+    padding: 8px 12px; font-size: .9rem; cursor: pointer; font-family: inherit;
+    transition: background .12s, border-color .12s;
+  }
+  button:hover:not(:disabled) { background: #efe2cc; border-color: #bda57e; }
+  button:disabled { opacity: .5; cursor: default; }
+  button.primary { background: #efe2cc; border-color: #b9a06a; }
+  button.on { background: #e6d3a8; border-color: #8a6d3b; }
+  .btnrow { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btnrow button { flex: 1 1 auto; }
+  .note { margin: 22px auto 0; max-width: 860px; font-size: .85rem; color: #6b6357; line-height: 1.55; }
+  code { background: #efe6d6; padding: 1px 5px; border-radius: 0; color: #3a3326; font-size: .85em; }
+  .progress { color: #8a6d3b; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Harmonic Extension from Live Particles</h1>
+  <p class="sub">
+    Draw a domain, place the point <b>x</b>, choose boundary data <b>f</b>, then
+    <b>click anywhere inside the shape to shoot particles</b> from <b>x</b>. Each Brownian particle hops
+    from <b>x</b> until it hits the boundary; averaging <b>f</b> over where they land estimates the
+    <b>harmonic extension</b> <b>H<sub>f</sub>(x)</b> — the solution of Laplace's equation with boundary
+    values f. Outer band = value of f (darker = larger); inner band = empirical hitting distribution (240 bins).
+  </p>
+
+  <div class="layout">
+    <canvas id="c" width="720" height="720"></canvas>
+
+    <div class="panel">
+      <div class="readout">
+        <div class="lbl">H<sub>f</sub>(x) ≈</div>
+        <div class="big" id="estimate">—</div>
+        <div class="meta" id="meta">no samples yet</div>
+      </div>
+
+      <div class="ctrl">
+        <div class="row">
+          <label for="fformula">boundary data f(x, y)</label>
+        </div>
+        <input id="fformula" type="text" value="x*x - y*y" spellcheck="false"
+               style="width:100%;font-family:ui-monospace,Menlo,monospace;font-size:.82rem" />
+        <select id="fpreset">
+          <optgroup label="harmonic — exact answer known">
+            <option value="x">x</option>
+            <option value="y">y</option>
+            <option value="x*x - y*y">x² − y²  (saddle)</option>
+            <option value="3*x*x*y - y*y*y">3x²y − y³  (monkey saddle)</option>
+            <option value="x*x*x - 3*x*y*y">x³ − 3xy²  (Re z³)</option>
+            <option value="exp(x)*cos(y)">eˣ cos y  (Re eᶻ)</option>
+            <option value="exp(-y)*sin(x)">e⁻ʸ sin x  (heated plate)</option>
+          </optgroup>
+          <optgroup label="boundary-parametrized — no closed form">
+            <option value="(s<0.25)?1:0">top-quarter indicator</option>
+            <option value="sin(2*PI*3*s)">sine around boundary</option>
+            <option value="sign(x)">sign(x)</option>
+          </optgroup>
+        </select>
+        <div class="row" style="font-size:.78rem;color:#8a8170;margin-top:-4px">
+          vars: x, y (normalized), s∈[0,1), t=angle. Harmonic f ⇒ exact shown.
+        </div>
+
+        <div class="row">
+          <span>particles / click</span>
+          <input id="perClick" type="number" min="1" max="200" value="1" />
+        </div>
+
+        <div class="btnrow">
+          <button id="turbo" class="primary">⚡ Turbo</button>
+          <input id="turboN" type="number" min="100" step="1000" value="50000" title="turbo runs" />
+        </div>
+
+        <div class="btnrow">
+          <button id="draw">✎ Draw domain</button>
+          <button id="defShape">Default</button>
+        </div>
+
+        <div class="btnrow">
+          <button id="reset">Reset samples</button>
+        </div>
+
+        <div class="row">
+          <span>speed</span>
+          <input id="speed" type="range" min="8" max="160" step="1" value="24" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="note">
+    Probabilistic Dirichlet solver: <code>H_f(x) = E_x[ f(B_τ) ] = ∫ f dω(x,·)</code>, where
+    <code>ω</code> is harmonic measure (the Brownian exit distribution). For <code>f = x</code> or
+    <code>f = y</code> the answer is exact and known — coordinate functions are harmonic, so
+    <code>H_f(x)</code> equals that coordinate of x. Turbo uses walk-on-spheres, exact for any domain.
+    Drag the black point to move x; press <b>Draw domain</b> then drag to sketch a new shape.
+  </p>
+</div>
+
+<script>
+(() => {
+  "use strict";
+  const canvas = document.getElementById("c");
+  const ctx = canvas.getContext("2d");
+  const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+  const SIZE = 720;
+  canvas.width = SIZE * dpr; canvas.height = SIZE * dpr;
+  ctx.scale(dpr, dpr);
+
+  const cx = 360, cy = 360, R0 = 200; // nominal scale for coordinate normalization
+  const NBINS = 240;
+  const SIGMA = 2.4;          // Brownian step std (px)
+  let stepsPerFrame = 24;
+
+  // --- domain state ---
+  let verts = [];             // polygon vertices {x,y}
+  let cum = [];               // cumulative arc length at each vertex
+  let perim = 0;
+  let centroid = { x: cx, y: cy };
+  let normalSign = 1;         // global outward-normal orientation (set in rebuild)
+  let start = { x: cx + 50, y: cy - 36 };
+
+  // --- sample state ---
+  let bins = new Float64Array(NBINS);
+  let total = 0, sumF = 0, sumF2 = 0, n = 0;
+  let binSamples = [];        // {x,y,nx,ny,s} per bin
+  let binF = new Float64Array(NBINS);
+  let fMin = -1, fMax = 1;
+
+  let walkers = [];
+  let mode = "idle";          // 'idle' | 'draw'
+  let drawPts = null;
+  let dirty = true;
+  let turboRunning = false;
+
+  // ---------- geometry helpers ----------
+  function pointInPolygon(px, py) {
+    let inside = false;
+    for (let i = 0, j = verts.length - 1; i < verts.length; j = i++) {
+      const xi = verts[i].x, yi = verts[i].y, xj = verts[j].x, yj = verts[j].y;
+      if (((yi > py) !== (yj > py)) &&
+          (px < (xj - xi) * (py - yi) / (yj - yi) + xi)) inside = !inside;
+    }
+    return inside;
+  }
+
+  function distToBoundary(px, py) {
+    let best = Infinity, bx = 0, by = 0, bestEdge = 0;
+    for (let i = 0, j = verts.length - 1; i < verts.length; j = i++) {
+      const ax = verts[j].x, ay = verts[j].y, bx2 = verts[i].x, by2 = verts[i].y;
+      const dx = bx2 - ax, dy = by2 - ay;
+      const L2 = dx * dx + dy * dy || 1e-9;
+      let t = ((px - ax) * dx + (py - ay) * dy) / L2;
+      t = Math.max(0, Math.min(1, t));
+      const qx = ax + t * dx, qy = ay + t * dy;
+      const d = Math.hypot(px - qx, py - qy);
+      if (d < best) { best = d; bx = qx; by = qy; bestEdge = j; }
+    }
+    return { dist: best, x: bx, y: by, edge: bestEdge };
+  }
+
+  // arc-length s for a point known to lie on edge `e` (e = index of edge from verts[e] to verts[e+1])
+  function sOnEdge(e, px, py) {
+    const a = verts[e];
+    const d = Math.hypot(px - a.x, py - a.y);
+    return ((cum[e] + d) / perim) % 1;
+  }
+
+  // segment intersection: returns t in [0,1] along p1->p2 of nearest crossing, or -1
+  function exitCrossing(p1, p2) {
+    let bestT = Infinity, ex = 0, ey = 0, edge = 0;
+    for (let i = 0, j = verts.length - 1; i < verts.length; j = i++) {
+      const p3 = verts[j], p4 = verts[i];
+      const d1x = p2.x - p1.x, d1y = p2.y - p1.y;
+      const d2x = p4.x - p3.x, d2y = p4.y - p3.y;
+      const den = d1x * d2y - d1y * d2x;
+      if (Math.abs(den) < 1e-9) continue;
+      const t = ((p3.x - p1.x) * d2y - (p3.y - p1.y) * d2x) / den;
+      const u = ((p3.x - p1.x) * d1y - (p3.y - p1.y) * d1x) / den;
+      if (t >= 0 && t <= 1 && u >= 0 && u <= 1 && t < bestT) {
+        bestT = t; ex = p1.x + t * d1x; ey = p1.y + t * d1y; edge = j;
+      }
+    }
+    if (bestT === Infinity) return null;
+    return { x: ex, y: ey, edge };
+  }
+
+  function edgeNormal(a, b) {
+    let nx = (b.y - a.y), ny = -(b.x - a.x);
+    const l = Math.hypot(nx, ny) || 1; return { x: nx / l, y: ny / l };
+  }
+
+  // ---- "magic loop": turn jittery freehand into a clean smooth closed curve ----
+  // resample a closed polyline to M points spaced evenly by arc length
+  function resampleClosed(pts, M) {
+    const n = pts.length, cumL = [0];
+    let total = 0;
+    for (let i = 0; i < n; i++) {
+      const a = pts[i], b = pts[(i + 1) % n];
+      total += Math.hypot(b.x - a.x, b.y - a.y);
+      cumL.push(total);
+    }
+    const out = [];
+    for (let k = 0; k < M; k++) {
+      const d = (k / M) * total;
+      let j = 0; while (j < n && cumL[j + 1] <= d) j++;
+      if (j >= n) j = n - 1;
+      const a = pts[j], b = pts[(j + 1) % n];
+      const segL = (cumL[j + 1] - cumL[j]) || 1;
+      const t = (d - cumL[j]) / segL;
+      out.push({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t });
+    }
+    return out;
+  }
+  // periodic Laplacian smoothing (removes hand-shake)
+  function smoothPeriodic(pts, passes, alpha) {
+    const n = pts.length;
+    for (let p = 0; p < passes; p++) {
+      const c = pts.map(q => ({ x: q.x, y: q.y }));
+      for (let i = 0; i < n; i++) {
+        const a = c[(i - 1 + n) % n], b = c[(i + 1) % n];
+        pts[i].x = (1 - alpha) * c[i].x + alpha * 0.5 * (a.x + b.x);
+        pts[i].y = (1 - alpha) * c[i].y + alpha * 0.5 * (a.y + b.y);
+      }
+    }
+  }
+  // closed Catmull-Rom spline through control points → dense smooth polygon
+  function catmullRomClosed(ctrl, perSeg) {
+    const n = ctrl.length, out = [];
+    for (let i = 0; i < n; i++) {
+      const p0 = ctrl[(i - 1 + n) % n], p1 = ctrl[i], p2 = ctrl[(i + 1) % n], p3 = ctrl[(i + 2) % n];
+      for (let s = 0; s < perSeg; s++) {
+        const t = s / perSeg, t2 = t * t, t3 = t2 * t;
+        out.push({
+          x: 0.5 * (2 * p1.x + (-p0.x + p2.x) * t + (2 * p0.x - 5 * p1.x + 4 * p2.x - p3.x) * t2 + (-p0.x + 3 * p1.x - 3 * p2.x + p3.x) * t3),
+          y: 0.5 * (2 * p1.y + (-p0.y + p2.y) * t + (2 * p0.y - 5 * p1.y + 4 * p2.y - p3.y) * t2 + (-p0.y + 3 * p1.y - 3 * p2.y + p3.y) * t3)
+        });
+      }
+    }
+    return out;
+  }
+  function smoothClosedLoop(raw) {
+    let ctrl = resampleClosed(raw, 48);
+    smoothPeriodic(ctrl, 2, 0.5);
+    return catmullRomClosed(ctrl, 5); // ~240 smooth vertices
+  }
+  // place x at the deepest interior point so it lands inside any (even non-convex) shape
+  function ensureStartInside() {
+    if (pointInPolygon(start.x, start.y)) return;
+    let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
+    for (const v of verts) { minx = Math.min(minx, v.x); maxx = Math.max(maxx, v.x); miny = Math.min(miny, v.y); maxy = Math.max(maxy, v.y); }
+    let bestD = -1, best = null;
+    for (let gx = 0; gx <= 14; gx++) for (let gy = 0; gy <= 14; gy++) {
+      const px = minx + (maxx - minx) * gx / 14, py = miny + (maxy - miny) * gy / 14;
+      if (pointInPolygon(px, py)) {
+        const d = distToBoundary(px, py).dist;
+        if (d > bestD) { bestD = d; best = { x: px, y: py }; }
+      }
+    }
+    if (best) start = best;
+  }
+
+  function boundarySample(s) {
+    const target = s * perim;
+    let e = 0;
+    while (e < verts.length - 1 && cum[e + 1] < target) e++;
+    const a = verts[e], b = verts[(e + 1) % verts.length];
+    const segLen = (cum[(e + 1) % verts.length] || perim) - cum[e] || 1e-9;
+    const t = Math.max(0, Math.min(1, (target - cum[e]) / segLen));
+    const x = a.x + (b.x - a.x) * t, y = a.y + (b.y - a.y) * t;
+    let nx = (b.y - a.y), ny = -(b.x - a.x);
+    const nl = Math.hypot(nx, ny) || 1; nx = nx / nl * normalSign; ny = ny / nl * normalSign;
+    return { x, y, nx, ny, s };
+  }
+
+  // ---------- f ----------
+  // Expressions are functions of normalized coords x,y, arc length s∈[0,1), angle t.
+  let fExpr = "x*x - y*y";
+  let fFn = compile(fExpr);
+  function compile(expr) {
+    const fn = new Function("s", "x", "y", "t", "with (Math) { return (" + expr + "); }");
+    fn(0.5, 0.1, 0.1, 0.1); // throws on a bad expression
+    return fn;
+  }
+  function f(s, px, py) {
+    const v = fFn(s, (px - cx) / R0, (py - cy) / R0, Math.atan2(py - cy, px - cx));
+    return isFinite(v) ? v : 0;
+  }
+  function fAtXY(x, y) { const v = fFn(0, x, y, 0); return isFinite(v) ? v : NaN; }
+
+  // If f is harmonic (Laplacian ≈ 0 across the domain) then H_f(x) = f(x) exactly.
+  function exactValue() {
+    if (/\bs\b|\bt\b/.test(fExpr)) return null;                 // boundary-parametrized
+    if (/[<>?]|sign|abs|floor|ceil|round|min|max/.test(fExpr)) return null; // discontinuous / kinked
+    const h = 1e-3; let maxLap = 0;
+    for (const px of [-1, -0.5, 0, 0.5, 1]) for (const py of [-1, -0.5, 0, 0.5, 1]) {
+      const lap = (fAtXY(px + h, py) + fAtXY(px - h, py) + fAtXY(px, py + h) + fAtXY(px, py - h) - 4 * fAtXY(px, py)) / (h * h);
+      if (!isFinite(lap)) return null;
+      maxLap = Math.max(maxLap, Math.abs(lap));
+    }
+    if (maxLap > 1e-2) return null;                             // not harmonic
+    const v = fAtXY((start.x - cx) / R0, (start.y - cy) / R0);
+    return isFinite(v) ? v : null;
+  }
+
+  // ---------- build domain ----------
+  function rebuild() {
+    perim = 0; cum = [0];
+    for (let i = 1; i < verts.length; i++) {
+      perim += Math.hypot(verts[i].x - verts[i - 1].x, verts[i].y - verts[i - 1].y);
+      cum.push(perim);
+    }
+    perim += Math.hypot(verts[0].x - verts[verts.length - 1].x, verts[0].y - verts[verts.length - 1].y);
+    let sx = 0, sy = 0;
+    for (const v of verts) { sx += v.x; sy += v.y; }
+    centroid = { x: sx / verts.length, y: sy / verts.length };
+
+    // Calibrate one consistent outward-normal sign using the farthest vertex, which is
+    // guaranteed to be locally convex (on the convex hull) so its outward normal truly
+    // points away from the centroid. Winding is consistent, so this sign holds everywhere.
+    let amax = 0, dmax = -1;
+    for (let i = 0; i < verts.length; i++) {
+      const d = Math.hypot(verts[i].x - centroid.x, verts[i].y - centroid.y);
+      if (d > dmax) { dmax = d; amax = i; }
+    }
+    {
+      const a = verts[amax], b = verts[(amax + 1) % verts.length];
+      const nx = b.y - a.y, ny = -(b.x - a.x);
+      normalSign = ((a.x - centroid.x) * nx + (a.y - centroid.y) * ny) >= 0 ? 1 : -1;
+    }
+
+    binSamples = [];
+    fMin = Infinity; fMax = -Infinity;
+    for (let i = 0; i < NBINS; i++) {
+      const bs = boundarySample((i + 0.5) / NBINS);
+      binSamples.push(bs);
+      const fv = f(bs.s, bs.x, bs.y);
+      binF[i] = fv;
+      if (fv < fMin) fMin = fv;
+      if (fv > fMax) fMax = fv;
+    }
+    if (fMax - fMin < 1e-9) { fMax = fMin + 1; }
+    resetSamples(false);
+    dirty = true;
+  }
+
+  function defaultShape() {
+    verts = [];
+    const N = 120;
+    for (let k = 0; k < N; k++) {
+      const th = 2 * Math.PI * k / N;
+      const r = R0 * (0.92 + 0.16 * Math.sin(3 * th + 0.5) + 0.10 * Math.cos(2 * th));
+      verts.push({ x: cx + r * Math.cos(th), y: cy + r * Math.sin(th) });
+    }
+    start = { x: cx + 50, y: cy - 36 };
+    rebuild();
+  }
+
+  // ---------- samples ----------
+  function resetSamples(redraw = true) {
+    bins = new Float64Array(NBINS);
+    total = 0; sumF = 0; sumF2 = 0; n = 0;
+    dirty = true;
+    if (redraw) { draw(); updateReadout(); }
+  }
+
+  function record(s, px, py) {
+    const v = f(s, px, py);
+    sumF += v; sumF2 += v * v; n++;
+    let b = Math.floor(s * NBINS);
+    if (b < 0) b = 0; if (b >= NBINS) b = NBINS - 1;
+    bins[b]++; total++;
+    dirty = true;
+  }
+
+  // ---------- walk on spheres (exact, any domain) ----------
+  function sampleExit() {
+    let x = start.x, y = start.y;
+    const eps = 0.6;
+    let db = distToBoundary(x, y);
+    for (let i = 0; i < 4000 && db.dist >= eps; i++) {
+      const a = Math.random() * 2 * Math.PI;
+      x += db.dist * Math.cos(a); y += db.dist * Math.sin(a);
+      db = distToBoundary(x, y);
+    }
+    record(sOnEdge(db.edge, db.x, db.y), db.x, db.y);
+  }
+
+  // ---------- animated Brownian ----------
+  function launch(count) {
+    for (let k = 0; k < count; k++) {
+      walkers.push({ x: start.x, y: start.y, prev: { x: start.x, y: start.y }, done: false, life: 1 });
+    }
+    ensureAnim();
+  }
+  function stepWalker(w) {
+    for (let s = 0; s < stepsPerFrame; s++) {
+      w.prev.x = w.x; w.prev.y = w.y;
+      w.x += randn() * SIGMA; w.y += randn() * SIGMA;
+      if (!pointInPolygon(w.x, w.y)) {
+        const ex = exitCrossing(w.prev, { x: w.x, y: w.y });
+        if (ex) {
+          w.x = ex.x; w.y = ex.y;
+          record(sOnEdge(ex.edge, ex.x, ex.y), ex.x, ex.y);
+        } else {
+          const db = distToBoundary(w.x, w.y);
+          w.x = db.x; w.y = db.y;
+          record(sOnEdge(db.edge, db.x, db.y), db.x, db.y);
+        }
+        w.done = true; return;
+      }
+    }
+  }
+  function randn() {
+    let u = 0, v = 0;
+    while (u === 0) u = Math.random();
+    while (v === 0) v = Math.random();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+  }
+
+  // ---------- color ----------
+  // ink on paper: t=0 pale cream, t=1 near-black
+  function inkColor(t) {
+    t = Math.max(0, Math.min(1, t));
+    const r = Math.round(0xef + (0x18 - 0xef) * t);
+    const g = Math.round(0xe5 + (0x18 - 0xe5) * t);
+    const b = Math.round(0xd4 + (0x18 - 0xd4) * t);
+    return `rgb(${r},${g},${b})`;
+  }
+
+  // ---------- render ----------
+  function draw() {
+    ctx.clearRect(0, 0, SIZE, SIZE);
+    if (verts.length < 3) {
+      if (drawPts && drawPts.length > 1) {
+        ctx.beginPath(); ctx.moveTo(drawPts[0].x, drawPts[0].y);
+        for (const p of drawPts) ctx.lineTo(p.x, p.y);
+        ctx.strokeStyle = "#8a6d3b"; ctx.lineWidth = 2; ctx.stroke();
+      }
+      return;
+    }
+
+    // domain fill
+    ctx.beginPath();
+    ctx.moveTo(verts[0].x, verts[0].y);
+    for (let i = 1; i < verts.length; i++) ctx.lineTo(verts[i].x, verts[i].y);
+    ctx.closePath();
+    ctx.fillStyle = "#fcf9f4";
+    ctx.fill();
+
+    // display-smoothed empirical density per bin (the H_f estimate uses raw sums, so no bias)
+    const W = 2; // rolling half-window
+    const dens = new Float64Array(NBINS);
+    let maxC = 0;
+    for (let i = 0; i < NBINS; i++) {
+      let s = 0;
+      for (let k = -W; k <= W; k++) s += bins[(i + k + NBINS) % NBINS];
+      dens[i] = s / (2 * W + 1);
+      if (dens[i] > maxC) maxC = dens[i];
+    }
+
+    // Two concentric bands just OUTSIDE the boundary, each drawn as per-bin filled quads.
+    // Consecutive quads share an edge exactly (same per-vertex normal), so they tile without
+    // gaps and cannot show the self-crossing artifacts that offset stroked polylines do.
+    const G_IN = 2, W_EMP = 10, SEP = 2, W_F = 10;  // empirical band, gap, f band (px outward)
+    function band(oi, oo, colorOf) {
+      for (let i = 0; i < NBINS; i++) {
+        const a = binSamples[i], b = binSamples[(i + 1) % NBINS];
+        const col = colorOf(i, a);
+        ctx.beginPath();
+        ctx.moveTo(a.x + a.nx * oi, a.y + a.ny * oi);
+        ctx.lineTo(b.x + b.nx * oi, b.y + b.ny * oi);
+        ctx.lineTo(b.x + b.nx * oo, b.y + b.ny * oo);
+        ctx.lineTo(a.x + a.nx * oo, a.y + a.ny * oo);
+        ctx.closePath();
+        ctx.fillStyle = col; ctx.strokeStyle = col; ctx.lineWidth = 0.6;
+        ctx.fill(); ctx.stroke();   // stroke covers sub-pixel seams between quads
+      }
+    }
+    // inner band: empirical hitting distribution
+    band(G_IN, G_IN + W_EMP, (i) => (maxC > 0 ? inkColor(dens[i] / maxC) : inkColor(0)));
+    // outer band: value of f
+    const e0 = G_IN + W_EMP + SEP;
+    band(e0, e0 + W_F, (i, a) => inkColor((f(a.s, a.x, a.y) - fMin) / (fMax - fMin)));
+
+    // active walkers: a single head dot, no trail
+    for (const w of walkers) {
+      ctx.globalAlpha = w.done ? Math.max(0, w.life) : 1;
+      ctx.beginPath();
+      ctx.fillStyle = w.done ? "#666" : "#141414";
+      ctx.arc(w.x, w.y, w.done ? 3 : 3.2, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // release point x: solid black dot
+    ctx.beginPath();
+    ctx.arc(start.x, start.y, 6, 0, 2 * Math.PI);
+    ctx.fillStyle = "#141414"; ctx.fill();
+    dirty = false;
+  }
+
+  // ---------- animation ----------
+  let raf = null;
+  function tick() {
+    let alive = false;
+    for (const w of walkers) {
+      if (!w.done) { stepWalker(w); alive = true; }
+      else { w.life -= 0.05; if (w.life > 0) alive = true; }
+    }
+    walkers = walkers.filter(w => !w.done || w.life > 0);
+    draw(); updateReadout();
+    if (walkers.length || alive) raf = requestAnimationFrame(tick);
+    else { raf = null; draw(); }
+  }
+  function ensureAnim() { if (raf === null) raf = requestAnimationFrame(tick); }
+
+  // ---------- readout ----------
+  const estEl = document.getElementById("estimate");
+  const metaEl = document.getElementById("meta");
+  function updateReadout(extra) {
+    if (n === 0) { estEl.textContent = "—"; metaEl.textContent = extra || "no samples yet"; return; }
+    const mean = sumF / n;
+    estEl.textContent = mean.toFixed(4);
+    const variance = Math.max(0, sumF2 / n - mean * mean);
+    const stderr = Math.sqrt(variance / n);
+    let m = `N = ${n.toLocaleString()} &nbsp; ± ${stderr.toFixed(4)}`;
+    const exact = exactValue();
+    if (exact !== null) {
+      m += `<br><span class="exact">exact = ${exact.toFixed(4)}</span>` +
+           ` &nbsp; <span class="err">err ${(mean - exact >= 0 ? "+" : "")}${(mean - exact).toFixed(4)}</span>`;
+    }
+    if (extra) m += `<br><span class="progress">${extra}</span>`;
+    metaEl.innerHTML = m;
+  }
+
+  // ---------- turbo ----------
+  const turboBtn = document.getElementById("turbo");
+  function turbo() {
+    if (turboRunning || verts.length < 3) return;
+    const N = Math.max(1, parseInt(document.getElementById("turboN").value, 10) || 0);
+    turboRunning = true; turboBtn.disabled = true;
+    let done = 0; const CHUNK = 3000;
+    function batch() {
+      const end = Math.min(done + CHUNK, N);
+      for (; done < end; done++) sampleExit();
+      draw(); updateReadout(done < N ? `turbo ${Math.round(100 * done / N)}%` : "");
+      if (done < N) setTimeout(batch, 0);
+      else { turboRunning = false; turboBtn.disabled = false; updateReadout(); }
+    }
+    batch();
+  }
+
+  // ---------- input ----------
+  function pos(e) {
+    const r = canvas.getBoundingClientRect();
+    const t = (e.touches && e.touches[0]) || e;
+    return { x: (t.clientX - r.left) * (SIZE / r.width), y: (t.clientY - r.top) * (SIZE / r.height) };
+  }
+  let dragging = false;
+  function down(e) {
+    e.preventDefault();
+    const p = pos(e);
+    if (mode === "draw") { drawPts = [p]; verts = []; return; }
+    if (Math.hypot(p.x - start.x, p.y - start.y) <= 12) { dragging = true; return; }
+    if (pointInPolygon(p.x, p.y)) {
+      launch(Math.max(1, parseInt(document.getElementById("perClick").value, 10) || 1));
+    }
+  }
+  function move(e) {
+    if (mode === "draw" && drawPts) {
+      e.preventDefault();
+      const p = pos(e);
+      const last = drawPts[drawPts.length - 1];
+      if (Math.hypot(p.x - last.x, p.y - last.y) > 7) { drawPts.push(p); draw(); }
+      return;
+    }
+    if (!dragging) return;
+    e.preventDefault();
+    const p = pos(e);
+    if (pointInPolygon(p.x, p.y)) { start.x = p.x; start.y = p.y; resetSamples(); }
+  }
+  function up() {
+    dragging = false;
+    if (mode === "draw" && drawPts) {
+      if (drawPts.length >= 4) {
+        verts = smoothClosedLoop(drawPts);
+        setMode("idle");
+        let sx = 0, sy = 0; for (const v of verts) { sx += v.x; sy += v.y; }
+        start = { x: sx / verts.length, y: sy / verts.length };
+        ensureStartInside();
+        rebuild();
+        draw(); updateReadout();
+      }
+      drawPts = null;
+    }
+  }
+  canvas.addEventListener("mousedown", down);
+  window.addEventListener("mousemove", move);
+  window.addEventListener("mouseup", up);
+  canvas.addEventListener("touchstart", down, { passive: false });
+  window.addEventListener("touchmove", move, { passive: false });
+  window.addEventListener("touchend", up);
+
+  // ---------- controls ----------
+  const drawBtn = document.getElementById("draw");
+  function setMode(m) {
+    mode = m;
+    drawBtn.classList.toggle("on", m === "draw");
+    canvas.style.cursor = m === "draw" ? "cell" : "crosshair";
+  }
+  drawBtn.addEventListener("click", () => setMode(mode === "draw" ? "idle" : "draw"));
+  document.getElementById("defShape").addEventListener("click", () => { setMode("idle"); defaultShape(); draw(); updateReadout(); });
+  document.getElementById("reset").addEventListener("click", () => resetSamples());
+  const fInput = document.getElementById("fformula");
+  function applyF() {
+    const expr = fInput.value.trim() || "0";
+    try {
+      const fn = compile(expr);
+      fFn = fn; fExpr = expr;
+      fInput.style.borderColor = "#d4c4a8";
+      rebuild(); draw(); updateReadout();
+    } catch (err) {
+      fInput.style.borderColor = "#c0392b";
+    }
+  }
+  fInput.addEventListener("change", applyF);
+  fInput.addEventListener("keydown", (e) => { if (e.key === "Enter") applyF(); });
+  document.getElementById("fpreset").addEventListener("change", (e) => {
+    if (e.target.value) { fInput.value = e.target.value; applyF(); e.target.selectedIndex = 0; }
+  });
+  document.getElementById("turbo").addEventListener("click", turbo);
+  document.getElementById("speed").addEventListener("input", (e) => { stepsPerFrame = parseInt(e.target.value, 10); });
+
+  // ---------- init ----------
+  defaultShape();
+  draw();
+  updateReadout();
+})();
+</script>
+</body>
+</html>
