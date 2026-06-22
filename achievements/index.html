@@ -92,6 +92,7 @@
             right: 0;
             bottom: 0;
             cursor: grab;
+            touch-action: none;
         }
 
         #canvas-container.grabbing { cursor: grabbing; }
@@ -698,6 +699,41 @@
         .sig-preview-row canvas {
             border: 1px solid rgba(43, 84, 126, 0.3);
             border-radius: 4px;
+        }
+
+        /* Mobile / phone layout — keep the header to a single compact row so the
+           canvas-container top offset (60px) stays valid. */
+        @media (max-width: 640px) {
+            .header {
+                padding: 10px 12px;
+                gap: 8px;
+            }
+            .header-left {
+                gap: 8px;
+                flex: 1;
+                min-width: 0;
+            }
+            .title { display: none; }
+            .search-box {
+                flex: 1;
+                min-width: 0;
+            }
+            .search-box input,
+            .search-box input:focus {
+                width: 100%;
+            }
+            .auth-btn {
+                padding: 5px 8px;
+                flex-shrink: 0;
+            }
+            .auth-btn #authLabel { display: none; }
+            .player-scores { gap: 6px; flex-shrink: 0; }
+            .player-score-card { padding: 4px 7px; gap: 5px; }
+            .player-score-card .player-name { display: none; }
+            .player-icon { font-size: 16px; }
+            .player-score { font-size: 11px; }
+            .instructions { display: none; }
+            .tooltip { max-width: 75vw; }
         }
     </style>
 </head>
@@ -1915,6 +1951,138 @@
                 showZoomIndicator();
             }
         }, { passive: false });
+
+        // Touch handling (mobile) — mirrors the mouse logic above, plus pinch-to-zoom.
+        // Single finger: tap a node to open it, drag a node to move it (edit mode),
+        // drag empty space to pan. Two fingers: pinch to zoom.
+        let pinchActive = false;
+        let pinchStartDist = 0;
+        let pinchStartScale = 1;
+
+        function getTouchPos(touch) {
+            const rect = canvas.getBoundingClientRect();
+            return {
+                x: touch.clientX - rect.left,
+                y: touch.clientY - rect.top
+            };
+        }
+
+        function touchDistance(t1, t2) {
+            return Math.hypot(t1.clientX - t2.clientX, t1.clientY - t2.clientY);
+        }
+
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                // Begin pinch — cancel any single-finger interaction so touchend won't fire a tap
+                pinchActive = true;
+                pinchStartDist = touchDistance(e.touches[0], e.touches[1]);
+                pinchStartScale = viewScale;
+                draggedNode = null;
+                isDraggingCanvas = false;
+                hasDragged = true;
+                container.classList.remove('grabbing');
+                e.preventDefault();
+                return;
+            }
+            if (e.touches.length !== 1) return;
+
+            const touch = e.touches[0];
+            const pos = getTouchPos(touch);
+            const worldPos = screenToWorld(pos.x, pos.y);
+            const node = nodes.find(n => isNodeVisible(n) && n.containsPoint(worldPos.x, worldPos.y));
+
+            hasDragged = false;
+
+            if (node) {
+                draggedNode = node;
+                selectedNode = node;
+                node._dragStartX = node.x;
+                node._dragStartY = node.y;
+                node.targetX = null;
+                node.targetY = null;
+                container.classList.add('grabbing');
+            } else {
+                isDraggingCanvas = true;
+                dragStartX = touch.clientX;
+                dragStartY = touch.clientY;
+                dragStartOffsetX = viewOffsetX;
+                dragStartOffsetY = viewOffsetY;
+                container.classList.add('grabbing');
+            }
+            e.preventDefault();
+        }, { passive: false });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (pinchActive && e.touches.length === 2) {
+                const dist = touchDistance(e.touches[0], e.touches[1]);
+                if (pinchStartDist > 0) {
+                    const rect = canvas.getBoundingClientRect();
+                    const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - rect.left;
+                    const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - rect.top;
+                    const worldBefore = screenToWorld(midX, midY);
+                    const newScale = Math.max(0.2, Math.min(3, pinchStartScale * (dist / pinchStartDist)));
+                    if (newScale !== viewScale) {
+                        viewScale = newScale;
+                        const worldAfter = screenToWorld(midX, midY);
+                        viewOffsetX += (worldAfter.x - worldBefore.x) * viewScale;
+                        viewOffsetY += (worldAfter.y - worldBefore.y) * viewScale;
+                        showZoomIndicator();
+                    }
+                }
+                e.preventDefault();
+                return;
+            }
+            if (e.touches.length !== 1) return;
+
+            const touch = e.touches[0];
+            const pos = getTouchPos(touch);
+
+            if (draggedNode) {
+                const worldPos = screenToWorld(pos.x, pos.y);
+                draggedNode.x = worldPos.x;
+                draggedNode.y = worldPos.y;
+                hasDragged = true;
+            } else if (isDraggingCanvas) {
+                const dx = touch.clientX - dragStartX;
+                const dy = touch.clientY - dragStartY;
+                if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+                    hasDragged = true;
+                }
+                viewOffsetX = dragStartOffsetX + dx;
+                viewOffsetY = dragStartOffsetY + dy;
+            }
+            e.preventDefault();
+        }, { passive: false });
+
+        canvas.addEventListener('touchend', (e) => {
+            if (pinchActive) {
+                if (e.touches.length === 0) {
+                    pinchActive = false;
+                    draggedNode = null;
+                    isDraggingCanvas = false;
+                    container.classList.remove('grabbing');
+                }
+                return;
+            }
+            if (e.touches.length > 0) return; // other fingers still down
+
+            if (draggedNode) {
+                if (hasDragged && draggedNode._dragStartX !== undefined) {
+                    pushUndo({ type: 'move', id: draggedNode.id, oldX: draggedNode._dragStartX, oldY: draggedNode._dragStartY });
+                }
+                savePositions();
+                if (!hasDragged && selectedNode === draggedNode) {
+                    if (isEditMode) {
+                        showEditModal(draggedNode);
+                    } else if (!draggedNode.isFullyLocked()) {
+                        showModal(draggedNode);
+                    }
+                }
+            }
+            draggedNode = null;
+            isDraggingCanvas = false;
+            container.classList.remove('grabbing');
+        });
 
         function showZoomIndicator() {
             zoomIndicator.textContent = `${Math.round(viewScale * 100)}%`;
