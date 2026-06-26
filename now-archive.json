@@ -1,15 +1,31 @@
 {
-  "lastUpdated": "2026-05-08",
+  "lastUpdated": "2026-06-26",
   "current": {
-    "paragraph": "I am about to graduate from Brown University, unless something really unexpected happens. I feel a little confused about that, but I expect that's pretty normal. I've been spending my time making plans and connections for after graduation, and passing off Brown EA into great hands, and very slowly reading Anna Karenina. And now I crave manual labor. I spend a lot of time greedily squeezing the juice out of everyone I love on this campus. I go outside. <br> I'm learning a little math as always, and finally finishing the biomath paper. <br> This week, I spent a while drafting a blogpost which I think will be good, and by May 10th you'll be able to find it on <a href=\"https://substack.com/@benpomeranz\" target=\"_blank\" rel=\"noopener noreferrer\"> my blog</a>. The contents are, approximately, \"prize philanthropy is underrated.\" Ooh la la. <br> Maybe one's Now section should be more formal, but if I update this often then the informality might blend into a timely collage.",
+    "paragraph": "I am doing Pivotal in London, using stats to squeeze more information from evals with SecureBio. Or, I will be on Monday: right now I'm actually at an airport. Its the end of a hectic period between graduation and London. <br> By my standards, recently events have come thick and fast. I graduated from Brown, and went to <a href=\"https://www.threesistersri.com/\" target=\"_blank\" rel=\"noopener noreferrer\">Three Sisters</a> with my three sisters. Then I went on a little road trip through New York and PA which was more beautiful than you think, and you'll have to trust me on that. At that point I expected to spend a while canvassing for Alex Bores, and I did canvass for a day, but then I got a sore throat so painful that I could not eat solid food for four days. That also meant I wasn't in physical shape to go hike with Jaden and Jake in the Sierras, so now I'm floundering for a last minute June outdoor adventure. I did get to boulder with Nava, Anya, Adin and The Ikey in the gunks. It was admittedly quite nice. <br> When I got back canvassing began in earnest. I helped organize a shabbat dinner with Alex, and probably talked to more strangers every day than I have in any other year of my life. I actually got quite good at talking to strangers about Alex Bores (although <a href=\"alex-bores.pdf\" target=\"_blank\" rel=\"noopener noreferrer\">the talking is the easy part</a>) but not good enough. It was a fascinating experience and I agree with <a href=\"https://docs.google.com/document/d/1wWLFx1mgNf8IT0kfXnEthqHR8xvYWYtzszSj6OKwGtM/edit?tab=t.0\" target=\"_blank\" rel=\"noopener noreferrer\">Eric Neyman's thoughts</a> on the value of what we did.",
     "courses": [
-      "Recent Applications of Probability and Statistics",
-      "Cryptography",
-      "Manifolds",
-      "Hilbert and Banach Space Theory"
+      "Evals science",
+      "Item Response Theory",
+      "Trees"
     ]
   },
   "past": [
+    {
+      "date": "2026-05-08",
+      "paragraph": "I am about to graduate from Brown University, unless something really unexpected happens. I feel a little confused about that, but I expect that's pretty normal. I've been spending my time making plans and connections for after graduation, and passing off Brown EA into great hands, and very slowly reading Anna Karenina. And now I crave manual labor. I spend a lot of time greedily squeezing the juice out of everyone I love on this campus. I go outside. <br> I'm learning a little math as always, and finally finishing the biomath paper. <br> This week, I spent a while drafting a blogpost which I think will be good, and by May 10th you'll be able to find it on <a href=\"https://substack.com/@benpomeranz\" target=\"_blank\" rel=\"noopener noreferrer\"> my blog</a>. The contents are, approximately, \"prize philanthropy is underrated.\" Ooh la la. <br> Maybe one's Now section should be more formal, but if I update this often then the informality might blend into a timely collage.",
+      "courses": [
+        "Recent Applications of Probability and Statistics",
+        "Cryptography",
+        "Manifolds",
+        "Hilbert and Banach Space Theory"
+      ],
+      "spotify": {
+        "title": "Haiti",
+        "artists": "Arcade Fire",
+        "album": "Funeral",
+        "cover": "https://i.scdn.co/image/ab67616d0000b2737870762a58313ad6f981d664",
+        "url": "https://open.spotify.com/track/3Gkl2fJztF2B3fnUheejAA"
+      }
+    },
     {
       "date": "2026-02-03",
       "paragraph": "I am at Brown University this spring, finishing my degrees in math and computer science. Over winter break I travelled with my family to <a href=\"https://substack.com/@benpomeranz/p-182236187\" target=\"_blank\" rel=\"noopener\">Vietnam</a>, and then attended my first ever <a href=\"https://meetings.ams.org/math/jmm2026/meetingapp.cgi/Paper/55179\" target=\"_blank\" rel=\"noopener\">JMM</a>. From there, I was off to Pittsburgh where I stayed at the nicest institution the city has to offer. I did my new outdoor experience of the month, which was learning how to ski (ish ish ish) in the North Country of New York. In a shocking conclusion, I watched live what will surely be <a href=\"https://www.youtube.com/watch?v=1DgjDi774FI\" target=\"_blank\" rel=\"noopener\">the craziest sports feat I ever see in person</a> on my Chicagoan grandmother's 95th birthday. <br> And now I'm in Providence, and there is no place I'd rather be.",
