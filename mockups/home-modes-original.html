@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Home — new colors, original fonts &amp; layout</title>
+<link rel="icon" href="../favicon.ico" />
+<style>
+  /* ============================================================
+     Homepage mockup — NEW COLORS on the ORIGINAL fonts + layout.
+     Identical structure/CSS to the live index.html + styles.css;
+     only the color scheme changes per mode. Toggle is mockup-only.
+     ============================================================ */
+
+  /* ---- Mode A: Brick + Tile ---- */
+  body[data-mode="brick"]{
+    --page:#f6eee3;     /* cream */
+    --ink:#160906;
+    --accent:#176B92;   /* tile = pop accent (links, "Pomeranz") */
+    --line:#B94821;     /* brick = base accent (structural line) */
+    --border:#D4C4A8;
+    --switch-active:#B94821;  /* brick */
+    --switch-active-fg:#fff;
+  }
+  /* ---- Mode B: Alpine ---- */
+  body[data-mode="alpine"]{
+    --page:#E7E8E4;     /* pale stone */
+    --ink:#160906;
+    --accent:#2F4A1A;   /* forest = pop accent (links, "Pomeranz") */
+    --line:#9BB6DA;     /* hazy sky = base accent (structural line) */
+    --border:#c2c4c0;
+    --switch-active:#9BB6DA;  /* hazy sky */
+    --switch-active-fg:#160906;
+  }
+
+  /* ---------- original styles.css, unchanged except colors ---------- */
+  body {
+    font-family: sans-serif;
+    font-size: 120%;
+    margin: 1rem;
+    background-color: var(--page);
+    color: var(--ink);
+  }
+  h1 { text-align: left; border-bottom: 3px solid var(--line); padding-bottom: 0.3rem; }
+  h1 .mark { color: var(--accent); }
+
+  a { text-decoration: none; color: inherit; }
+  a:hover { text-decoration: underline; }
+  a::before { content: "["; }
+  a::after  { content: "]"; }
+
+  nav { display: flex; align-items: center; gap: 10px; }
+  nav a { text-decoration: none; color: inherit; display: inline-flex;
+    align-items: center; gap: 6px; padding: 0 2px; }
+  nav a:hover { text-decoration: underline; }
+  .nav-right { margin-left: auto; display: flex; gap: 14px; align-items: center; }
+
+  img { display: block; margin-left: 0; max-width: 100%; height: auto; }
+
+  /* page-specific (from index.html) */
+  .photo { width: 40%; min-width: 250px; image-rendering: auto; }
+
+  /* in-content links pick up the mode accent (nav stays ink) */
+  p a { color: var(--accent); }
+
+  /* mode toggle — mockup-only control */
+  .modeswitch{display:inline-flex;border:1px solid var(--border);background:#fcf9f4;
+    border-radius:0;overflow:hidden;font-size:.7em;font-family:sans-serif}
+  .modeswitch button{appearance:none;border:0;background:transparent;color:#6b6357;
+    font-family:inherit;font-size:inherit;padding:5px 10px;cursor:pointer;line-height:1}
+  .modeswitch button + button{border-left:1px solid var(--border)}
+  .modeswitch button.active{background:var(--switch-active);color:var(--switch-active-fg)}
+  .modeswitch a::before,.modeswitch a::after{content:none}
+</style>
+</head>
+<body data-mode="brick">
+
+  <nav>
+    <a href="#">Home</a>
+    <a href="#">Now</a>
+    <a href="#">Call Me</a>
+    <a href="#">Achievements</a>
+    <a href="#">HELP</a>
+    <div class="nav-right">
+      <div class="modeswitch" role="group" aria-label="Color mode">
+        <button id="m-brick" class="active" onclick="setMode('brick')">Brick + Tile</button>
+        <button id="m-alpine" onclick="setMode('alpine')">Alpine</button>
+      </div>
+    </div>
+  </nav>
+
+  <h1>Ben <span class="mark">Pomeranz</span></h1>
+  <p>is my name. I stud<s>y</s>ied math and CS at Brown and I drink lots of milk but
+    don't worry <a href="#">it's not so terrible</a>. My <a href="#">blog</a> isn't half
+    bad, but only because it's more than half empty.</p>
+  <p>Here's a photo of me so you can know whether this is the website of <em>the</em>
+    Ben Pomeranz you're trying to Google:</p>
+  <img src="../goodphoto.jpg" alt="Ben awaits ice cream" class="photo" loading="lazy">
+
+<script>
+  function setMode(mode){
+    document.body.setAttribute('data-mode', mode);
+    document.getElementById('m-brick').classList.toggle('active', mode === 'brick');
+    document.getElementById('m-alpine').classList.toggle('active', mode === 'alpine');
+  }
+</script>
+</body>
+</html>
