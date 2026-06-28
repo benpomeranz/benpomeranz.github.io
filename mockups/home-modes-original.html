@@ -16,7 +16,8 @@
   body[data-mode="brick"]{
     --page:#f6eee3;     /* cream */
     --ink:#160906;
-    --accent:#176B92;   /* tile = link / text accent */
+    --accent:#176B92;   /* tile = pop accent (links, "Pomeranz") */
+    --line:#B94821;     /* brick = base accent (structural line) */
     --border:#D4C4A8;
     --switch-active:#B94821;  /* brick */
     --switch-active-fg:#fff;
@@ -25,7 +26,8 @@
   body[data-mode="alpine"]{
     --page:#E7E8E4;     /* pale stone */
     --ink:#160906;
-    --accent:#2F4A1A;   /* forest = link / text accent */
+    --accent:#2F4A1A;   /* forest = pop accent (links, "Pomeranz") */
+    --line:#9BB6DA;     /* hazy sky = base accent (structural line) */
     --border:#c2c4c0;
     --switch-active:#9BB6DA;  /* hazy sky */
     --switch-active-fg:#160906;
@@ -39,7 +41,8 @@
     background-color: var(--page);
     color: var(--ink);
   }
-  h1 { text-align: left; }
+  h1 { text-align: left; border-bottom: 3px solid var(--line); padding-bottom: 0.3rem; }
+  h1 .mark { color: var(--accent); }
 
   a { text-decoration: none; color: inherit; }
   a:hover { text-decoration: underline; }
@@ -86,7 +89,7 @@
     </div>
   </nav>
 
-  <h1>Ben Pomeranz</h1>
+  <h1>Ben <span class="mark">Pomeranz</span></h1>
   <p>is my name. I stud<s>y</s>ied math and CS at Brown and I drink lots of milk but
     don't worry <a href="#">it's not so terrible</a>. My <a href="#">blog</a> isn't half
     bad, but only because it's more than half empty.</p>
