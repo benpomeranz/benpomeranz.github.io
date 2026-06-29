@@ -1,0 +1,136 @@
+/* ============================================================
+   Shared mockup styles — the live site's ORIGINAL formatting
+   (system sans, 120%, square corners, bracketed links) with the
+   NEW color modes layered on top. One mode per page in production;
+   the toggle (mock.js) is a mockup-only control that persists the
+   choice across these pages via localStorage.
+
+   Role mapping per mode:
+     --line   = base accent  (the single structural header rule)
+     --accent = pop accent   (links / inline emphasis)
+   Titles stay black (--ink).
+   ============================================================ */
+
+/* ---- Mode A: Brick + Tile ---- */
+body[data-mode="brick"]{
+  --page:#f6eee3;     /* cream */
+  --ink:#160906;
+  --accent:#176B92;   /* tile  = pop accent (links) */
+  --line:#B94821;     /* brick = base accent (header rule) */
+  --surface:#fcf9f4;  /* card */
+  --border:#D4C4A8;   /* tan hairline */
+  --muted:#6b6357;
+  --switch-active:#B94821;
+  --switch-active-fg:#fff;
+}
+/* ---- Mode B: Alpine ---- */
+body[data-mode="alpine"]{
+  --page:#E7E8E4;     /* pale stone */
+  --ink:#160906;
+  --accent:#2F4A1A;   /* forest   = pop accent (links) */
+  --line:#9BB6DA;     /* hazy sky = base accent (header rule) */
+  --surface:color-mix(in srgb,#5D6761 19%,#F4F4EE); /* lake-grey tint */
+  --border:#c2c4c0;
+  --muted:#566058;
+  --switch-active:#9BB6DA;
+  --switch-active-fg:#160906;
+}
+
+/* ---------- original styles.css, unchanged except colors ---------- */
+body{
+  font-family: sans-serif;
+  font-size: 120%;
+  margin: 1rem;
+  background-color: var(--page);
+  color: var(--ink);
+}
+
+/* header rule = the base accent; title text stays black */
+h1{
+  text-align: left;
+  border-bottom: 3px solid var(--line);
+  padding-bottom: 0.3rem;
+}
+
+a{ text-decoration: none; color: inherit; }
+a:hover{ text-decoration: underline; }
+a::before{ content: "["; }
+a::after { content: "]"; }
+
+/* navigation */
+nav{ display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+nav img{ display: inline; margin: 0; width: auto; }
+nav img.icon{ height: 20px; width: auto; display: inline-block; vertical-align: middle; }
+nav a{ text-decoration: none; color: inherit; display: inline-flex; align-items: center; gap: 6px; padding: 0 2px; }
+nav a:hover{ text-decoration: underline; }
+.nav-right{ margin-left: auto; display: flex; gap: 14px; align-items: center; }
+
+img{ display: block; margin-left: 0; max-width: 100%; height: auto; }
+
+/* in-content links pick up the pop accent (nav stays ink) */
+p a{ color: var(--accent); }
+
+/* page-specific (from index.html) */
+.photo{ width: 40%; min-width: 250px; image-rendering: auto; }
+
+/* ---------- Now-page widgets (from styles.css, recolored) ---------- */
+.widgets-container{ display: flex; gap: 1rem; align-items: stretch; margin-top: 1rem; flex-wrap: wrap; }
+.widget{
+  border: 1px solid var(--border);
+  border-radius: 0;
+  padding: 1rem 1.25rem;
+  display: inline-block;
+  background: var(--surface);
+  flex: 1;
+  min-width: 200px;
+}
+.widget h2, .widget h3{
+  margin-top: 0; font-size: 1.25rem;
+  display: flex; justify-content: space-between; align-items: baseline;
+  flex-wrap: wrap; gap: 0.5rem;
+}
+.widget h3{ font-size: 1.1rem; }
+.widget ul{ margin: 0.5rem 0 0 0; padding-left: 1.25rem; }
+.muted{ font-size: 0.9rem; opacity: 0.7; }
+
+.spotify-row{ display: flex; align-items: center; gap: 1rem; }
+.spotify-row img, .spotify-row .cover-ph{ width: 100px; height: 100px; object-fit: cover; }
+.spotify-row .cover-ph{ background: var(--border); display: block; }
+.spotify-row a::before, .spotify-row a::after{ content: none; }
+
+.responsive-iframe{ max-width: 100%; overflow: hidden; }
+.responsive-iframe iframe{ max-width: 100%; }
+
+.now-header{ display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; }
+.date-wheel-selected{
+  font-size: 0.9rem; font-weight: normal; font-family: inherit;
+  background: none; border: none; cursor: pointer; opacity: 0.7;
+  padding: 0.25rem 0.5rem; border-radius: 4px;
+}
+.date-wheel-selected::before{ content: "["; }
+.date-wheel-selected::after{ content: "]"; }
+
+/* ---------- Call Me / booking (from styles.css, recolored) ---------- */
+.booking{ max-width: 820px; margin: 1.5rem auto 0; }
+.booking h1{ margin: 0 0 0.4rem; }
+.booking-note{ margin: 0 0 1.25rem; font-size: 0.95rem; opacity: 0.7; max-width: 60ch; }
+.booking-frame{
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: 0;
+  padding: 0.5rem;
+  overflow: hidden;
+}
+
+/* ---------- mode toggle (mockup-only control) ---------- */
+.modeswitch{
+  display: inline-flex; border: 1px solid var(--border); background: var(--surface);
+  border-radius: 0; overflow: hidden; font-size: 0.7em; font-family: sans-serif;
+}
+.modeswitch button{
+  appearance: none; border: 0; background: transparent; color: var(--muted);
+  font-family: inherit; font-size: inherit; padding: 5px 10px; cursor: pointer; line-height: 1;
+}
+.modeswitch button + button{ border-left: 1px solid var(--border); }
+.modeswitch button.active{ background: var(--switch-active); color: var(--switch-active-fg); }
+.modeswitch a::before, .modeswitch a::after{ content: none; }
