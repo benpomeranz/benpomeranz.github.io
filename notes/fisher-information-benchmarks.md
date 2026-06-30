@@ -32,10 +32,10 @@ We can read this to say: more discriminative benchmarks give us more information
 
 Using all of the public benchmark data, we can fit our IRT model and find the values of $\alpha_{\text{easyBench}}$ and $\alpha_{\text{weirdBench}}$. We find that $\alpha_{\text{easyBench}} = 3$ and $\alpha_{\text{weirdBench}} = 0.8$. Moreover, current frontier models score around 80% on easyBench and 40% on weirdBench, and we assume these new frontier models will perform somewhere in that range. Crunching the numbers, we find:
 
-$$I_{\text{easyBench}}(\theta) \approx 3^2 \times 0.8 \times 0.2 = 14.4$$
+$$I_{\text{easyBench}}(\theta) \approx 3^2 \times 0.8 \times 0.2 = 1.44$$
 
 and
 
 $$I_{\text{weirdBench}}(\theta) \approx 0.8^2 \times 0.4 \times 0.6 = 0.1536$$
 
-This is a huge gap, telling us that the expected error of our capability estimates is about ten times lower if we use easyBench instead of weirdBench, even though easyBench is more "saturated" in the sense that models can score much higher on it. So, we know which benchmark to run!
+This is a huge gap, telling us that the expected error of our capability estimates is about three times lower if we use easyBench instead of weirdBench, even though easyBench is more "saturated" in the sense that models can score much higher on it. So, we know which benchmark to run!
