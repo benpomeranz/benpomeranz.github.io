@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ben Pomeranz's Website</title>
     <link rel="icon" href="favicon.ico">
-    <link rel="stylesheet" href="styles.css?v=4">
+    <!-- apply the saved colour mode before paint (no flash) -->
+    <script>try{var m=localStorage.getItem("site-mode");if(m==="brick"||m==="alpine")document.documentElement.setAttribute("data-mode",m);}catch(e){}</script>
+    <link rel="stylesheet" href="styles.css?v=9">
     <style>
         /* Page-specific: limit photo width on large screens */
         .photo {
@@ -17,14 +19,30 @@
 </head>
 <body>
     <div id="nav-placeholder"></div>
-    <script>
-        fetch("/nav.html")
-        .then(r => r.text())
-        .then(html => { document.getElementById("nav-placeholder").innerHTML = html; });
-    </script>
-    <h1>Ben Pomeranz</h1>
+    <script src="/nav.js?v=3"></script>
+    <h1 id="site-title"><span class="mode-key" data-mode="brick">B</span>en Pomer<span class="mode-key" data-mode="alpine">a</span>nz</h1>
     <p>is my name. I stud<s>y</s>ied math and CS at Brown and I drink lots of milk but don't worry <a href="https://reducing-suffering.org/how-much-direct-suffering-is-caused-by-various-animal-foods/">it's not so terrible</a>. My <a href="https://benpomeranz.substack.com/" target="_blank" rel="noopener">blog</a> isn't half bad, but only because it's more than half empty.</p>
     <p>Here's a photo of me so you can know whether this is the website of <em>the</em> Ben Pomeranz you're trying to Google:</p>
     <img src="goodphoto.jpg" alt="Ben awaits ice cream" class="photo" loading="lazy">
+
+    <script>
+        // Title easter egg: click the B for Brick+Tile, the a for Alpine,
+        // any other letter to return to default. Choice persists site-wide.
+        (function () {
+            var title = document.getElementById("site-title");
+            if (!title) return;
+            title.addEventListener("click", function (e) {
+                var key = e.target.closest(".mode-key");
+                if (key) {
+                    var mode = key.getAttribute("data-mode");
+                    document.documentElement.setAttribute("data-mode", mode);
+                    try { localStorage.setItem("site-mode", mode); } catch (e) {}
+                } else {
+                    document.documentElement.removeAttribute("data-mode");
+                    try { localStorage.removeItem("site-mode"); } catch (e) {}
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

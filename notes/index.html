@@ -5,16 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notes – Ben Pomeranz</title>
     <link rel="icon" href="/favicon.ico">
-    <link rel="stylesheet" href="/styles.css?v=4">
-    <link rel="stylesheet" href="/notes/note.css?v=2">
+    <!-- apply the saved colour mode before paint (no flash) -->
+    <script>try{var m=localStorage.getItem("site-mode");if(m==="brick"||m==="alpine")document.documentElement.setAttribute("data-mode",m);}catch(e){}</script>
+    <link rel="stylesheet" href="/styles.css?v=9">
+    <link rel="stylesheet" href="/notes/note.css?v=3">
 </head>
 <body>
     <div id="nav-placeholder"></div>
-    <script>
-        fetch("/nav.html")
-        .then(r => r.text())
-        .then(html => { document.getElementById("nav-placeholder").innerHTML = html; });
-    </script>
+    <script src="/nav.js?v=3"></script>
 
     <h1>Notes</h1>
 

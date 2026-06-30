@@ -2,6 +2,9 @@
    lighter background than the rest of the site. The Notes index and every
    other page keep the global #f6eee3. To revert: delete this rule. */
 body.note-page { background-color: #fbf7f1; }
+/* inside a colour mode, the note follows the mode background instead */
+html[data-mode="brick"] body.note-page,
+html[data-mode="alpine"] body.note-page { background-color: var(--page); }
 
 /* ---- Notes index list ---------------------------------------------------- */
 .notes-list {
@@ -31,12 +34,10 @@ body.note-page { background-color: #fbf7f1; }
 .note h1 {
     margin: 1rem 0 0.25rem;
     line-height: 1.2;
-    text-align: center;
 }
 .note-date-line {
     margin: 0 0 1.75rem;
     font-size: 0.95rem;
-    text-align: center;
 }
 
 /* readable body */

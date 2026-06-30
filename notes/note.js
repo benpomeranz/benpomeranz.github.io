@@ -118,6 +118,7 @@
         var body = document.getElementById("note-body");
         body.innerHTML = html;
         fitIframes(body);
+        fitDisplayMath(body);
 
         // smooth in-page jumps for footnote links
         body.addEventListener("click", function (e) {
@@ -139,6 +140,46 @@
                 ' <a class="fn-back" href="#fnref-' + e + '" aria-label="Back to reference">←</a></li>';
         }).join("\n");
         return '<hr class="fn-sep"><ol class="footnotes">\n' + items + "\n</ol>";
+    }
+
+    // Shrink any display equation that's wider than its column down to fit,
+    // and only as much as needed (small phones see smaller math, desktop sees
+    // none of this). Re-runs on resize/rotate. KaTeX scales with font-size.
+    function fitDisplayMath(container) {
+        var eqs = container.querySelectorAll(".katex-display");
+        if (!eqs.length) return;
+        function naturalWidth(d) {
+            // sum of the .base run widths = the true (1em) formula width
+            var bases = d.querySelectorAll(".katex-html > .base"), w = 0;
+            Array.prototype.forEach.call(bases, function (b) {
+                w += b.getBoundingClientRect().width;
+            });
+            return w;
+        }
+        function fitOne(d) {
+            d.style.fontSize = "";                  // unscale, then measure live
+            var natural = naturalWidth(d);          // (re-measured each call so it's
+            if (!natural) return;                   //  correct once KaTeX fonts load)
+            var avail = d.clientWidth - 2;          // small safety margin
+            var scale = avail / natural;
+            if (scale < 1) d.style.fontSize = scale.toFixed(3) + "em";
+        }
+        function fitAll() {
+            Array.prototype.forEach.call(container.querySelectorAll(".katex-display"), fitOne);
+        }
+        fitAll();
+        // re-fit once KaTeX's web fonts have loaded (glyph widths change)
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitAll);
+        if (!container.__mathResizeBound) {
+            container.__mathResizeBound = true;
+            var t;
+            window.addEventListener("resize", function () {
+                clearTimeout(t);
+                t = setTimeout(function () {
+                    Array.prototype.forEach.call(container.querySelectorAll(".katex-display"), fitOne);
+                }, 120);
+            });
+        }
     }
 
     // Size same-origin iframes to fit their content so there's no inner
