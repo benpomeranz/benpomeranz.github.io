@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes – Ben Pomeranz</title>
+    <link rel="icon" href="/favicon.ico">
+    <link rel="stylesheet" href="/styles.css?v=4">
+    <link rel="stylesheet" href="/notes/note.css?v=2">
+</head>
+<body>
+    <div id="nav-placeholder"></div>
+    <script>
+        fetch("/nav.html")
+        .then(r => r.text())
+        .then(html => { document.getElementById("nav-placeholder").innerHTML = html; });
+    </script>
+
+    <h1>Notes</h1>
+
+    <ul class="notes-list" id="notes-list">
+        <li class="muted">Loading…</li>
+    </ul>
+
+    <script>
+        function fmtDate(iso) {
+            // iso = "YYYY-MM-DD"; render as "Jun 30, 2026" without timezone surprises
+            const [y, m, d] = iso.split("-").map(Number);
+            const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+            return months[m - 1] + " " + d + ", " + y;
+        }
+
+        fetch("/notes/notes.json")
+            .then(r => r.json())
+            .then(notes => {
+                // hide notes whose slug starts with "_" unless ?all is in the URL
+                const showAll = new URLSearchParams(location.search).has("all");
+                const list = notes
+                    .filter(n => showAll || !n.slug.startsWith("_"))
+                    .sort((a, b) => b.date.localeCompare(a.date));
+
+                const ul = document.getElementById("notes-list");
+                if (!list.length) {
+                    ul.innerHTML = '<li class="muted">No notes yet.</li>';
+                    return;
+                }
+                ul.innerHTML = list.map(n =>
+                    '<li>' +
+                        '<span class="note-date">' + fmtDate(n.date) + '</span>' +
+                        '<a class="note-link" href="/notes/note.html?n=' + encodeURIComponent(n.slug) + '">' +
+                            n.title +
+                        '</a>' +
+                    '</li>'
+                ).join("");
+            })
+            .catch(() => {
+                document.getElementById("notes-list").innerHTML =
+                    '<li class="muted">Couldn’t load notes.</li>';
+            });
+    </script>
+</body>
+</html>
