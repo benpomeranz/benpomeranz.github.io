@@ -1,6 +1,6 @@
 There are dozens of LLM evals, and many LLMs have been scored on each of them. All those scores have been posted publicly, so we know how well different LLMs do on different benchmarks.
 
-We, for whatever reason, only have access to two LLM evals: easyBench and weirdBench. We want to evaluate compare the capabilities of there brand new frontier models: Goomy, Clyde, and Chaddy PT. We can see results from other benchmarks, but we can only generate our own results for these models on easyBench and weirdBench. Even worse, each of these evals takes days to run at a high effort setting. Both benchmarks claim to measure scientific reasoning, and from first glance all of the questions really are about dense scientific theory. Which should we run on these new models to figure out how capable they really are?
+We, for whatever reason, only have access to two LLM evals: easyBench and weirdBench. We want to evaluate and compare the capabilities of three brand new frontier models: Goomy, Clyde, and Chaddy PT. We can see results from other benchmarks, but we can only generate our own results for these models on easyBench and weirdBench. Even worse, each of these evals takes days to run at a high effort setting. Both benchmarks claim to measure scientific reasoning, and from first glance all of the questions really are about dense scientific theory. Which should we run on these new models to figure out how capable they really are?
 
 ## Item Response Theory
 
