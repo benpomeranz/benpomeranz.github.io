@@ -1,10 +1,10 @@
 There are dozens of LLM evals, and many LLMs have been scored on each of them. All those scores have been posted publicly, so we know how well different LLMs do on different benchmarks.
 
-We, unfortunately, only have access to two LLM evals, easyBench and weirdBench, and three brand new frontier models: Goomy, Clyde, and Chaddy PT. We can see results from other benchmarks, but we can only generate our own results for these models on easyBench and weirdBench. Even worse, each of these evals takes days to run at a high effort setting. Both benchmarks claim to measure scientific reasoning, and from first glance all of the questions really are about dense scientific theory. Which should we run on these new models to figure out how capable they really are?
+We, for whatever reason, only have access to two LLM evals: easyBench and weirdBench. We want to evaluate compare the capabilities of there brand new frontier models: Goomy, Clyde, and Chaddy PT. We can see results from other benchmarks, but we can only generate our own results for these models on easyBench and weirdBench. Even worse, each of these evals takes days to run at a high effort setting. Both benchmarks claim to measure scientific reasoning, and from first glance all of the questions really are about dense scientific theory. Which should we run on these new models to figure out how capable they really are?
 
 ## Item Response Theory
 
-Item Response Theory is a statistical framework from psychometrics for combining the results of many test-takers, or solvers, on many different tests, or items, into a single capability score for each solver and a single difficulty score for each item. We let $\theta_i$ denote the capability of solver $i$ and $b_j$ denote the difficulty of item $j$.
+Item Response Theory is a statistical framework from psychometrics for combining the results of many test-takers, or solvers, on many different tests, or items, into a single capability score for each solver and a single difficulty score for each item. We let $\theta_j$ denote the capability of solver $j$ and $b_i$ denote the difficulty of item $i$.
 
 We are considering the case where our solvers are LLMs and our items are benchmarks or evaluations.
 
@@ -12,15 +12,15 @@ Generally, we assume that at a sufficiently high capability level the performanc
 
 Similarly, we assume that at a sufficiently low capability level the solver performance levels off at 0. In between these two plateaus, capabilities rise linearly, so we get a sigmoid. For now, we'll assume all items are binary, meaning a model scores 1 or 0, and we model the probability that the solver gets an item correct as a function of capability:
 
-$$\hat{p}_{i,j}(\theta) = \sigma\!\left(\alpha_i(\theta_i - b_j)\right)$$
+$$\hat{p}_{i,j}(\theta) = \sigma\!\left(\alpha_i(\theta_j - b_i)\right)$$
 
 This probability-vs-capability curve is called the item characteristic curve (ICC).
 
-Here, $\alpha_i$ is a discrimination parameter which models the slope of the sigmoid. Items which more sharply distinguish capable and incapable solvers have higher $\alpha_i$ values.
+Here, $\alpha_i$ is a discrimination parameter which models the slope of the sigmoid. Items which more sharply distinguish slightly better and slightly worse solvers have higher $\alpha_i$ values.
 
 ## Fisher Information and our Toy Example
 
-To help make sense of our toy example, we can employ Fisher information. The Fisher information of a given capability level $\theta$ on a benchmark $j$, denoted $I_j(\theta)$, is a measure of how tightly coupled data from the benchmark at that capability level is with a solver actually having capability level $\theta$. In other words, if $I_j(\theta)$ is high, then a solver's responses on $j$ around that level pin down its ability sharply — the estimate $\hat\theta$ recovered from those responses has low variance (around an expected value of $\theta$).
+To help make sense of our toy example, we can employ Fisher information. The Fisher information of a given capability level $\theta$ on a benchmark $i$, denoted $I_i(\theta)$, is a measure of how tightly coupled data from the benchmark at that capability level is with a solver actually having capability level $\theta$. In other words, if $I_i(\theta)$ is high, then a solver's responses on $i$ around that level pin down its ability sharply — the estimate $\hat\theta$ recovered from those responses has low variance (around an expected value of $\theta$).
 
 The formula for Fisher information in our two-parameter logistic IRT model is:
 
@@ -38,4 +38,6 @@ and
 
 $$I_{\text{weirdBench}}(\theta) \approx 0.8^2 \times 0.4 \times 0.6 = 0.1536$$
 
-This is a huge gap, telling us that the expected error of our capability estimates is about three times lower if we use easyBench instead of weirdBench, even though easyBench is more "saturated" in the sense that models can score much higher on it. So, we know which benchmark to run!
+This is a huge gap, telling us that the expected error of our capability estimates is about three times lower if we use easyBench instead of weirdBench[^1], even though easyBench is more "saturated" in the sense that models can score much higher on it. So, we know which benchmark to run!
+
+[^1]: That is, assuming that the capability $\theta$ of these new models is close to that of the old frontier. If the $\theta$ value of the new frontier models is much higher, than it is possible that weirdBench provides more information.
