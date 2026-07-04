@@ -26,7 +26,7 @@ html[data-mode="alpine"] {
     --surface: color-mix(in srgb, #5D6761 19%, #F4F4EE);
     --border:  #c2c4c0;
     --line:    #9BB6DA;
-    --accent:  #2F4A1A;
+    --accent:  #1B5E20;
 }
 /* the structural header rule appears only inside a mode; titles stay ink */
 html[data-mode="brick"] h1,
@@ -43,9 +43,9 @@ html[data-mode="alpine"] p a { color: var(--accent); }
    (black) letter of the title returns to default. */
 .mode-key { cursor: pointer; }
 .mode-key[data-mode="brick"]:hover  { color: #B94821; }   /* brick base accent */
-.mode-key[data-mode="alpine"]:hover { color: #2F4A1A; }   /* forest pop accent (legible on cream) */
+.mode-key[data-mode="alpine"]:hover { color: #1B5E20; }   /* forest pop accent (legible on cream) */
 html[data-mode="brick"]  .mode-key[data-mode="brick"]  { color: #B94821; }
-html[data-mode="alpine"] .mode-key[data-mode="alpine"] { color: #2F4A1A; }
+html[data-mode="alpine"] .mode-key[data-mode="alpine"] { color: #1B5E20; }
 
 /* Base styles */
 body {
@@ -100,10 +100,7 @@ nav a {
 nav a:hover {
     text-decoration: underline;
 }
-/* current page (and section) link */
-nav a.active {
-    font-weight: bold;
-}
+/* current page (and section) link — no special emphasis */
 .nav-right {
     margin-left: auto;
     display: flex;
@@ -228,12 +225,11 @@ img {
     cursor: pointer;
     opacity: 0.7;
     padding: 0.25rem 0.5rem;
-    border-radius: 4px;
-    transition: opacity 0.15s, background-color 0.15s;
+    transition: opacity 0.15s;
 }
 .date-wheel-selected:hover {
     opacity: 1;
-    background-color: rgba(0, 0, 0, 0.05);
+    text-decoration: underline;
 }
 .date-wheel-selected::before {
     content: "[";
@@ -245,7 +241,7 @@ img {
     cursor: default;
 }
 .date-wheel-selected.no-past:hover {
-    background-color: transparent;
+    text-decoration: none;
 }
 
 /* Date wheel dropdown */
@@ -256,7 +252,6 @@ img {
     margin-top: 0.25rem;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 6px;
     min-width: 140px;
     max-height: 200px;
     overflow-y: auto;
@@ -290,18 +285,12 @@ img {
     font-family: inherit;
     color: inherit;
     opacity: 0.5;
-    transition: opacity 0.15s, background-color 0.15s;
+    transition: opacity 0.15s;
     scroll-snap-align: center;
-}
-.date-wheel-item:first-child {
-    border-radius: 5px 5px 0 0;
-}
-.date-wheel-item:last-child {
-    border-radius: 0 0 5px 5px;
 }
 .date-wheel-item:hover {
     opacity: 0.8;
-    background-color: rgba(0, 0, 0, 0.03);
+    text-decoration: underline;
 }
 .date-wheel-item.selected {
     opacity: 1;
