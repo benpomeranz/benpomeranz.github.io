@@ -1,5 +1,10 @@
 [
   {
+    "slug": "information-on-the-frontier",
+    "title": "Information on the Frontier",
+    "date": "2026-07-08"
+  },
+  {
     "slug": "fisher-information-benchmarks",
     "title": "Fisher Information of Benchmarks: a Toy Example",
     "date": "2026-06-30"

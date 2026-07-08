@@ -87,10 +87,11 @@ html[data-mode="alpine"] body.note-page { background-color: var(--page); }
     margin: 1.25rem 0;
 }
 
-/* A "figure" iframe breaks out wider than the text column, centered on the
-   viewport, with sharp corners. Its height is set to fit its content by
-   note.js (no inner scrollbar). */
-.note-body iframe.note-figure {
+/* A "figure" iframe or image breaks out wider than the text column, centered
+   on the viewport, with sharp corners. For iframes the height is set to fit
+   their content by note.js (no inner scrollbar). */
+.note-body iframe.note-figure,
+.note-body img.note-figure {
     width: min(1040px, 94vw);
     max-width: none;
     position: relative;
@@ -98,6 +99,21 @@ html[data-mode="alpine"] body.note-page { background-color: var(--page); }
     transform: translateX(-50%);
     border-radius: 0;
     margin: 1.75rem 0;
+}
+/* keep the wrapping <p> from adding its own bottom gap under a figure image */
+.note-body p:has(> img.note-figure) { margin: 0; }
+
+/* the italic paragraph right after a figure is its caption: centered, small,
+   muted, and pulled close to the figure. Kept as Markdown (not raw HTML) so
+   any math inside the caption still renders through KaTeX. */
+.note-body p:has(> img.note-figure) + p,
+.note-body img.note-figure + p {
+    text-align: center;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    opacity: 0.72;
+    max-width: 60ch;
+    margin: 0.4rem auto 1.9rem;
 }
 
 /* horizontal scroll for wide display math instead of overflowing the page */
