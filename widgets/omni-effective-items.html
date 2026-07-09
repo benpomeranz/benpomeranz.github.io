@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Omni-Math: information from n items</title>
+<style>
+  html,body{margin:0;background:#F6EEE3;}
+  body{display:flex;justify-content:center;padding:2rem 1rem;
+        font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;}
+  .wrap{width:100%;max-width:880px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+<!-- Omni-Math within-benchmark effective-items explorer. Self-contained, embeddable: paste this
+     whole snippet, or iframe the file. All styles/ids are scoped under #eff-widget-omni so it can
+     coexist with the MMLU widget on the same page. -->
+<style>
+  #eff-widget-omni{
+    --cream:#F6EEE3; --card:#FCF9F4; --tan:#D4C4A8; --ink:#160906;
+    --brick:#B94821; --brick-deep:#9E2B25; --tile:#176B92; --muted:#8a7a68;
+    font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    color:var(--ink); background:var(--card);
+    border:1px solid var(--tan); border-radius:0; padding:1rem 1.15rem 1.15rem;
+    max-width:680px; box-sizing:border-box;
+  }
+  #eff-widget-omni *{box-sizing:border-box;}
+  #eff-widget-omni .eff-title{font-size:1.12rem; font-weight:600; margin:0;}
+  #eff-widget-omni .eff-rule{height:2px; background:var(--brick); margin:.45rem 0 .7rem; width:100%;}
+  #eff-widget-omni .eff-formula{font-size:.98rem; color:var(--ink); margin:.1rem 0 .8rem;}
+  #eff-widget-omni .eff-formula .frac{display:inline-block; text-align:center; vertical-align:-0.6em; margin:0 .15em;}
+  #eff-widget-omni .eff-formula .frac .num{display:block;}
+  #eff-widget-omni .eff-formula .frac .den{display:block; border-top:1px solid var(--ink); padding-top:1px;}
+  #eff-widget-omni canvas{width:100%; height:auto; display:block;}
+  #eff-widget-omni .eff-controls{margin-top:.7rem; display:flex; flex-direction:column; gap:.6rem;}
+  #eff-widget-omni .eff-row{display:flex; align-items:center; gap:.6rem; flex-wrap:wrap;}
+  #eff-widget-omni .eff-row label{white-space:nowrap;}
+  #eff-widget-omni input[type=range]{
+    flex:1 1 180px; min-width:150px; accent-color:var(--brick); height:1.1rem; cursor:pointer;
+  }
+  #eff-widget-omni .eff-val{font-variant-numeric:tabular-nums; min-width:3.4em;}
+  #eff-widget-omni .eff-ceil{color:var(--tile); font-variant-numeric:tabular-nums;}
+  #eff-widget-omni .eff-check{display:flex; align-items:center; gap:.45rem; cursor:pointer;}
+  #eff-widget-omni .eff-check input{accent-color:var(--brick); width:1rem; height:1rem; cursor:pointer;}
+  #eff-widget-omni .eff-note{font-size:.82rem; color:var(--muted); margin-top:.55rem; line-height:1.4;}
+  #eff-widget-omni .k-brick{color:var(--brick-deep);} #eff-widget-omni .k-tile{color:var(--tile);}
+</style>
+
+<div id="eff-widget-omni">
+  <p class="eff-title">Omni-Math: information from <em>n</em> items (within-benchmark)</p>
+  <div class="eff-rule"></div>
+  <div class="eff-formula">
+    <span class="k-brick">I(n)&thinsp;/&thinsp;I(1)</span> =
+    <span class="frac"><span class="num"><em>n</em></span><span class="den">1 + (<em>n</em>&minus;1)&rho;&#770;</span></span>
+    &nbsp;— information from <em>n</em> Omni-Math items, in units of independent items.
+  </div>
+
+  <canvas id="eff-canvas-omni" width="680" height="408" aria-label="Effective items vs true item count"></canvas>
+
+  <div class="eff-controls">
+    <div class="eff-row">
+      <label>within-benchmark&nbsp; &rho;&#770; =</label>
+      <input id="eff-rho-omni" type="range" min="0" max="0.15" step="0.0001" value="0.0012">
+      <span class="eff-val" id="eff-rho-val-omni">0.0012</span>
+      <span class="eff-ceil" id="eff-ceil-omni">ceiling&nbsp;1/&rho;&#770;&nbsp;&asymp;&nbsp;833 items</span>
+    </div>
+    <label class="eff-check">
+      <input id="eff-deriv-omni" type="checkbox">
+      <span>show derivative — the <span class="k-tile">marginal value of the next item</span></span>
+    </label>
+  </div>
+
+  <p class="eff-note">
+    ρ&#770; is how much Omni-Math items correlate beyond chance, conditioning on Omni-Math's
+    <em>own</em> latent (math) trait. Its <span class="k-brick">null-calibrated</span> within-benchmark
+    value is ≈ <span class="k-brick">0.0012</span> (robust estimate; estimators span 0.0008–0.0019),
+    capping information at <span class="k-tile">1/ρ&#770; ≈ 833</span> independent items. Omni-Math's
+    1000 items are then worth ~455 independent items about the math trait — its items are only
+    mildly redundant for their own trait. The derivative
+    <span class="k-tile"><em>f</em>&#8242;(n) = (1&minus;ρ&#770;) / [1 + (n&minus;1)ρ&#770;]²</span>
+    is how much the next item is worth.
+  </p>
+</div>
+
+<script>
+(function(){
+  var NMAX = 1000;
+  var C = {cream:"#F6EEE3", card:"#FCF9F4", tan:"#D4C4A8", ink:"#160906",
+           brick:"#B94821", tile:"#176B92", muted:"#8a7a68", grid:"#ece2d2"};
+  var cv = document.getElementById("eff-canvas-omni");
+  var ctx = cv.getContext("2d");
+  var rhoEl = document.getElementById("eff-rho-omni");
+  var rhoVal = document.getElementById("eff-rho-val-omni");
+  var ceilEl = document.getElementById("eff-ceil-omni");
+  var derivEl = document.getElementById("eff-deriv-omni");
+  var hover = null, G = null;
+
+  function f(n, rho){ return n / (1 + (n-1)*rho); }
+  function fp(n, rho){ var d = 1 + (n-1)*rho; return (1-rho)/(d*d); }
+  function niceTicks(max, count){
+    var raw = max/count, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+    var norm = raw/mag, step = norm<1.5?1:norm<3?2:norm<7?5:10; step*=mag;
+    var ticks=[]; for(var v=0; v<=max+1e-9; v+=step) ticks.push(v); return ticks;
+  }
+
+  function draw(){
+    var rho = parseFloat(rhoEl.value);
+    var showD = derivEl.checked;
+    rhoVal.textContent = rho.toFixed(4);
+    ceilEl.innerHTML = rho>0 ? ("ceiling&nbsp;1/&rho;&#770;&nbsp;&asymp;&nbsp;"+Math.round(1/rho)+" items")
+                             : "ceiling&nbsp;1/&rho;&#770;&nbsp;=&nbsp;&infin;";
+
+    var dpr = window.devicePixelRatio||1;
+    var cssW = cv.clientWidth||680, cssH = Math.max(300, Math.round(cssW*0.6));
+    cv.width = cssW*dpr; cv.height = cssH*dpr;
+    cv.style.height = cssH+"px";
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,cssW,cssH);
+    ctx.font = '12px "Helvetica Neue",Helvetica,Arial,sans-serif';
+
+    var mL=52, mR=showD?56:22, mT=16, mB=40;
+    var x0=mL, x1=cssW-mR, y0=mT, y1=cssH-mB;
+    var ceiling = rho>0 ? 1/rho : Infinity;
+    var yMax = rho>0 ? ceiling*1.12 : NMAX*1.04;
+
+    var X = function(n){ return x0 + (n/NMAX)*(x1-x0); };
+    var YL = function(v){ return y1 - (v/yMax)*(y1-y0); };
+    var YR = function(d){ return y1 - (d/1.05)*(y1-y0); };
+    G = {x0:x0, x1:x1, y0:y0, y1:y1};
+
+    // gridlines + left ticks
+    ctx.strokeStyle=C.grid; ctx.fillStyle=C.ink; ctx.lineWidth=1;
+    ctx.textAlign="right"; ctx.textBaseline="middle";
+    niceTicks(yMax,6).forEach(function(v){
+      var y=YL(v); if(y<y0-1) return;
+      ctx.beginPath(); ctx.moveTo(x0,y); ctx.lineTo(x1,y); ctx.stroke();
+      ctx.fillText(Math.round(v), x0-7, y);
+    });
+    // x ticks
+    ctx.textAlign="center"; ctx.textBaseline="top";
+    [0,200,400,600,800,1000].forEach(function(n){
+      var x=X(n); ctx.strokeStyle=C.grid; ctx.beginPath(); ctx.moveTo(x,y0); ctx.lineTo(x,y1); ctx.stroke();
+      ctx.fillStyle=C.ink; ctx.fillText(n, x, y1+6);
+    });
+    // axes
+    ctx.strokeStyle=C.muted; ctx.lineWidth=1;
+    ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x0,y1); ctx.lineTo(x1,y1); ctx.stroke();
+
+    // axis labels
+    ctx.fillStyle=C.ink; ctx.textAlign="center"; ctx.textBaseline="alphabetic";
+    ctx.fillText("true number of Omni-Math items  n", (x0+x1)/2, cssH-6);
+    ctx.save(); ctx.translate(13,(y0+y1)/2); ctx.rotate(-Math.PI/2);
+    ctx.fillStyle=C.brick; ctx.fillText("information, in independent items  I(n)/I(1)", 0, 0); ctx.restore();
+
+    // ceiling line
+    if(rho>0){
+      var yc=YL(ceiling);
+      ctx.strokeStyle=C.tile; ctx.setLineDash([3,4]); ctx.lineWidth=1.4;
+      ctx.beginPath(); ctx.moveTo(x0,yc); ctx.lineTo(x1,yc); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle=C.tile; ctx.textAlign="right"; ctx.textBaseline="bottom";
+      ctx.fillText("1/ρ̂ ≈ "+Math.round(ceiling), x1-2, yc-3);
+      ctx.fillStyle=C.muted; ctx.textAlign="left"; ctx.textBaseline="top";
+      ctx.fillText("calibrated ρ̂ ≈ 0.0012    range [0.0008, 0.0019]    ceiling ~520–1250", x0+4, yc+4);
+    }
+
+    // main curve I(n)/I(1)
+    ctx.strokeStyle=C.brick; ctx.lineWidth=2.6; ctx.beginPath();
+    for(var n=1;n<=NMAX;n++){ var px=X(n),py=YL(f(n,rho)); if(n===1)ctx.moveTo(px,py); else ctx.lineTo(px,py); }
+    ctx.stroke();
+
+    // derivative overlay (right axis)
+    if(showD){
+      ctx.strokeStyle=C.tile; ctx.lineWidth=1.8; ctx.setLineDash([5,4]); ctx.beginPath();
+      for(var m=1;m<=NMAX;m++){ var qx=X(m),qy=YR(fp(m,rho)); if(m===1)ctx.moveTo(qx,qy); else ctx.lineTo(qx,qy); }
+      ctx.stroke(); ctx.setLineDash([]);
+      // right axis ticks + label
+      ctx.fillStyle=C.tile; ctx.textAlign="left"; ctx.textBaseline="middle";
+      [0,0.25,0.5,0.75,1].forEach(function(d){ ctx.fillText(d.toFixed(2), x1+6, YR(d)); });
+      ctx.save(); ctx.translate(cssW-8,(y0+y1)/2); ctx.rotate(Math.PI/2);
+      ctx.textAlign="center"; ctx.textBaseline="alphabetic";
+      ctx.fillText("marginal value of next item  f′(n)", 0, 0); ctx.restore();
+    }
+
+    // hover readout
+    if(hover && hover.n){
+      var hn=hover.n, hy=f(hn,rho), hx=X(hn), hpy=YL(hy);
+      ctx.save();
+      ctx.strokeStyle="#b7a789"; ctx.setLineDash([2,3]); ctx.lineWidth=1;
+      ctx.beginPath(); ctx.moveTo(hx,y0); ctx.lineTo(hx,y1); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle=C.brick; ctx.beginPath(); ctx.arc(hx,hpy,4,0,2*Math.PI); ctx.fill();
+      var lines=["n = "+hn, "I(n)/I(1) = "+hy.toFixed(1)];
+      if(showD){ var hd=fp(hn,rho); ctx.fillStyle=C.tile; ctx.beginPath(); ctx.arc(hx,YR(hd),3.5,0,2*Math.PI); ctx.fill(); lines.push("f'(n) = "+hd.toFixed(3)); }
+      ctx.font='12px "Helvetica Neue",Helvetica,Arial,sans-serif';
+      var tw=0,i; for(i=0;i<lines.length;i++){ tw=Math.max(tw,ctx.measureText(lines[i]).width); }
+      var pad=6,lh=15,bw=tw+2*pad,bh=lines.length*lh+2*pad;
+      var bx=hx+12,by=hpy-bh-8;
+      if(bx+bw>x1) bx=hx-bw-12; if(bx<x0) bx=x0+2;
+      if(by<y0) by=hpy+12; if(by+bh>y1) by=y1-bh-2;
+      ctx.fillStyle="rgba(252,249,244,0.96)"; ctx.strokeStyle="#d8cbb6"; ctx.lineWidth=1;
+      ctx.beginPath(); ctx.rect(bx,by,bw,bh); ctx.fill(); ctx.stroke();
+      ctx.textAlign="left"; ctx.textBaseline="top";
+      for(i=0;i<lines.length;i++){ ctx.fillStyle=(i===0?C.ink:(i===1?C.brick:C.tile)); ctx.fillText(lines[i],bx+pad,by+pad+i*lh); }
+      ctx.restore();
+    }
+  }
+
+  function nFromEvent(e){ if(!G) return null; var rect=cv.getBoundingClientRect(); var px=e.clientX-rect.left; var n=Math.round(((px-G.x0)/(G.x1-G.x0))*NMAX); return Math.max(1,Math.min(NMAX,n)); }
+  cv.addEventListener("mousemove", function(e){ var n=nFromEvent(e); hover = n?{n:n}:null; draw(); });
+  cv.addEventListener("mouseleave", function(){ hover=null; draw(); });
+  rhoEl.addEventListener("input", draw);
+  derivEl.addEventListener("change", draw);
+  window.addEventListener("resize", draw);
+  if(window.ResizeObserver){ new ResizeObserver(draw).observe(cv); }
+  draw();
+})();
+</script>
+
+</div>
+</body>
+</html>
