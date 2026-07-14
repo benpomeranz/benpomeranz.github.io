@@ -107,7 +107,8 @@ html[data-mode="alpine"] body.note-page { background-color: var(--page); }
    muted, and pulled close to the figure. Kept as Markdown (not raw HTML) so
    any math inside the caption still renders through KaTeX. */
 .note-body p:has(> img.note-figure) + p,
-.note-body img.note-figure + p {
+.note-body img.note-figure + p,
+.note-body table + p {
     text-align: center;
     font-size: 0.9rem;
     line-height: 1.5;
@@ -115,6 +116,37 @@ html[data-mode="alpine"] body.note-page { background-color: var(--page); }
     max-width: 60ch;
     margin: 0.4rem auto 1.9rem;
 }
+
+/* ---- Tables -------------------------------------------------------------- */
+/* Break out a little wider than the text column, like a figure, and carry the
+   same cream/tan/tile palette as the note's plots. Column alignment comes from
+   the Markdown (:---:, ---:); math in cells still renders through KaTeX. */
+.note-body table {
+    border-collapse: collapse;
+    width: min(960px, 94vw);
+    max-width: none;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 1.75rem 0 2rem;
+    font-size: 0.92rem;
+    line-height: 1.4;
+    font-variant-numeric: tabular-nums;
+    border: 1px solid var(--border);
+}
+.note-body thead th {
+    background: #176B92;
+    color: #fff;
+    font-weight: 600;
+    padding: 0.55rem 0.85rem;
+    border: 1px solid var(--border);
+}
+.note-body tbody td {
+    padding: 0.5rem 0.85rem;
+    border: 1px solid var(--border);
+}
+.note-body tbody tr:nth-child(odd)  { background: #FCF9F4; }
+.note-body tbody tr:nth-child(even) { background: #F6EEE3; }
 
 /* horizontal scroll for wide display math instead of overflowing the page */
 .note-body .katex-display {
