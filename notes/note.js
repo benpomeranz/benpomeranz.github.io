@@ -117,6 +117,7 @@
 
         var body = document.getElementById("note-body");
         body.innerHTML = html;
+        markExternalLinks(body);
         fitIframes(body);
         fitDisplayMath(body);
 
@@ -180,6 +181,31 @@
                 }, 120);
             });
         }
+    }
+
+    // Open links that leave the note in a new tab, so it keeps your place while
+    // you follow a reference. "Leaves the note" means another site, or a file
+    // that isn't a page (a PDF) — matching the convention the Now page already
+    // uses by hand. Done here rather than in the Markdown because marked emits
+    // a bare <a>: every note, present and future, gets this without the author
+    // remembering to ask. Links within the site (including footnote jumps) keep
+    // the current tab.
+    function markExternalLinks(container) {
+        var links = container.querySelectorAll("a[href]");
+        Array.prototype.forEach.call(links, function (a) {
+            var url;
+            try {
+                url = new URL(a.getAttribute("href"), location.href);
+            } catch (e) {
+                return;                                 // not a resolvable URL; leave it
+            }
+            if (!/^https?:$/.test(url.protocol)) return;   // mailto:, #frag, etc.
+            var offsite = url.hostname !== location.hostname;
+            var isFile = /\.pdf$/i.test(url.pathname);
+            if (!offsite && !isFile) return;
+            a.target = "_blank";
+            a.rel = "noopener noreferrer";
+        });
     }
 
     // Size same-origin iframes to fit their content so there's no inner
