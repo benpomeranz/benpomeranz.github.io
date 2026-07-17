@@ -34,9 +34,16 @@ html[data-mode="alpine"] h1 {
     border-bottom: 3px solid var(--line);
     padding-bottom: 0.3rem;
 }
-/* in-content links take the pop accent inside a mode (nav stays ink) */
-html[data-mode="brick"] p a,
-html[data-mode="alpine"] p a { color: var(--accent); }
+/* In a colour mode, in-content links take the pop accent. This is deliberately
+   a blanket `a` rule rather than a per-context whitelist (`p a`, `li a`,
+   `h2 a`, …): a whitelist silently drops back to ink every time a link shows
+   up somewhere new — a heading, a table cell, the notes index — so the theme
+   is opt-out (nav below), not opt-in. */
+html[data-mode="brick"] a,
+html[data-mode="alpine"] a { color: var(--accent); }
+/* the nav is chrome, not content: it stays ink in every mode */
+html[data-mode="brick"] nav a,
+html[data-mode="alpine"] nav a { color: var(--ink); }
 
 /* Homepage title easter egg: B = Brick, a = Alpine. Hover previews the
    colour; the active mode's key stays coloured; clicking any other

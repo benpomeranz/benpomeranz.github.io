@@ -184,9 +184,6 @@ html[data-mode="alpine"] body.note-page { background-color: var(--page); }
 .fn-back::before, .fn-back::after { content: ""; }     /* the ← carries its own meaning */
 .fn-back:hover { opacity: 1; }
 
-/* In a colour mode, in-content links take the pop accent — but styles.css only
-   targets `p a`, so links inside a list (e.g. the benchmark names) stay ink.
-   Extend the accent to note-body list links so they match the prose links.
-   Scoped to .note-body, so the nav (which also uses lists) is untouched. */
-html[data-mode="brick"] .note-body li a,
-html[data-mode="alpine"] .note-body li a { color: var(--accent); }
+/* Link colour in a colour mode is handled by the blanket `a` rule in
+   styles.css (nav excluded there), so note links — prose, lists, headings,
+   table cells, footnotes — are themed without a rule here. */
