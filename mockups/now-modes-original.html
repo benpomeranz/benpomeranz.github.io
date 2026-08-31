@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Now — new colors, original fonts &amp; layout</title>
+<link rel="icon" href="../favicon.ico" />
+<link rel="stylesheet" href="mock.css" />
+</head>
+<body data-mode="brick">
+
+  <nav>
+    <a href="home-modes-original.html">Home</a>
+    <a href="now-modes-original.html">Now</a>
+    <a href="callme-modes-original.html">Call Me</a>
+    <a href="#">Achievements</a>
+    <a href="#">HELP</a>
+    <div class="nav-right">
+      <a href="https://benpomeranz.substack.com" target="_blank" rel="noopener">
+        <img src="../substack-logo.svg" alt="Blog" class="icon">
+      </a>
+      <a href="https://x.com/mortonsatgirl" target="_blank" rel="noopener">
+        <img src="../twitter-logo.svg" alt="Twitter" class="icon">
+      </a>
+      <div class="modeswitch" role="group" aria-label="Color mode">
+        <button id="m-brick" class="active" onclick="setMode('brick')">Brick + Tile</button>
+        <button id="m-alpine" onclick="setMode('alpine')">Alpine</button>
+      </div>
+    </div>
+  </nav>
+
+  <h1 class="now-header">
+    <span>Now</span>
+    <button class="date-wheel-selected" type="button">Jun 29, 2026</button>
+  </h1>
+
+  <p>It's the summer of 2026. I'm building things, reading more than I'm writing, and
+    drinking an irresponsible amount of chai. (Static snapshot — the live page loads this
+    from <a href="#">now-archive.json</a>.)</p>
+
+  <div class="widgets-container">
+    <section class="widget" aria-labelledby="currently-studying-title">
+      <h2 id="currently-studying-title">Currently studying</h2>
+      <ul>
+        <li>Stochastic processes</li>
+        <li>Aluffi, <em>Algebra: Chapter 0</em></li>
+        <li>German, slowly</li>
+      </ul>
+    </section>
+    <section class="widget" aria-labelledby="last-listened-title">
+      <h2 id="last-listened-title">Currently listening
+        <span class="muted">Ok not really currently really on Jun 29, 2026 at 2:14 PM</span>
+      </h2>
+      <div class="spotify-row">
+        <span class="cover-ph" aria-hidden="true"></span>
+        <div>
+          <div><a href="#">Solar Power</a></div>
+          <div class="muted">Lorde – Solar Power</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="caffeine-section">
+    <p>I'm also making (and drinking) a lot of chai without becoming addicted to caffeine:</p>
+    <div class="responsive-iframe">
+      <iframe title="Average reaction time with and without caffeine" aria-label="Scatter Plot"
+        src="https://datawrapper.dwcdn.net/CA9Lb/10/" scrolling="no" frameborder="0"
+        style="border: none;" width="500" height="431" data-external="1"></iframe>
+    </div>
+  </div>
+
+<script src="mock.js"></script>
+</body>
+</html>

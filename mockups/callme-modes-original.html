@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Call Me — new colors, original fonts &amp; layout</title>
+<link rel="icon" href="../favicon.ico" />
+<link rel="stylesheet" href="mock.css" />
+</head>
+<body data-mode="brick">
+
+  <nav>
+    <a href="home-modes-original.html">Home</a>
+    <a href="now-modes-original.html">Now</a>
+    <a href="callme-modes-original.html">Call Me</a>
+    <a href="#">Achievements</a>
+    <a href="#">HELP</a>
+    <div class="nav-right">
+      <a href="https://benpomeranz.substack.com" target="_blank" rel="noopener">
+        <img src="../substack-logo.svg" alt="Blog" class="icon">
+      </a>
+      <a href="https://x.com/mortonsatgirl" target="_blank" rel="noopener">
+        <img src="../twitter-logo.svg" alt="Twitter" class="icon">
+      </a>
+      <div class="modeswitch" role="group" aria-label="Color mode">
+        <button id="m-brick" class="active" onclick="setMode('brick')">Brick + Tile</button>
+        <button id="m-alpine" onclick="setMode('alpine')">Alpine</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="booking">
+    <h1>Book a call</h1>
+    <p class="booking-note">I'm not always available at all the times listed — some
+      activities don't make my calendar. I'll shoot you a message if we need to reschedule.</p>
+    <div class="booking-frame">
+      <iframe src="https://calendar.google.com/calendar/appointments/schedules/AcZssZ1ZllIU5_T320O-SaDCPona79y1t9lRfgV9y_FLnLmFWdb4Si5XH3cVfGt2GULEdPRLBIq4GDiy?gv=true"
+        style="border:0;width:100%;height:700px;display:block;" frameborder="0"></iframe>
+    </div>
+  </div>
+
+<script src="mock.js"></script>
+</body>
+</html>
