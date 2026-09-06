@@ -8,7 +8,7 @@
         return p.replace(/index\.html$/, "").replace(/\/$/, "") || "/";
     }
 
-    fetch("/nav.html?v=3")
+    fetch("/nav.html?v=4")
         .then(function (r) { return r.text(); })
         .then(function (html) {
             ph.innerHTML = html;

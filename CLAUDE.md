@@ -9,7 +9,7 @@ Personal website for benpomeranz.com, hosted on GitHub Pages. Static HTML site w
 ## Architecture
 
 ### Frontend (GitHub Pages)
-- **Static HTML pages**: `index.html`, `now.html`, `contact.html` — plain HTML with shared `styles.css` and `nav.html` (fetched client-side)
+- **Static HTML pages**: `index.html` (served at `/`), `now.html` (served at `/now`), `contact.html` — plain HTML with shared `styles.css` and `nav.html` (fetched client-side)
 - **Achievements page** (`achievements/index.html`): Self-contained single-file app (~3500 lines). Canvas-based interactive achievement tree with force-directed graph layout, pan/zoom, search, edit mode, confetti, signature drawings, per-person notes, undo, and auth-gated saving
 - **Achievements data** (`achievements/achievements.csv`): CSV with RFC 4180 quoting. Columns: `id,name,description,prerequisites,target,{player}_completed,{player}_progress,{player}_notes` for each player (bentzi/adin/ben). Prerequisites are pipe-delimited IDs
 - **Signatures** (`achievements/signatures.json`): Stroke data for per-player completion drawings. Keyed by `{achievementId}_{player}`. Stored/loaded via the worker's `?file=signatures` endpoint

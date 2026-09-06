@@ -3,7 +3,7 @@
 /**
  * Updates the Now page archive.
  *
- * Usage: node update-now.js
+ * Usage: node update-now.mjs
  *
  * 1. Edit now-draft-paragraph.html with your new paragraph
  * 2. Edit now-draft-courses.txt with your courses (one per line)
