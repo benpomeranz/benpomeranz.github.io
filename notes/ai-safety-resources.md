@@ -1,3 +1,5 @@
+_[EDIT 9/15: After only a month, parts of this list are starting to look quite outdated. For further sources on politics and power, obvious present day misalignment, and RSI I recommend \*checks notes\* most major media outlets]_
+
 *Written for some friends in $<2$ hours, with the goal of giving them some decent sense of the "AI risk landscape."*
 
 This is by no means a definitive list. Thanks to mr. [Cleo Nardo](https://www.lesswrong.com/users/cleo-nardo?from=post_header) for providing some inspiration here. Many sources are taken from this [AI futurism reading list](https://blog.redwoodresearch.org/p/ai-futurism-reading-list), which goes much more in depth. If there is a subject that appears to be important that is missing, which there certainly is, please ask me. Exercises optional.
