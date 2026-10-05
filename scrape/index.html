@@ -1,6 +1,7 @@
 <!doctype html><html><head><meta charset='utf-8'><title>Housing Scout</title><meta name='robots' content='noindex, nofollow'><meta name='viewport' content='width=device-width, initial-scale=1'><style>
 body { font-family: Georgia, 'Times New Roman', serif; color: #000; background: #fff; max-width: 1200px; margin: 20px auto; padding: 0 16px; }
 h1 { font-size: 22px; margin-bottom: 4px; }
+button { font-family: inherit; font-size: 13px; border: 1px solid #000; background: #fff; padding: 2px 8px; cursor: pointer; }
 .controls { border: 1px solid #000; padding: 8px 10px; margin: 12px 0; display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; align-items: center; }
 .controls label { white-space: nowrap; }
 .controls input[type=number] { width: 70px; } .controls input[type=date] { width: 135px; } .controls input[type=text] { width: 180px; }
@@ -11,7 +12,7 @@ th { cursor: pointer; user-select: none; background: #fff; } th.sorted::after { 
 img { width: 90px; height: auto; display: block; } a { color: #000; }
 .muted { font-size: 12px; } .count { font-size: 14px; margin: 6px 0; }
 .excluded td { color: #555; }
-</style></head><body><h1>Housing Scout</h1><p class='muted'>Generated Sunday, October 04, 2026 20:26. Click a column header to sort; click again to reverse. Origin: Downtown Berkeley BART. Bike minutes = route distance at 16 km/h plus 1 min per 10 m of climb.</p>
+</style></head><body><h1>Housing Scout</h1><p id='refreshed' data-generated='2026-10-05T03:31:49.828902+00:00'><b>Last refreshed:</b> Sunday, October 04, 2026 at 20:31 Pacific <span id='ago' class='muted'></span> <button id='reload'>Check for a newer version</button></p><p class='muted'>Click a column header to sort; click again to reverse. Origin: Downtown Berkeley BART. Bike minutes = route distance at 16 km/h plus 1 min per 10 m of climb.</p>
 <div class='controls'>
   <label>Rent $<input type='number' id='priceMin' placeholder='min'> to <input type='number' id='priceMax' placeholder='max'></label>
   <label>Per bedroom max $<input type='number' id='ppbMax' placeholder='1800'></label>
@@ -96,5 +97,12 @@ document.querySelectorAll('th[data-key]').forEach(th => th.addEventListener('cli
 }));
 document.querySelectorAll('.controls input, .controls select').forEach(el => el.addEventListener('input', render));
 $('reset').addEventListener('click', () => { document.querySelectorAll('.controls input').forEach(el => { if (el.type === 'checkbox') el.checked = el.id === 'unitsOnly' ? false : false; else el.value = ''; }); $('source').value = 'all'; render(); });
+function ago() {
+  const gen = new Date($('refreshed').dataset.generated); const mins = Math.round((Date.now() - gen) / 60000);
+  const text = mins < 60 ? mins + ' min ago' : mins < 2880 ? Math.round(mins / 60) + ' hours ago' : Math.round(mins / 1440) + ' days ago';
+  $('ago').textContent = '(' + text + ')';
+}
+$('reload').addEventListener('click', () => { location.href = location.pathname + '?t=' + Date.now(); });
+ago(); setInterval(ago, 60000);
 render();
 </script></body></html>
