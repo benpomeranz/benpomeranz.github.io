@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Home — new colors, original fonts &amp; layout</title>
+<link rel="icon" href="../favicon.ico" />
+<link rel="stylesheet" href="mock.css" />
+</head>
+<body data-mode="brick">
+
+  <nav>
+    <a href="home-modes-original.html">Home</a>
+    <a href="now-modes-original.html">Now</a>
+    <a href="callme-modes-original.html">Call Me</a>
+    <a href="#">Achievements</a>
+    <a href="#">HELP</a>
+    <div class="nav-right">
+      <a href="https://benpomeranz.substack.com" target="_blank" rel="noopener">
+        <img src="../substack-logo.svg" alt="Blog" class="icon">
+      </a>
+      <a href="https://x.com/mortonsatgirl" target="_blank" rel="noopener">
+        <img src="../twitter-logo.svg" alt="Twitter" class="icon">
+      </a>
+      <div class="modeswitch" role="group" aria-label="Color mode">
+        <button id="m-brick" class="active" onclick="setMode('brick')">Brick + Tile</button>
+        <button id="m-alpine" onclick="setMode('alpine')">Alpine</button>
+      </div>
+    </div>
+  </nav>
+
+  <h1>Ben Pomeranz</h1>
+  <p>is my name. I stud<s>y</s>ied math and CS at Brown and I drink lots of milk but
+    don't worry <a href="#">it's not so terrible</a>. My <a href="#">blog</a> isn't half
+    bad, but only because it's more than half empty.</p>
+  <p>Here's a photo of me so you can know whether this is the website of <em>the</em>
+    Ben Pomeranz you're trying to Google:</p>
+  <img src="../goodphoto.jpg" alt="Ben awaits ice cream" class="photo" loading="lazy">
+
+<script src="mock.js"></script>
+</body>
+</html>
