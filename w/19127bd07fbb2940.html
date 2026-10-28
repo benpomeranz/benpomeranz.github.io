@@ -177,7 +177,7 @@
 
   .head-right { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
 
-  /* Present mode: only the pie. Slices name themselves on hover; [edit] sits under the pie, clear of
+  /* Present mode: the pie with its key on the right. Slices name themselves on hover; [edit] sits under the pie, clear of
      Notion's embed controls (top right), and shows on hover or after any click or tap. */
   .linkish { font: inherit; border: 0; background: transparent; padding: 0; color: var(--ink-soft); cursor: pointer; }
   .linkish::before { content: "["; }
@@ -189,10 +189,18 @@
     .edit-corner { transition: opacity 120ms ease; }
   }
 
-  .wrap[data-mode="present"] { max-width: 240px; gap: 4px; }
+  .key { display: none; margin: 0; padding: 0; list-style: none; gap: 6px; font-size: 13px; min-width: 0; }
+  .key li { display: grid; grid-template-columns: 11px minmax(0, 1fr); gap: 7px; align-items: start; }
+  .key .swatch { width: 11px; height: 11px; margin-top: 3px; }
+  .key-label { min-width: 0; overflow-wrap: break-word; }
+  .key-other .key-name { color: var(--ink-soft); }
+  .key-value { color: var(--ink-soft); white-space: nowrap; }
+
+  .wrap[data-mode="present"] { max-width: 520px; gap: 4px; }
   .wrap[data-mode="present"] .head,
   .wrap[data-mode="present"] .table { display: none; }
-  .wrap[data-mode="present"] .body { grid-template-columns: minmax(0, 1fr); }
+  .wrap[data-mode="present"] .body { grid-template-columns: minmax(0, 200px) minmax(130px, 1fr); align-items: center; gap: 16px; }
+  .wrap[data-mode="present"] .key { display: grid; }
   .wrap[data-mode="present"] .edit-corner { display: block; }
   .wrap[data-mode="present"]:hover .edit-corner,
   .wrap[data-mode="present"].touched .edit-corner,
@@ -247,6 +255,8 @@
       <p class="limit" id="limit" hidden>Five categories is the limit, so the slices stay easy to tell apart.</p>
       <p class="note" id="note" hidden>These are example hours. Type over them. Your changes are saved in this browser.</p>
     </div>
+
+    <ul class="key" id="key" aria-label="Key"></ul>
   </div>
 
   <button type="button" class="linkish edit-corner" id="edit">edit</button>
@@ -274,6 +284,7 @@
       wrap: document.getElementById("wrap"),
       present: document.getElementById("present"),
       edit: document.getElementById("edit"),
+      key: document.getElementById("key"),
       summary: document.getElementById("summary"),
       slices: document.getElementById("slices"),
       labels: document.getElementById("labels"),
@@ -491,9 +502,45 @@
       els.limit.hidden = !els.add.disabled;
       els.note.hidden = !state.isExample;
       drawPie();
+      drawKey();
     }
 
-    // Edit mode shows the full editor; present mode shows only the pie.
+    // The present-mode key: one line per slice, in the pie's order.
+    function drawKey() {
+      const { otherHours, denominator } = computeSplit();
+      const entries = state.categories
+        .filter((c) => c.hours > 0)
+        .map((c) => ({ name: displayName(c), hours: c.hours, slot: c.slot }));
+      if (otherHours > 0) entries.push({ name: "Other", hours: otherHours, slot: null });
+
+      els.key.replaceChildren(
+        ...entries.map((entry) => {
+          const item = document.createElement("li");
+          const swatch = document.createElement("span");
+          swatch.className = "swatch";
+          swatch.setAttribute("aria-hidden", "true");
+          if (entry.slot === null) {
+            item.className = "key-other";
+            swatch.classList.add("other");
+          } else {
+            swatch.style.background = `var(--s${entry.slot})`;
+          }
+          const name = document.createElement("span");
+          name.className = "key-name";
+          name.textContent = entry.name;
+          const value = document.createElement("span");
+          value.className = "key-value";
+          value.textContent = `${formatHours(entry.hours)} h · ${shareText(entry.hours, denominator)}`;
+          const label = document.createElement("span");
+          label.className = "key-label";
+          label.append(name, "  ", value);
+          item.append(swatch, label);
+          return item;
+        })
+      );
+    }
+
+    // Edit mode shows the full editor; present mode shows the pie and its key.
     function loadMode() {
       try {
         const saved = localStorage.getItem(MODE_KEY);
