@@ -1,0 +1,609 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Forty-Hour Week</title>
+<style>
+  /* Layout: a single light panel, pie on the left and its editable legend on the right, stacking below 560px.
+     Brick+Tile mode, light only (deliberately single-theme). */
+  :root {
+    --cream: #F6EEE3;
+    --card: #FCF9F4;
+    --tan: #D4C4A8;
+    --tan-light: #E6DAC6;
+    --tan-deep: #B39C76;
+    --ink: #160906;
+    --ink-soft: #5E4F45;
+    --brick: #B94821;
+    --tile: #176B92;
+    /* Slice colors, fixed order, validated on cream (all pairs, CVD floor met with labels + gaps) */
+    --s0: #b74b21;
+    --s1: #0d5c91;
+    --s2: #d4ab4f;
+    --s3: #549957;
+    --s4: #bd88c9;
+    --font: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    color-scheme: light;
+  }
+
+  [hidden] { display: none !important; }
+
+  body {
+    margin: 0;
+    background: var(--cream);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 15px;
+    line-height: 1.4;
+    padding-block: 14px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    font-variant-numeric: tabular-nums;
+  }
+
+  .wrap { max-width: 720px; display: grid; gap: 14px; }
+
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px 18px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--brick);
+  }
+  h1 { margin: 0; font-size: 1.05rem; font-weight: 600; text-wrap: balance; }
+  .summary { margin: 0; color: var(--ink-soft); }
+  .summary strong { color: var(--ink); font-weight: 600; }
+
+  .body {
+    display: grid;
+    grid-template-columns: minmax(0, 230px) minmax(0, 1fr);
+    gap: 22px;
+    align-items: start;
+  }
+  @media (max-width: 560px) {
+    .body { grid-template-columns: minmax(0, 1fr); }
+    .pie { max-width: 230px; margin-inline: auto; width: 100%; }
+  }
+
+  .pie { position: relative; }
+  .pie svg { display: block; width: 100%; height: auto; max-width: 100%; }
+  .pie path, .pie circle.slice { stroke: var(--cream); stroke-width: 2; cursor: default; outline: none; }
+  .pie path:focus-visible, .pie circle.slice:focus-visible { stroke: var(--ink); stroke-width: 2.5; }
+  .slice-label { font-size: 11px; font-weight: 600; pointer-events: none; font-family: var(--font); }
+  .slice-label.on-dark { fill: var(--card); }
+  .slice-label.on-light { fill: var(--ink); paint-order: stroke; stroke: var(--card); stroke-width: 3px; stroke-linejoin: round; }
+
+  .tip {
+    position: absolute;
+    pointer-events: none;
+    background: var(--card);
+    border: 1px solid var(--tan);
+    padding: 4px 8px;
+    font-size: 13px;
+    white-space: nowrap;
+    transform: translate(-50%, calc(-100% - 10px));
+    box-shadow: 0 1px 3px rgba(22, 9, 6, 0.12);
+  }
+
+  .table { display: grid; gap: 6px; min-width: 0; }
+  .row {
+    display: grid;
+    grid-template-columns: 12px minmax(0, 1fr) 4.6em 3em 26px;
+    gap: 8px;
+    align-items: center;
+  }
+  .row.headings { color: var(--ink-soft); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; }
+  .row.headings span:nth-child(3), .row.headings span:nth-child(4) { text-align: right; }
+  .swatch { width: 12px; height: 12px; display: block; }
+  .swatch.other {
+    background: repeating-linear-gradient(45deg, var(--tan-deep) 0 1.5px, var(--tan-light) 1.5px 4px);
+  }
+  .share, .fixed-hours { text-align: right; color: var(--ink-soft); }
+  .fixed-hours { padding-right: 7px; color: var(--ink); }
+  .other-name { color: var(--ink-soft); padding-left: 7px; }
+
+  input[type="text"], input[type="number"] {
+    font: inherit;
+    color: var(--ink);
+    background: var(--card);
+    border: 1px solid var(--tan);
+    border-radius: 2px;
+    padding: 4px 6px;
+    min-width: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  input[type="number"] { text-align: right; }
+  input:focus-visible { outline: 2px solid var(--brick); outline-offset: 0; border-color: var(--brick); }
+  input::placeholder { color: #9A8B7E; }
+
+  .remove {
+    font: inherit;
+    width: 26px;
+    height: 26px;
+    border: 0;
+    background: transparent;
+    color: var(--ink-soft);
+    cursor: pointer;
+    border-radius: 2px;
+    line-height: 1;
+    font-size: 17px;
+  }
+  .remove:hover { color: var(--brick); background: var(--card); }
+  .remove:focus-visible { outline: 2px solid var(--brick); }
+
+  .other-row { border-top: 1px solid var(--tan); padding-top: 6px; }
+
+  .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; padding-top: 4px; }
+  .btn {
+    font: inherit;
+    font-size: 14px;
+    padding: 4px 10px;
+    border: 1px solid var(--brick);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--brick);
+    cursor: pointer;
+  }
+  .btn:hover:not(:disabled) { background: var(--brick); color: var(--card); }
+  .btn:disabled { border-color: var(--tan); color: var(--ink-soft); cursor: not-allowed; }
+  .btn:focus-visible, .quiet:focus-visible { outline: 2px solid var(--brick); outline-offset: 2px; }
+  .quiet {
+    font: inherit;
+    font-size: 14px;
+    border: 0;
+    background: transparent;
+    color: var(--ink-soft);
+    cursor: pointer;
+    padding: 4px 0;
+  }
+  .quiet:hover { text-decoration: underline; color: var(--ink); }
+
+  .total-field { display: flex; align-items: center; gap: 6px; color: var(--ink-soft); font-size: 14px; }
+  .total-field input { width: 4.2em; }
+
+  .note, .limit { margin: 0; font-size: 13px; color: var(--ink-soft); }
+  .warn { margin: 0; font-size: 14px; color: var(--ink); display: flex; gap: 6px; align-items: baseline; }
+  .warn .icon { color: var(--brick); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .pie path { transition: opacity 120ms ease; }
+  }
+  .pie.hovering path:not(.active), .pie.hovering circle.slice:not(.active) { opacity: 0.55; }
+
+  .head-right { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+
+  /* Present mode: only the pie. Slices name themselves on hover; [edit] shows on hover or after a tap. */
+  .wrap { position: relative; }
+  .linkish { font: inherit; border: 0; background: transparent; padding: 0; color: var(--ink-soft); cursor: pointer; }
+  .linkish::before { content: "["; }
+  .linkish::after { content: "]"; }
+  .linkish:hover { color: var(--brick); text-decoration: underline; }
+  .linkish:focus-visible { outline: 2px solid var(--brick); outline-offset: 2px; }
+  .edit-corner { display: none; position: absolute; top: 0; right: 0; font-size: 13px; opacity: 0; }
+  @media (prefers-reduced-motion: no-preference) {
+    .edit-corner { transition: opacity 120ms ease; }
+  }
+
+  .wrap[data-mode="present"] { max-width: 240px; }
+  .wrap[data-mode="present"] .head,
+  .wrap[data-mode="present"] .table { display: none; }
+  .wrap[data-mode="present"] .body { grid-template-columns: minmax(0, 1fr); }
+  .wrap[data-mode="present"] .edit-corner { display: block; }
+  .wrap[data-mode="present"]:hover .edit-corner,
+  .wrap[data-mode="present"].touched .edit-corner,
+  .wrap[data-mode="present"] .edit-corner:focus-visible { opacity: 1; }
+</style>
+</head>
+<body>
+
+<div class="wrap" id="wrap" data-mode="edit">
+  <div class="head">
+    <h1>Forty-Hour Week</h1>
+    <div class="head-right">
+      <p class="summary" id="summary" aria-live="polite"></p>
+      <button type="button" class="btn" id="present">Done</button>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="pie" id="pie">
+      <svg id="chart" viewBox="0 0 200 200" role="img" aria-labelledby="chart-title">
+        <title id="chart-title">How the week's hours are split</title>
+        <defs>
+          <pattern id="hatch" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect width="5" height="5" fill="#E6DAC6"></rect>
+            <line x1="0" y1="0" x2="0" y2="5" stroke="#B39C76" stroke-width="2"></line>
+          </pattern>
+        </defs>
+        <g id="slices"></g>
+        <g id="labels"></g>
+      </svg>
+      <div class="tip" id="tip" hidden></div>
+    </div>
+
+    <div class="table">
+      <div class="row headings" aria-hidden="true">
+        <span></span><span>Category</span><span>Hours</span><span>Share</span><span></span>
+      </div>
+      <div id="rows" class="table"></div>
+      <div class="row other-row">
+        <span class="swatch other" aria-hidden="true"></span>
+        <span class="other-name">Other</span>
+        <span class="fixed-hours" id="other-hours">0</span>
+        <span class="share" id="other-share">0%</span>
+        <span></span>
+      </div>
+      <p class="warn" id="warn" role="status" hidden><span class="icon" aria-hidden="true">▲</span><span id="warn-text"></span></p>
+      <div class="actions">
+        <button type="button" class="btn" id="add">Add category</button>
+        <label class="total-field" for="total">Hours per week <input type="number" id="total" min="1" step="0.5" inputmode="decimal"></label>
+        <button type="button" class="quiet" id="clear">Clear all</button>
+      </div>
+      <p class="limit" id="limit" hidden>Five categories is the limit, so the slices stay easy to tell apart.</p>
+      <p class="note" id="note" hidden>These are example hours. Type over them. Your changes are saved in this browser.</p>
+    </div>
+  </div>
+
+  <button type="button" class="linkish edit-corner" id="edit">edit</button>
+</div>
+
+<script>
+  (function () {
+    const STORAGE_KEY = "forty-hour-week.v1";
+    const SLOT_COUNT = 5;
+    const DARK_SLOTS = new Set([0, 1, 3]); // slices that take light label text
+    const EXAMPLE_STATE = {
+      totalHours: 40,
+      isExample: true,
+      categories: [
+        { id: "ex1", name: "Deep work", hours: 14, slot: 0 },
+        { id: "ex2", name: "Meetings", hours: 7, slot: 1 },
+        { id: "ex3", name: "Email and Slack", hours: 6, slot: 2 },
+        { id: "ex4", name: "Reading and learning", hours: 5, slot: 3 },
+      ],
+    };
+
+    const MODE_KEY = "forty-hour-week.mode";
+
+    const els = {
+      wrap: document.getElementById("wrap"),
+      present: document.getElementById("present"),
+      edit: document.getElementById("edit"),
+      summary: document.getElementById("summary"),
+      slices: document.getElementById("slices"),
+      labels: document.getElementById("labels"),
+      pie: document.getElementById("pie"),
+      tip: document.getElementById("tip"),
+      rows: document.getElementById("rows"),
+      otherHours: document.getElementById("other-hours"),
+      otherShare: document.getElementById("other-share"),
+      warn: document.getElementById("warn"),
+      warnText: document.getElementById("warn-text"),
+      add: document.getElementById("add"),
+      total: document.getElementById("total"),
+      clear: document.getElementById("clear"),
+      limit: document.getElementById("limit"),
+      note: document.getElementById("note"),
+    };
+
+    function isValidState(candidate) {
+      return (
+        candidate &&
+        typeof candidate.totalHours === "number" &&
+        candidate.totalHours > 0 &&
+        Array.isArray(candidate.categories) &&
+        candidate.categories.length <= SLOT_COUNT &&
+        candidate.categories.every(
+          (c) => typeof c.id === "string" && typeof c.name === "string" && typeof c.hours === "number" && Number.isInteger(c.slot) && c.slot >= 0 && c.slot < SLOT_COUNT
+        )
+      );
+    }
+
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (isValidState(saved)) return saved;
+      } catch (_) {}
+      return JSON.parse(JSON.stringify(EXAMPLE_STATE));
+    }
+
+    function saveState() {
+      state.isExample = false;
+      els.note.hidden = true;
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (_) {}
+    }
+
+    let state = loadState();
+
+    function formatHours(hours) {
+      return Number.isInteger(hours) ? String(hours) : hours.toFixed(1);
+    }
+
+    // Allocated hours, the leftover that becomes "Other", and the pie's denominator.
+    function computeSplit() {
+      const allocated = state.categories.reduce((sum, c) => sum + c.hours, 0);
+      const otherHours = Math.max(0, state.totalHours - allocated);
+      const denominator = Math.max(state.totalHours, allocated);
+      return { allocated, otherHours, denominator };
+    }
+
+    function shareText(hours, denominator) {
+      return denominator > 0 ? Math.round((hours / denominator) * 100) + "%" : "0%";
+    }
+
+    function displayName(category) {
+      return category.name.trim() || "Untitled";
+    }
+
+    // --- pie -----------------------------------------------------------------
+
+    const CENTER = 100;
+    const RADIUS = 96;
+    const SVG_NS = "http://www.w3.org/2000/svg";
+
+    function pointAt(angle, radius) {
+      return [CENTER + radius * Math.sin(angle), CENTER - radius * Math.cos(angle)];
+    }
+
+    function wedgePath(startAngle, endAngle) {
+      const [x0, y0] = pointAt(startAngle, RADIUS);
+      const [x1, y1] = pointAt(endAngle, RADIUS);
+      const largeArc = endAngle - startAngle > Math.PI ? 1 : 0;
+      return `M${CENTER},${CENTER} L${x0.toFixed(2)},${y0.toFixed(2)} A${RADIUS},${RADIUS} 0 ${largeArc} 1 ${x1.toFixed(2)},${y1.toFixed(2)} Z`;
+    }
+
+    function drawPie() {
+      const { otherHours, denominator } = computeSplit();
+      const wedges = state.categories
+        .filter((c) => c.hours > 0)
+        .map((c) => ({ name: displayName(c), hours: c.hours, fill: `var(--s${c.slot})`, onDark: DARK_SLOTS.has(c.slot) }));
+      if (otherHours > 0) wedges.push({ name: "Other", hours: otherHours, fill: "url(#hatch)", onDark: false });
+
+      els.slices.replaceChildren();
+      els.labels.replaceChildren();
+
+      let angle = 0;
+      for (const wedge of wedges) {
+        const sweep = (wedge.hours / denominator) * Math.PI * 2;
+        const share = shareText(wedge.hours, denominator);
+        let shape;
+        if (sweep >= Math.PI * 2 - 1e-6) {
+          shape = document.createElementNS(SVG_NS, "circle");
+          shape.setAttribute("cx", CENTER);
+          shape.setAttribute("cy", CENTER);
+          shape.setAttribute("r", RADIUS);
+          shape.setAttribute("class", "slice");
+        } else {
+          shape = document.createElementNS(SVG_NS, "path");
+          shape.setAttribute("d", wedgePath(angle, angle + sweep));
+        }
+        shape.setAttribute("fill", wedge.fill);
+        shape.setAttribute("tabindex", "0");
+        shape.setAttribute("aria-label", `${wedge.name}, ${formatHours(wedge.hours)} hours, ${share}`);
+        const mid = angle + sweep / 2;
+        shape.dataset.tip = `${wedge.name} · ${formatHours(wedge.hours)} h · ${share}`;
+        shape.dataset.mid = String(mid);
+        els.slices.appendChild(shape);
+
+        // Direct label only where the wedge has room for it.
+        if (wedge.hours / denominator >= 0.08) {
+          const [lx, ly] = sweep >= Math.PI * 2 - 1e-6 ? [CENTER, CENTER] : pointAt(mid, RADIUS * 0.62);
+          const label = document.createElementNS(SVG_NS, "text");
+          label.setAttribute("x", lx.toFixed(2));
+          label.setAttribute("y", ly.toFixed(2));
+          label.setAttribute("text-anchor", "middle");
+          label.setAttribute("dominant-baseline", "central");
+          label.setAttribute("class", "slice-label " + (wedge.onDark ? "on-dark" : "on-light"));
+          label.textContent = share;
+          els.labels.appendChild(label);
+        }
+        angle += sweep;
+      }
+    }
+
+    function showTip(shape, clientX, clientY) {
+      const box = els.pie.getBoundingClientRect();
+      let x, y;
+      if (clientX === undefined) {
+        const scale = box.width / 200;
+        const [px, py] = pointAt(Number(shape.dataset.mid), RADIUS * 0.62);
+        x = px * scale;
+        y = py * scale;
+      } else {
+        x = clientX - box.left;
+        y = clientY - box.top;
+      }
+      els.tip.textContent = shape.dataset.tip;
+      els.tip.hidden = false;
+      const half = els.tip.offsetWidth / 2;
+      els.tip.style.left = Math.min(Math.max(x, half), box.width - half) + "px";
+      els.tip.style.top = Math.max(y, els.tip.offsetHeight + 10) + "px";
+      for (const s of els.slices.children) s.classList.toggle("active", s === shape);
+      els.pie.classList.add("hovering");
+    }
+
+    function hideTip() {
+      els.tip.hidden = true;
+      els.pie.classList.remove("hovering");
+    }
+
+    els.slices.addEventListener("pointermove", (e) => {
+      if (e.target.dataset && e.target.dataset.tip) showTip(e.target, e.clientX, e.clientY);
+    });
+    // Touch has no hover: a tap on a slice shows its label, and any tap reveals [edit].
+    els.slices.addEventListener("pointerdown", (e) => {
+      if (e.pointerType === "touch" && e.target.dataset && e.target.dataset.tip) showTip(e.target, e.clientX, e.clientY);
+    });
+    els.slices.addEventListener("pointerleave", (e) => {
+      if (e.pointerType !== "touch") hideTip();
+    });
+    document.addEventListener("pointerdown", (e) => {
+      if (e.pointerType !== "touch") return;
+      els.wrap.classList.add("touched");
+      if (!(e.target.dataset && e.target.dataset.tip)) hideTip();
+    });
+    els.slices.addEventListener("focusin", (e) => showTip(e.target));
+    els.slices.addEventListener("focusout", hideTip);
+
+    // --- table ---------------------------------------------------------------
+
+    function buildRows() {
+      els.rows.replaceChildren();
+      for (const category of state.categories) {
+        const row = document.createElement("div");
+        row.className = "row";
+        row.dataset.id = category.id;
+        row.innerHTML = `
+          <span class="swatch" aria-hidden="true" style="background: var(--s${category.slot})"></span>
+          <input type="text" id="name-${category.id}" aria-label="Category name" placeholder="New category" maxlength="40">
+          <input type="number" id="hours-${category.id}" aria-label="Hours" min="0" step="0.5" inputmode="decimal">
+          <span class="share" data-share></span>
+          <button type="button" class="remove" aria-label="Remove category">×</button>`;
+        row.querySelector('input[type="text"]').value = category.name;
+        row.querySelector('input[type="number"]').value = formatHours(category.hours);
+        els.rows.appendChild(row);
+      }
+    }
+
+    function updateComputed() {
+      const { allocated, otherHours, denominator } = computeSplit();
+      for (const row of els.rows.children) {
+        const category = state.categories.find((c) => c.id === row.dataset.id);
+        if (category) row.querySelector("[data-share]").textContent = shareText(category.hours, denominator);
+      }
+      els.otherHours.textContent = formatHours(otherHours);
+      els.otherShare.textContent = shareText(otherHours, denominator);
+
+      const over = allocated - state.totalHours;
+      els.summary.innerHTML = `<strong>${formatHours(allocated)}</strong> of ${formatHours(state.totalHours)} h planned · ${formatHours(otherHours)} h other`;
+      els.warn.hidden = over <= 0;
+      if (over > 0) {
+        els.warnText.textContent = `Over by ${formatHours(over)} h. The slices show shares of the ${formatHours(allocated)} h you entered.`;
+      }
+      els.add.disabled = state.categories.length >= SLOT_COUNT;
+      els.limit.hidden = !els.add.disabled;
+      els.note.hidden = !state.isExample;
+      drawPie();
+    }
+
+    // Edit mode shows the full editor; present mode shows only the pie.
+    function loadMode() {
+      try {
+        const saved = localStorage.getItem(MODE_KEY);
+        if (saved === "edit" || saved === "present") return saved;
+      } catch (_) {}
+      return "edit";
+    }
+
+    function setMode(mode) {
+      els.wrap.dataset.mode = mode;
+      hideTip();
+      try {
+        localStorage.setItem(MODE_KEY, mode);
+      } catch (_) {}
+    }
+
+    els.present.addEventListener("click", () => {
+      setMode("present");
+      els.edit.focus();
+    });
+    els.edit.addEventListener("click", () => {
+      setMode("edit");
+      els.present.focus();
+    });
+
+    function renderAll() {
+      els.total.value = formatHours(state.totalHours);
+      buildRows();
+      updateComputed();
+    }
+
+    els.rows.addEventListener("input", (e) => {
+      const row = e.target.closest(".row");
+      const category = row && state.categories.find((c) => c.id === row.dataset.id);
+      if (!category) return;
+      if (e.target.type === "text") {
+        category.name = e.target.value;
+      } else {
+        const hours = parseFloat(e.target.value);
+        category.hours = Number.isFinite(hours) && hours > 0 ? hours : 0;
+      }
+      saveState();
+      updateComputed();
+    });
+
+    els.rows.addEventListener("change", (e) => {
+      if (e.target.type === "number") {
+        const row = e.target.closest(".row");
+        const category = state.categories.find((c) => c.id === row.dataset.id);
+        if (category) e.target.value = formatHours(category.hours);
+      }
+    });
+
+    els.rows.addEventListener("click", (e) => {
+      if (!e.target.classList.contains("remove")) return;
+      const id = e.target.closest(".row").dataset.id;
+      state.categories = state.categories.filter((c) => c.id !== id);
+      saveState();
+      buildRows();
+      updateComputed();
+      els.add.focus();
+    });
+
+    els.add.addEventListener("click", () => {
+      if (state.categories.length >= SLOT_COUNT) return;
+      const usedSlots = new Set(state.categories.map((c) => c.slot));
+      let slot = 0;
+      while (usedSlots.has(slot)) slot += 1;
+      const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      state.categories.push({ id, name: "", hours: 0, slot });
+      saveState();
+      buildRows();
+      updateComputed();
+      document.getElementById("name-" + id).focus();
+    });
+
+    els.total.addEventListener("input", () => {
+      const total = parseFloat(els.total.value);
+      if (!Number.isFinite(total) || total <= 0) return;
+      state.totalHours = total;
+      saveState();
+      updateComputed();
+    });
+    els.total.addEventListener("change", () => {
+      els.total.value = formatHours(state.totalHours);
+    });
+
+    // Clearing needs a second click, since the page cannot show a confirm dialog.
+    let clearTimer = null;
+    els.clear.addEventListener("click", () => {
+      if (!clearTimer) {
+        els.clear.textContent = "Click again to clear";
+        clearTimer = setTimeout(() => {
+          els.clear.textContent = "Clear all";
+          clearTimer = null;
+        }, 3000);
+        return;
+      }
+      clearTimeout(clearTimer);
+      clearTimer = null;
+      els.clear.textContent = "Clear all";
+      state.categories = [];
+      saveState();
+      buildRows();
+      updateComputed();
+    });
+
+    els.wrap.dataset.mode = loadMode();
+    renderAll();
+  })();
+</script>
+</body>
+</html>
