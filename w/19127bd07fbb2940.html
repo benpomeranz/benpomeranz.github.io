@@ -177,19 +177,19 @@
 
   .head-right { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
 
-  /* Present mode: only the pie. Slices name themselves on hover; [edit] shows on hover or after a tap. */
-  .wrap { position: relative; }
+  /* Present mode: only the pie. Slices name themselves on hover; [edit] sits under the pie, clear of
+     Notion's embed controls (top right), and shows on hover or after any click or tap. */
   .linkish { font: inherit; border: 0; background: transparent; padding: 0; color: var(--ink-soft); cursor: pointer; }
   .linkish::before { content: "["; }
   .linkish::after { content: "]"; }
   .linkish:hover { color: var(--brick); text-decoration: underline; }
   .linkish:focus-visible { outline: 2px solid var(--brick); outline-offset: 2px; }
-  .edit-corner { display: none; position: absolute; top: 0; right: 0; font-size: 13px; opacity: 0; }
+  .edit-corner { display: none; justify-self: start; font-size: 13px; opacity: 0; }
   @media (prefers-reduced-motion: no-preference) {
     .edit-corner { transition: opacity 120ms ease; }
   }
 
-  .wrap[data-mode="present"] { max-width: 240px; }
+  .wrap[data-mode="present"] { max-width: 240px; gap: 4px; }
   .wrap[data-mode="present"] .head,
   .wrap[data-mode="present"] .table { display: none; }
   .wrap[data-mode="present"] .body { grid-template-columns: minmax(0, 1fr); }
@@ -437,7 +437,8 @@
     els.slices.addEventListener("pointermove", (e) => {
       if (e.target.dataset && e.target.dataset.tip) showTip(e.target, e.clientX, e.clientY);
     });
-    // Touch has no hover: a tap on a slice shows its label, and any tap reveals [edit].
+    // Touch has no hover: a tap on a slice shows its label. Any click or tap reveals [edit], in case
+    // the page hosting this embed doesn't pass hover through.
     els.slices.addEventListener("pointerdown", (e) => {
       if (e.pointerType === "touch" && e.target.dataset && e.target.dataset.tip) showTip(e.target, e.clientX, e.clientY);
     });
@@ -445,9 +446,8 @@
       if (e.pointerType !== "touch") hideTip();
     });
     document.addEventListener("pointerdown", (e) => {
-      if (e.pointerType !== "touch") return;
       els.wrap.classList.add("touched");
-      if (!(e.target.dataset && e.target.dataset.tip)) hideTip();
+      if (e.pointerType === "touch" && !(e.target.dataset && e.target.dataset.tip)) hideTip();
     });
     els.slices.addEventListener("focusin", (e) => showTip(e.target));
     els.slices.addEventListener("focusout", hideTip);
